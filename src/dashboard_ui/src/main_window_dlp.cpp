@@ -236,16 +236,27 @@ void AnalyzeFile(const fs::path& p, std::vector<DlpFinding>& out) {
     // because a Zendesk support-article-ID embedded in a URL happened to
     // pass Luhn. Requiring a plausible brand prefix+length combo on top
     // eliminates that whole class of false positive.
-    auto it = CardDigitsRe().globalMatch(content);
-    bool cardFound = false;
-    while (it.hasNext() && !cardFound) {
-        const auto m = it.next();
-        const QString match = m.captured(0);
-        if (LuhnValid(match) && LooksLikeRealCardBin(match)) cardFound = true;
-    }
-    if (cardFound) {
-        out.push_back({ 90, "Credit card number", fname, spath,
-            "Luhn-valid card number matching a real issuer prefix found in plaintext" });
+
+    // Additional context filter: skip card detection in dependency files (package.json, lock files)
+    // These files are full of numeric version IDs, build hashes that coincidentally pass Luhn.
+    const bool isDependencyFile = (fname.find("package.json") != std::string::npos ||
+                                   fname.find("package-lock.json") != std::string::npos ||
+                                   fname.find(".lock") != std::string::npos ||
+                                   fname.find("Gemfile.lock") != std::string::npos ||
+                                   fname.find("Cargo.lock") != std::string::npos);
+
+    if (!isDependencyFile) {
+        auto it = CardDigitsRe().globalMatch(content);
+        bool cardFound = false;
+        while (it.hasNext() && !cardFound) {
+            const auto m = it.next();
+            const QString match = m.captured(0);
+            if (LuhnValid(match) && LooksLikeRealCardBin(match)) cardFound = true;
+        }
+        if (cardFound) {
+            out.push_back({ 90, "Credit card number", fname, spath,
+                "Luhn-valid card number matching a real issuer prefix found in plaintext" });
+        }
     }
 }
 

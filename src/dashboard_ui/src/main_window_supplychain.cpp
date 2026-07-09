@@ -147,13 +147,37 @@ void AnalyzeFile(const fs::path& p, std::vector<ScFinding>& out) {
     if (content.isEmpty()) return;
     const std::string fname = Utf8(p.filename().wstring());
     const std::string spath = Utf8(p.wstring());
+
+    // Check if file is minified/bundled/build artifact (context for obfuscation rule)
+    const bool isMinified = (fname.find(".min.js") != std::string::npos ||
+                             fname.find("bundle.js") != std::string::npos ||
+                             fname.find("bundled") != std::string::npos);
+    const bool isNodeModules = (spath.find("node_modules") != std::string::npos);
+    const bool isBuildDir = (spath.find("\\dist\\") != std::string::npos ||
+                             spath.find("/dist/") != std::string::npos ||
+                             spath.find("\\build\\") != std::string::npos ||
+                             spath.find("/build/") != std::string::npos);
+    const bool hasSourcemap = content.contains("//# sourceMappingURL=");
+
     for (const auto& rule : Rules()) {
         // VS Code rules only make sense inside a tasks/launch/settings json.
         if ((std::string(rule.id).rfind("SC-VSC", 0) == 0) && fname.find("tasks.json") == std::string::npos
             && fname.find("launch.json") == std::string::npos)
             continue;
+
         if (rule.re.match(content).hasMatch()) {
-            out.push_back({ rule.risk, rule.cls, fname, spath, rule.detail });
+            // Special handling for obfuscation rule (SC-OBF-002):
+            // Long base64 blobs are normal in minified/bundled JS, don't report as high-risk
+            if (std::string(rule.id) == "SC-OBF-002" && (isMinified || hasSourcemap || isBuildDir || isNodeModules)) {
+                // Skip this rule for minified code with sourcemap (clear sign of legitimate build artifact)
+                if (hasSourcemap) continue;
+                // For build/node_modules, still report but at LOWER risk to differentiate from malware obfuscation
+                // (user can still investigate if they're concerned)
+                out.push_back({ 20, "Build artifact obfuscation", fname, spath,
+                    "Long base64 blob in minified/bundled code (typical of production builds, low risk)" });
+            } else {
+                out.push_back({ rule.risk, rule.cls, fname, spath, rule.detail });
+            }
         }
     }
 }

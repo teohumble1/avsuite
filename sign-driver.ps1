@@ -4,11 +4,12 @@ param(
     [string]$DriverPath,
 
     [Parameter(Mandatory=$false)]
-    [string]$CertPath = "D:\Dev\AvSuite\avsuite_driver_cert.pfx",
-
-    [Parameter(Mandatory=$false)]
-    [string]$CertPassword = "AvSuite2026"
+    [string]$CertPath = "avsuite_cert.pfx"
 )
+
+# Prompt for password securely
+Write-Host "Enter the certificate password (from generate-cert.ps1):"
+$CertPassword = Read-Host -AsSecureString
 
 $signtool = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe"
 
@@ -23,7 +24,15 @@ if (-not (Test-Path $DriverPath)) {
 }
 
 Write-Host "Signing driver: $DriverPath"
-& $signtool sign /f $CertPath /p $CertPassword /fd sha256 /td sha256 /tr http://timestamp.digicert.com $DriverPath
+
+# Convert SecureString to plaintext for signtool
+$bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToCoTaskMemUnicode($CertPassword)
+$plainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringUni($bstr)
+
+& $signtool sign /f $CertPath /p $plainPassword /fd sha256 /td sha256 /tr http://timestamp.digicert.com $DriverPath
+
+# Clear plaintext from memory
+[System.Runtime.InteropServices.Marshal]::ZeroFreeCoTaskMemUnicode($bstr)
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "✓ Driver signed successfully"

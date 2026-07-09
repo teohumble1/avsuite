@@ -3,11 +3,12 @@
 
 param(
     [Parameter(Mandatory=$false)]
-    [string]$CertPath = "D:\Dev\AvSuite\avsuite_driver_cert.pfx",
-
-    [Parameter(Mandatory=$false)]
-    [string]$CertPassword = "AvSuite2026"
+    [string]$CertPath = "avsuite_cert.pfx"
 )
+
+# Prompt for password securely
+Write-Host "Enter the certificate password (from generate-cert.ps1):"
+$CertPassword = Read-Host -AsSecureString
 
 # Check if running as admin
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
@@ -23,8 +24,7 @@ if (-not (Test-Path $CertPath)) {
 Write-Host "Installing AvSuite driver certificate to Trusted Root CA store..."
 
 # Import certificate to Trusted Root CA
-$certSecurePassword = ConvertTo-SecureString $CertPassword -AsPlainText -Force
-Import-PfxCertificate -FilePath $CertPath -CertStoreLocation Cert:\LocalMachine\Root -Password $certSecurePassword -Exportable
+Import-PfxCertificate -FilePath $CertPath -CertStoreLocation Cert:\LocalMachine\Root -Password $CertPassword -Exportable
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "✓ Certificate installed successfully"

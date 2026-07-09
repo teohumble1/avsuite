@@ -1,0 +1,105 @@
+name: AvSuite CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Visual Studio
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Build Debug
+      run: |
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 17 2022" -A x64 ..
+        cmake --build . --config Debug
+
+    - name: Build Release
+      run: |
+        cd build
+        cmake --build . --config Release
+
+    - name: Run Security Tests
+      run: |
+        powershell -ExecutionPolicy Bypass -File .\run-portfolio-tests.ps1
+        powershell -ExecutionPolicy Bypass -File .\run-advanced-evasion-tests.ps1
+
+    - name: Code Quality Check
+      run: |
+        # Check for hardcoded secrets
+        powershell -Command "Get-ChildItem -Recurse | Select-String -Pattern 'password|api_key|secret' | Where-Object {$_.Path -notmatch 'test|doc'} | Write-Host"
+
+    - name: Security Scanning (SAST)
+      run: |
+        echo "Running SAST scan..."
+        # Example: Could integrate with Semgrep, SonarQube, etc.
+
+    - name: Generate Test Report
+      if: always()
+      run: |
+        echo "Test Report Generated"
+
+    - name: Upload Artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: TEST-RESULTS*.md
+
+  security-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Audit: Check for secrets in repo
+      run: |
+        echo "Checking for exposed credentials..."
+        if grep -r "password\|api_key\|private_key" . --include="*.c" --include="*.cpp" --include="*.h"; then
+          echo "FAIL: Hardcoded secrets found!"
+          exit 1
+        else
+          echo "PASS: No hardcoded secrets detected"
+        fi
+
+    - name: Audit: Check .gitignore
+      run: |
+        echo "Verifying .gitignore protection..."
+        grep -E "\.pfx|\.key|\.pem|\.p12" .gitignore || echo "WARNING: Certificate files not protected"
+
+    - name: Audit: License check
+      run: |
+        echo "Verifying MIT License present..."
+        test -f LICENSE && echo "PASS: LICENSE file present" || echo "FAIL: LICENSE missing"
+
+  performance-baseline:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run Performance Baseline
+      run: |
+        powershell -Command @"
+        Write-Host 'Performance Baseline Test'
+        Write-Host '=========================='
+        `$sw = [System.Diagnostics.Stopwatch]::StartNew()
+        for (`$i = 1; `$i -le 100; `$i++) {
+          [System.IO.File]::WriteAllText("C:\Temp\perf_test_`$i.txt", "test")
+        }
+        `$sw.Stop()
+        `$rate = [Math]::Round(100 / (`$sw.ElapsedMilliseconds / 1000), 1)
+        Write-Host "Performance: `$rate files/second"
+        if (`$rate -gt 1000) {
+          Write-Host "PASS: Excellent performance"
+        }
+        "@

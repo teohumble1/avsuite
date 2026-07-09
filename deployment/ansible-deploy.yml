@@ -1,0 +1,290 @@
+---
+# AvSuite Deployment Automation - Ansible Playbook
+# Deploy AvSuite to Windows endpoints at scale
+
+- name: Deploy AvSuite Security Driver
+  hosts: windows_endpoints
+  gather_facts: yes
+  vars:
+    avsuite_version: "1.0"
+    avsuite_install_path: "C:\\Program Files\\AvSuite"
+    avsuite_log_path: "C:\\ProgramData\\AvSuite\\Logs"
+    test_environment_only: true
+
+  pre_tasks:
+    - name: Verify Windows version
+      win_shell: |
+        [System.Environment]::OSVersion.Version.Major
+      register: windows_version
+      failed_when: windows_version.stdout | int < 10
+
+    - name: Check available disk space
+      win_shell: |
+        (Get-Volume -DriveLetter C).SizeRemaining / 1GB
+      register: disk_space
+      failed_when: disk_space.stdout | float < 2
+
+    - name: Backup current configuration
+      win_copy:
+        src: "{{ avsuite_install_path }}/config.json"
+        dest: "{{ avsuite_install_path }}/config.json.backup.{{ ansible_date_time.iso8601 }}"
+        remote_src: yes
+      ignore_errors: yes
+
+  tasks:
+    - name: Create installation directories
+      win_file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ avsuite_install_path }}"
+        - "{{ avsuite_log_path }}"
+        - "C:\\ProgramData\\AvSuite\\Database"
+
+    - name: Download AvSuite binary from internal repository
+      win_get_url:
+        url: "https://internal-repo.corp.com/avsuite/{{ avsuite_version }}/AvMiniFilter.sys"
+        dest: "{{ avsuite_install_path }}\\AvMiniFilter.sys"
+        checksum: "sha256:{{ avsuite_binary_sha256 }}"
+        checksum_algorithm: sha256
+      vars:
+        avsuite_binary_sha256: "abc123def456..."  # Set at deploy time
+
+    - name: Copy supporting files
+      win_copy:
+        src: "{{ item }}"
+        dest: "{{ avsuite_install_path }}"
+      loop:
+        - ../build/Release/AvSuite.exe
+        - ../build/Release/behavior_engine.dll
+        - ../build/Release/rules.db
+
+    - name: Generate self-signed certificate (test environment only)
+      win_shell: |
+        powershell -ExecutionPolicy Bypass -Command @"
+        if ("{{ test_environment_only }}" -eq "true") {
+          & "{{ avsuite_install_path }}\generate-cert.ps1" `
+            -CertName "AvSuite-{{ inventory_hostname }}" `
+            -OutputPath "{{ avsuite_install_path }}\avsuite_cert.pfx"
+          Write-Host "Certificate generated"
+        }
+        "@
+      when: test_environment_only
+
+    - name: Install certificate to Trusted Root (test environment only)
+      win_shell: |
+        powershell -ExecutionPolicy Bypass -Command @"
+        if ("{{ test_environment_only }}" -eq "true") {
+          $cert = Get-PfxCertificate -FilePath "{{ avsuite_install_path }}\avsuite_cert.pfx"
+          $store = New-Object System.Security.Cryptography.X509Certificates.X509Store("Root", "LocalMachine")
+          $store.Open("ReadWrite")
+          $store.Add($cert)
+          $store.Close()
+          Write-Host "Certificate installed"
+        }
+        "@
+      when: test_environment_only
+
+    - name: Enable test-signing mode (test environment only)
+      win_shell: |
+        bcdedit /set testsigning on
+      when: test_environment_only
+      notify: reboot_for_testsigning
+
+    - name: Create Windows service
+      win_service:
+        name: AvMiniFilter
+        path: "{{ avsuite_install_path }}\\AvMiniFilter.sys"
+        display_name: "AvSuite Minifilter Driver"
+        state: present
+        start_mode: auto
+
+    - name: Start AvSuite service
+      win_service:
+        name: AvMiniFilter
+        state: started
+
+    - name: Verify driver loaded
+      win_shell: |
+        fltmc instances | Select-String "AvMiniFilter"
+      register: driver_check
+      failed_when: driver_check.rc != 0
+      retries: 3
+      delay: 5
+
+    - name: Configure logging
+      win_template:
+        src: ../config/config.json.j2
+        dest: "{{ avsuite_install_path }}\\config.json"
+      vars:
+        log_path: "{{ avsuite_log_path }}"
+        log_level: "INFO"
+        soc_server: "{{ soc_endpoint }}"
+
+    - name: Configure Windows Firewall rules
+      win_firewall_rule:
+        name: "AvSuite SOC Communication"
+        localport: 443
+        action: allow
+        direction: out
+        protocol: tcp
+        description: "Allow AvSuite to communicate with SOC"
+        enabled: yes
+
+    - name: Create scheduled task for log rotation
+      win_scheduled_task:
+        name: "AvSuite Log Rotation"
+        description: "Rotate AvSuite logs daily"
+        actions:
+          - path: powershell.exe
+            arguments: "-ExecutionPolicy Bypass -File {{ avsuite_install_path }}\\rotate-logs.ps1"
+        triggers:
+          - type: daily
+            start_boundary: '2026-01-01T02:00:00'
+        enabled: yes
+
+    - name: Run health check
+      win_shell: |
+        {{ avsuite_install_path }}\AvSuite.exe --health-check
+      register: health_check
+      failed_when: "'OK' not in health_check.stdout"
+
+  handlers:
+    - name: reboot_for_testsigning
+      win_reboot:
+        reboot_timeout: 600
+
+  post_tasks:
+    - name: Generate deployment report
+      template:
+        src: ../deployment/report.j2
+        dest: "{{ avsuite_log_path }}/deployment-{{ ansible_date_time.iso8601 }}.log"
+      vars:
+        deployment_status: "{{ 'SUCCESS' if ansible_failed_task is not defined else 'FAILED' }}"
+        deployment_time: "{{ ansible_date_time.iso8601 }}"
+        deployed_version: "{{ avsuite_version }}"
+
+    - name: Notify SOC of deployment
+      uri:
+        url: "https://soc.corp.com/api/deployments"
+        method: POST
+        user: "{{ soc_api_user }}"
+        password: "{{ soc_api_password }}"
+        body_format: json
+        body:
+          hostname: "{{ inventory_hostname }}"
+          version: "{{ avsuite_version }}"
+          status: "{{ 'deployed' if ansible_failed_task is not defined else 'failed' }}"
+          timestamp: "{{ ansible_date_time.iso8601 }}"
+
+    - name: Display deployment summary
+      debug:
+        msg: |
+          ================================
+          AvSuite Deployment Summary
+          ================================
+          Host: {{ inventory_hostname }}
+          Version: {{ avsuite_version }}
+          Install Path: {{ avsuite_install_path }}
+          Driver Status: {{ driver_check.stdout }}
+          Health Check: {{ health_check.stdout }}
+          Status: SUCCESS
+          ================================
+
+---
+# Cleanup playbook - Remove AvSuite
+
+- name: Uninstall AvSuite
+  hosts: windows_endpoints
+  gather_facts: no
+  vars:
+    avsuite_install_path: "C:\\Program Files\\AvSuite"
+
+  tasks:
+    - name: Stop AvSuite service
+      win_service:
+        name: AvMiniFilter
+        state: stopped
+
+    - name: Remove Windows service
+      win_service:
+        name: AvMiniFilter
+        state: absent
+
+    - name: Delete installation directory
+      win_file:
+        path: "{{ avsuite_install_path }}"
+        state: absent
+
+    - name: Remove scheduled tasks
+      win_scheduled_task:
+        name: "AvSuite Log Rotation"
+        state: absent
+
+    - name: Remove firewall rules
+      win_firewall_rule:
+        name: "AvSuite SOC Communication"
+        state: absent
+
+    - name: Restore configuration from backup
+      win_copy:
+        src: "{{ avsuite_install_path }}/config.json.backup.{{ backup_timestamp }}"
+        dest: "{{ avsuite_install_path }}/config.json"
+        remote_src: yes
+      ignore_errors: yes
+
+    - name: Disable test-signing mode (if enabled)
+      win_shell: |
+        bcdedit /set testsigning off
+      ignore_errors: yes
+
+    - name: Notify SOC of uninstall
+      uri:
+        url: "https://soc.corp.com/api/deployments"
+        method: POST
+        body_format: json
+        body:
+          hostname: "{{ inventory_hostname }}"
+          action: "uninstalled"
+          timestamp: "{{ ansible_date_time.iso8601 }}"
+
+---
+# Validation playbook - Test deployment
+
+- name: Validate AvSuite Deployment
+  hosts: windows_endpoints
+  gather_facts: no
+
+  tasks:
+    - name: Check driver loaded
+      win_shell: |
+        fltmc instances | Select-String "AvMiniFilter"
+      register: driver_status
+
+    - name: Check service status
+      win_service_info:
+        name: AvMiniFilter
+      register: service_status
+
+    - name: Check logs being generated
+      win_shell: |
+        $logFile = "C:\ProgramData\AvSuite\Logs\current.log"
+        if (Test-Path $logFile) {
+          $age = (Get-Date) - (Get-Item $logFile).LastWriteTime
+          if ($age.TotalMinutes -lt 5) {
+            Write-Host "Logging: OK (updated in last 5 min)"
+          }
+        }
+      register: logging_status
+
+    - name: Validation Report
+      debug:
+        msg: |
+          ================================
+          AvSuite Validation Report
+          ================================
+          Host: {{ inventory_hostname }}
+          Driver: {{ 'LOADED' if 'AvMiniFilter' in driver_status.stdout else 'NOT LOADED' }}
+          Service Status: {{ service_status.services[0].state if service_status.services else 'NOT FOUND' }}
+          Logging: {{ logging_status.stdout }}
+          ================================

@@ -157,14 +157,16 @@ struct Engine::Impl {
     // kill-chain correlation.
     void ScanOneFile(const std::string& path, std::uint32_t etw_pid = 0) {
         auto scan_start = std::chrono::steady_clock::now();
-        std::optional<avcore::DetectionEvent> malicious_cause;
+        std::optional<avcore::DetectionEvent> quarantine_cause;
         int detection_count = 0;
 
         auto consider = [&](const avcore::DetectionEvent& detection) {
             Emit(detection);
             ++detection_count;
-            if (!malicious_cause && detection.severity == avcore::Severity::Malicious) {
-                malicious_cause = detection;
+            // Quarantine at Suspicious level and above (Suspicious, Malicious)
+            // This ensures DLP/Supply-Chain detections trigger quarantine, not just kernel-level threats
+            if (!quarantine_cause && detection.severity >= avcore::Severity::Suspicious) {
+                quarantine_cause = detection;
             }
         };
 
@@ -204,9 +206,12 @@ struct Engine::Impl {
         metrics.detections_count = detection_count;
         RecordMetrics(metrics);
 
-        if (malicious_cause) {
-            if (etw_pid != 0) behavior_engine.MarkPidMalicious(etw_pid, malicious_cause->rule_id);
-            Quarantine(path, *malicious_cause);
+        if (quarantine_cause) {
+            // Mark process as malicious only if it's actually malicious (not just suspicious)
+            if (etw_pid != 0 && quarantine_cause->severity == avcore::Severity::Malicious) {
+                behavior_engine.MarkPidMalicious(etw_pid, quarantine_cause->rule_id);
+            }
+            Quarantine(path, *quarantine_cause);
         }
     }
 

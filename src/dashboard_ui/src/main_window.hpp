@@ -107,6 +107,7 @@ private slots:
     void OnExportDetectionsClicked();
     void OnExportListsClicked();
     void OnImportListsClicked();
+    void OnSelectAllQuarantineClicked();
     void OnRestoreQuarantineClicked();
     void OnDeleteQuarantineClicked();
 

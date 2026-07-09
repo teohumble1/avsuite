@@ -194,6 +194,20 @@ QPushButton#SuccessButton:hover {
         stop:0 #55F099, stop:0.44 #38D878, stop:0.5 #30C86A, stop:1 #229855);
 }
 
+QPushButton#SelectButton {
+    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+        stop:0 #4DB8FF, stop:0.44 #2A9FE8, stop:0.5 #1E8FD8, stop:1 #1470B0);
+    color: #ffffff;
+    border-top:    1px solid rgba(100,200,255,0.35);
+    border-left:   1px solid rgba(80,180,255,0.22);
+    border-right:  1px solid rgba(0,0,0,0.30);
+    border-bottom: 3px solid rgba(10,40,80,0.80);
+}
+QPushButton#SelectButton:hover {
+    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+        stop:0 #5DC7FF, stop:0.44 #3AAEE8, stop:0.5 #2D9FD8, stop:1 #227FBF);
+}
+
 /* ── LABELS ── */
 QLabel#StatusLabel {
     color: rgba(199,182,162,0.55);

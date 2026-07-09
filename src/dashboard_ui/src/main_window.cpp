@@ -2325,6 +2325,8 @@ QWidget* MainWindow::BuildQuarantinePage() {
 
     auto* button_row = new QHBoxLayout();
     button_row->setSpacing(8);
+    auto* select_all_button = new QPushButton(QString::fromUtf8("✓ Select All"), page);
+    select_all_button->setObjectName("SelectButton");
     auto* restore_button = new QPushButton(QString::fromUtf8("↩  Restore"), page);
     restore_button->setObjectName("SuccessButton");
     auto* delete_button = new QPushButton(QString::fromUtf8("   X\xc3\xb3" "a v\xc4\xa9nh vi\xe1\xbb\x85n"), page);
@@ -2334,6 +2336,7 @@ QWidget* MainWindow::BuildQuarantinePage() {
         di->setAttribute(Qt::WA_TransparentForMouseEvents);
         di->move(9, 8);
     }
+    button_row->addWidget(select_all_button);
     button_row->addWidget(restore_button);
     button_row->addWidget(delete_button);
     button_row->addStretch();
@@ -2352,11 +2355,12 @@ QWidget* MainWindow::BuildQuarantinePage() {
     }
     quarantine_table_->setEditTriggers(QAbstractItemView::NoEditTriggers);
     quarantine_table_->setSelectionBehavior(QAbstractItemView::SelectRows);
-    quarantine_table_->setSelectionMode(QAbstractItemView::SingleSelection);
+    quarantine_table_->setSelectionMode(QAbstractItemView::MultiSelection);
     quarantine_table_->setAlternatingRowColors(true);
     quarantine_table_->verticalHeader()->setVisible(false);
     layout->addWidget(quarantine_table_);
 
+    connect(select_all_button, &QPushButton::clicked, this, &MainWindow::OnSelectAllQuarantineClicked);
     connect(restore_button, &QPushButton::clicked, this, &MainWindow::OnRestoreQuarantineClicked);
     connect(delete_button, &QPushButton::clicked, this, &MainWindow::OnDeleteQuarantineClicked);
 
@@ -2927,29 +2931,58 @@ void MainWindow::OnImportListsClicked() {
                                 .arg(result.blacklist_count));
 }
 
+void MainWindow::OnSelectAllQuarantineClicked() {
+    quarantine_table_->selectAll();
+}
+
 void MainWindow::OnRestoreQuarantineClicked() {
-    const std::int64_t id = SelectedQuarantineId();
-    if (id == 0) return;
-    if (!engine_->RestoreFromQuarantine(id)) {
+    const auto selected = quarantine_table_->selectionModel()->selectedRows();
+    if (selected.isEmpty()) return;
+    int restored_count = 0;
+    for (const auto& idx : selected) {
+        const std::int64_t id = quarantine_table_->item(idx.row(), 0)->text().toLongLong();
+        if (engine_->RestoreFromQuarantine(id)) {
+            ++restored_count;
+        }
+    }
+    if (restored_count == 0) {
         QMessageBox::warning(this, QString::fromUtf8("Restore thất bại"),
                               QString::fromUtf8("Không thể restore (đã restore trước đó, file gốc đã có lại, "
                                                  "hoặc file quarantine bị mất)."));
         return;
+    }
+    if (restored_count < selected.count()) {
+        QMessageBox::information(this, QString::fromUtf8("Restore một phần"),
+                                 QString::fromUtf8("Restored %1 / %2 files.")
+                                 .arg(restored_count).arg(selected.count()));
     }
     ReloadQuarantineTable();
     RefreshHomeStats();
 }
 
 void MainWindow::OnDeleteQuarantineClicked() {
-    const std::int64_t id = SelectedQuarantineId();
-    if (id == 0) return;
+    const auto selected = quarantine_table_->selectionModel()->selectedRows();
+    if (selected.isEmpty()) return;
     const auto answer = QMessageBox::question(
         this, QString::fromUtf8("Xóa vĩnh viễn"),
-        QString::fromUtf8("Xóa vĩnh viễn file này khỏi quarantine? Không thể hoàn tác."));
+        QString::fromUtf8("Xóa vĩnh viễn %1 file(s) khỏi quarantine? Không thể hoàn tác.")
+        .arg(selected.count()));
     if (answer != QMessageBox::Yes) return;
-    if (!engine_->DeleteQuarantine(id)) {
-        QMessageBox::warning(this, QString::fromUtf8("Xóa thất bại"), QString::fromUtf8("Không thể xóa entry này."));
+    int deleted_count = 0;
+    for (const auto& idx : selected) {
+        const std::int64_t id = quarantine_table_->item(idx.row(), 0)->text().toLongLong();
+        if (engine_->DeleteQuarantine(id)) {
+            ++deleted_count;
+        }
+    }
+    if (deleted_count == 0) {
+        QMessageBox::warning(this, QString::fromUtf8("Xóa thất bại"), QString::fromUtf8("Không thể xóa bất kỳ entry nào."));
         return;
+    }
+    if (deleted_count < selected.count()) {
+        QMessageBox::information(this, QString::fromUtf8("Xóa một phần"),
+                                 QString::fromUtf8("Deleted %1 / %2 files.")
+                                 .arg(deleted_count).arg(selected.count()));
     }
     ReloadQuarantineTable();
     RefreshHomeStats();

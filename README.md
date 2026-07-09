@@ -178,6 +178,22 @@ High false positives = Users disable protection (worse than no protection)
 **Tại sao điều này quan trọng:**
 Dương tính giả cao = Người dùng tắt bảo vệ (tệ hơn không có bảo vệ)
 
+## Auto-Quarantine Improvements (v1.0.1 fixes) | Cải Thiện Auto-Quarantine
+
+**Fixed: Quarantine now triggers at Suspicious level** (commit e44d61e)
+
+Previously: Only Malicious-severity detections were auto-quarantined  
+Now: Suspicious-level detections also trigger auto-quarantine
+
+**Result:**
+- ✅ DLP findings (leaked credentials, credit cards) → auto-quarantine
+- ✅ Supply-Chain threats (obfuscated code, exfil hooks) → auto-quarantine  
+- ✅ Hook Hunt anomalies → auto-quarantine
+- ✅ Memory injection patterns → auto-quarantine
+- ✅ History tab + Quarantine tab now consistent
+
+---
+
 ## False Positive Reduction (v1.0.1 improvements) | Giảm False Positive
 
 **Recent optimization: Context-aware detection** (commit bc522cf)
@@ -205,8 +221,14 @@ Three modules improved to reduce alert fatigue by understanding context:
 
 ## Quarantine Management | Quản Lý Quarantine
 
-**v1.0.0 Feature: Select All with Batch Operations**
+**v1.0.0 Features: Auto-Quarantine + Batch Operations**
 
+**Automatic Quarantine (v1.0.1):**
+- ✅ Files detected as **Suspicious or higher** are auto-quarantined
+- ✅ Includes: DLP leaks, supply-chain threats, injection patterns, hook anomalies
+- ✅ All detected threats appear in Quarantine tab automatically
+
+**Manual Management (v1.0.0):**
 The Quarantine tab provides:
 - ✅ View all isolated threats in a table
 - ✅ **Select All button** - Quickly select all quarantine items (cyan/blue styled)

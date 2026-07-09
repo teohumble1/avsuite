@@ -1,0 +1,29 @@
+# Security: Never commit private keys
+*.pfx
+*.p12
+*.key
+*.pem
+*.der
+
+# Build artifacts
+build/
+Release/
+Debug/
+dist/
+output/
+*.exe
+*.dll
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.sln.docstates
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Backups
+*.bak
+*.zip

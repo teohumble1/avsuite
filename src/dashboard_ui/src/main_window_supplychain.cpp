@@ -1,0 +1,349 @@
+// main_window_supplychain.cpp — Supply-chain & infostealer defense scanner.
+//
+// Scans a project/dev folder for indicators of the modern attack chain:
+//   * Hijacked npm packages: malicious pre/post-install scripts in package.json
+//   * Malicious VS Code tasks: .vscode/tasks.json auto-running on folderOpen or
+//     launching interpreters (the "VS Code Tasks deploy Python infostealer" TTP)
+//   * Python / JS infostealers: exfil webhooks, browser credential/cookie theft,
+//     obfuscated exec(base64(...)), curl|bash pipe-to-shell installers
+//
+// Detection-only (defensive). ASCII labels (MSVC builds without /utf-8).
+
+#include "main_window.hpp"
+#include "av_quit_guard.hpp"
+#include "hunt_toolbar.hpp"
+
+#include <QAbstractItemView>
+#include <QColor>
+#include <QFileDialog>
+#include <QHeaderView>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QRegularExpression>
+#include <QTableWidget>
+#include <QTableWidgetItem>
+#include <QTimer>
+#include <QVBoxLayout>
+#include <QWidget>
+
+#include <windows.h>
+#include <ShlObj.h>
+#pragma comment(lib, "shell32.lib")
+
+#include <atomic>
+#include <cctype>
+#include <filesystem>
+#include <fstream>
+#include <memory>
+#include <string>
+#include <thread>
+#include <vector>
+
+namespace fs = std::filesystem;
+
+namespace avdashboard {
+namespace {
+
+struct ScFinding {
+    int         risk = 0;
+    std::string type;
+    std::string filename;
+    std::string path;
+    std::string detail;
+};
+
+struct ScRule {
+    const char* id;
+    const char* cls;
+    int         risk;
+    const char* detail;
+    QRegularExpression re;
+};
+
+// Content rules applied to inspected text files.
+const std::vector<ScRule>& Rules() {
+    static const std::vector<ScRule> rules = [] {
+        auto R = [](const char* id, const char* cls, int risk, const char* detail, const char* pat) {
+            return ScRule{ id, cls, risk, detail,
+                QRegularExpression(QString::fromUtf8(pat),
+                    QRegularExpression::CaseInsensitiveOption
+                  | QRegularExpression::DotMatchesEverythingOption) };
+        };
+        std::vector<ScRule> v;
+        // npm install hooks that pull/run code
+        v.push_back(R("SC-NPM-001", "npm install hook", 88,
+            "package.json (pre/post)install runs network/shell code",
+            "\"(pre|post)?install\"\\s*:\\s*\"[^\"]*(curl|wget|node\\s+-e|base64|child_process|https?://|powershell|iwr|invoke-expression|\\.sh\\b)"));
+        // VS Code auto-run tasks
+        v.push_back(R("SC-VSC-001", "VSCode auto-task", 90,
+            ".vscode task auto-runs when the folder is opened (runOn: folderOpen)",
+            "\"runOn\"\\s*:\\s*\"folderOpen\""));
+        v.push_back(R("SC-VSC-002", "VSCode task exec", 60,
+            "VS Code task launches an interpreter/downloader",
+            "\"command\"\\s*:\\s*\"(python3?|powershell|pwsh|cmd|bash|sh|node|curl|wget)\""));
+        // Infostealer: exfil webhooks
+        v.push_back(R("SC-EXF-001", "Exfil webhook", 90,
+            "Data exfiltration to a chat webhook (Discord/Telegram/Slack)",
+            "discord(app)?\\.com/api/webhooks|api\\.telegram\\.org/bot|hooks\\.slack\\.com/services"));
+        // Infostealer: browser credential / cookie theft
+        v.push_back(R("SC-STEAL-001", "Browser cred theft", 92,
+            "Accesses browser saved credentials / cookies",
+            "Login Data|cookies\\.sqlite|Google\\\\Chrome\\\\User Data|Local State|moz_cookies|win32crypt|CryptUnprotectData"));
+        // Obfuscated exec
+        v.push_back(R("SC-OBF-001", "Obfuscated exec", 85,
+            "Executes decoded/obfuscated payload",
+            "(exec|eval)\\s*\\(\\s*(base64\\.b64decode|atob|__import__\\(\\s*['\"]base64)"));
+        v.push_back(R("SC-OBF-002", "Obfuscation", 55,
+            "Char-code / long base64 blob (possible packed payload)",
+            "String\\.fromCharCode\\((\\s*\\d+\\s*,){12,}|[A-Za-z0-9+/]{220,}={0,2}"));
+        // Pipe-to-shell installer
+        v.push_back(R("SC-PIPE-001", "Pipe-to-shell", 85,
+            "Downloads and pipes straight into a shell",
+            "(curl|wget)\\s+[^\\n|]*\\|\\s*(bash|sh)\\b|(iwr|invoke-webrequest)[^\\n|]*\\|\\s*iex"));
+        return v;
+    }();
+    return rules;
+}
+
+std::string Utf8(const std::wstring& w) {
+    if (w.empty()) return {};
+    int len = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    if (len <= 0) return {};
+    std::string s(static_cast<size_t>(len - 1), '\0');
+    WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, s.data(), len, nullptr, nullptr);
+    return s;
+}
+
+std::string LowerExt(const fs::path& p) {
+    std::string e = p.extension().string();
+    if (!e.empty() && e[0] == '.') e.erase(0, 1);
+    for (auto& c : e) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    return e;
+}
+
+// Only inspect text/config/script files (and specific config names) to stay fast.
+bool ShouldInspect(const fs::path& p) {
+    const std::string ext = LowerExt(p);
+    static const char* exts[] = { "json","js","ts","mjs","cjs","py","sh","ps1","bat",
+                                  "cmd","yml","yaml","toml","rb","pl","php", nullptr };
+    for (int i = 0; exts[i]; ++i) if (ext == exts[i]) return true;
+    const std::string name = p.filename().string();
+    return name == "package.json" || name == "tasks.json" || name == "launch.json";
+}
+
+QString ReadTextCapped(const fs::path& p, qint64 cap = 512 * 1024) {
+    std::ifstream f(p, std::ios::binary);
+    if (!f) return {};
+    std::string buf(static_cast<size_t>(cap), '\0');
+    f.read(buf.data(), cap);
+    buf.resize(static_cast<size_t>(f.gcount()));
+    return QString::fromUtf8(buf.c_str(), static_cast<int>(buf.size()));
+}
+
+void AnalyzeFile(const fs::path& p, std::vector<ScFinding>& out) {
+    if (!ShouldInspect(p)) return;
+    const QString content = ReadTextCapped(p);
+    if (content.isEmpty()) return;
+    const std::string fname = Utf8(p.filename().wstring());
+    const std::string spath = Utf8(p.wstring());
+    for (const auto& rule : Rules()) {
+        // VS Code rules only make sense inside a tasks/launch/settings json.
+        if ((std::string(rule.id).rfind("SC-VSC", 0) == 0) && fname.find("tasks.json") == std::string::npos
+            && fname.find("launch.json") == std::string::npos)
+            continue;
+        if (rule.re.match(content).hasMatch()) {
+            out.push_back({ rule.risk, rule.cls, fname, spath, rule.detail });
+        }
+    }
+}
+
+QColor RiskColor(int r) {
+    if (r >= 85) return QColor(0xFF, 0x3B, 0x50);
+    if (r >= 55) return QColor(0xFF, 0x7A, 0x00);
+    return QColor(0xE6, 0xC2, 0x4A);
+}
+
+} // namespace
+
+QWidget* BuildSupplyChainPage(QWidget* parent) {
+    (void)parent;
+    auto* page = new QWidget();
+    page->setStyleSheet("background:#120B06;");
+    auto* root = new QVBoxLayout(page);
+    root->setContentsMargins(28, 24, 28, 24);
+    root->setSpacing(12);
+
+    auto* title = new QLabel(QString::fromUtf8("Supply-chain & Infostealer Defense"), page);
+    title->setStyleSheet("color:#FFFFFF; font-size:16pt; font-weight:800; background:transparent;");
+    root->addWidget(title);
+    auto* sub = new QLabel(QString::fromUtf8(
+        "Scans a project folder for hijacked npm packages (malicious install hooks), "
+        "malicious VS Code tasks (auto-run on open), and Python/JS infostealers "
+        "(exfil webhooks, browser credential theft, obfuscated exec, pipe-to-shell)."), page);
+    sub->setStyleSheet("color:#8B7355; font-size:9pt; background:transparent;");
+    sub->setWordWrap(true);
+    root->addWidget(sub);
+
+    auto* ctl = new QHBoxLayout();
+    ctl->setSpacing(12);
+    auto* scan_btn = new QPushButton(QString::fromUtf8("Choose project folder & scan"), page);
+    scan_btn->setCursor(Qt::PointingHandCursor);
+    scan_btn->setStyleSheet(
+        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
+        " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
+        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
+        "QPushButton:disabled { background:#3A2A1C; color:#8B7355; }");
+    ctl->addWidget(scan_btn);
+
+    // Stop: this page's worker polls `scanning`, so clearing it cancels the walk.
+    auto* stop_btn = new QPushButton(QString::fromUtf8("Stop"), page);
+    stop_btn->setCursor(Qt::PointingHandCursor);
+    stop_btn->setEnabled(false);
+    stop_btn->setStyleSheet(
+        "QPushButton { background:#2A2010; border:1px solid #E6C24A; border-radius:10px;"
+        " color:#E6C24A; font-size:10pt; font-weight:700; padding:10px 20px; }"
+        "QPushButton:hover { background:#3A2C14; }"
+        "QPushButton:disabled { background:#241814; color:#6B5444; border-color:#3A2A1C; }");
+    ctl->addWidget(stop_btn);
+
+    auto* status = new QLabel(QString::fromUtf8("Idle. Pick a project/repo folder."), page);
+    status->setStyleSheet("color:#C7B6A2; font-size:9.5pt; background:transparent;");
+    ctl->addWidget(status, 1);
+    root->addLayout(ctl);
+
+    auto* table = new QTableWidget(0, 4, page);
+    table->setHorizontalHeaderLabels({"Risk", "Type", "File", "Detail"});
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->verticalHeader()->setVisible(false);
+    table->setShowGrid(false);
+    table->setAlternatingRowColors(true);
+    table->setStyleSheet(
+        "QTableWidget { background:#1A120C; color:#E8D5C0; font-size:9.5pt; border:1px solid rgba(255,170,90,26);"
+        " border-radius:10px; gridline-color:#2A1F14; }"
+        "QTableWidget::item { padding:5px 8px; }"
+        "QHeaderView::section { background:#130D07; color:#8B7355; font-size:9pt; font-weight:700;"
+        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+    {
+        auto* h = table->horizontalHeader();
+        h->setStretchLastSection(true);
+        h->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+        h->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+        h->setSectionResizeMode(2, QHeaderView::Stretch);
+    }
+    root->addWidget(table, 1);
+
+    QObject::connect(table, &QTableWidget::cellDoubleClicked, table, [table](int row, int) {
+        auto* it = table->item(row, 2);
+        if (!it) return;
+        const std::wstring wp = it->data(Qt::UserRole).toString().toStdWString();
+        if (PIDLIST_ABSOLUTE pidl = ILCreateFromPathW(wp.c_str())) {
+            SHOpenFolderAndSelectItems(pidl, 0, nullptr, 0);
+            ILFree(pidl);
+        }
+    });
+
+    ArmQuitGuard(page);
+    auto scanning = std::make_shared<std::atomic<bool>>(false);
+    auto scanned  = std::make_shared<std::atomic<long long>>(0);
+    auto flagged  = std::make_shared<std::atomic<long long>>(0);
+
+    auto addRow = [table](const ScFinding& f) {
+        const int row = table->rowCount();
+        table->insertRow(row);
+        QString bg; if (f.risk >= 90) bg = "#3A1F1F"; else if (f.risk >= 70) bg = "#3A2F1F"; else if (f.risk >= 50) bg = "#2F3A1F"; else bg = "#1F2F1F";
+        auto* risk = new QTableWidgetItem(QString::number(f.risk));
+        risk->setForeground(RiskColor(f.risk)); risk->setBackground(QColor(bg));
+        table->setItem(row, 0, risk);
+        auto* type = new QTableWidgetItem(QString::fromStdString(f.type));
+        type->setForeground(RiskColor(f.risk)); type->setBackground(QColor(bg));
+        table->setItem(row, 1, type);
+        auto* file = new QTableWidgetItem(QString::fromStdString(f.filename));
+        file->setData(Qt::UserRole, QString::fromStdString(f.path));
+        file->setToolTip(QString::fromStdString(f.path)); file->setBackground(QColor(bg));
+        table->setItem(row, 2, file);
+        auto* detail = new QTableWidgetItem(QString::fromStdString(f.detail)); detail->setBackground(QColor(bg));
+        table->setItem(row, 3, detail);
+    };
+
+    QObject::connect(scan_btn, &QPushButton::clicked, page,
+            [page, scan_btn, status, table, scanning, scanned, flagged, addRow]() {
+        if (scanning->load()) return;
+        const QString dir = QFileDialog::getExistingDirectory(
+            page, QString::fromUtf8("Choose project folder"), QString(),
+            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        if (dir.isEmpty()) return;
+        table->setRowCount(0);
+        scanned->store(0);
+        flagged->store(0);
+        scanning->store(true);
+        scan_btn->setEnabled(false);
+        status->setText(QString::fromUtf8("Scanning: ") + dir);
+
+        const std::wstring root = dir.toStdWString();
+        std::thread([root, status, table, scanning, scanned, flagged, addRow]() {
+            std::error_code ec;
+            fs::recursive_directory_iterator it(
+                fs::path(root), fs::directory_options::skip_permission_denied, ec);
+            const fs::recursive_directory_iterator end;
+            for (; !ec && it != end; it.increment(ec)) {
+                if (!scanning->load() || AppQuitting().load()) break;
+                std::error_code fec;
+                if (it->is_symlink(fec)) { it.disable_recursion_pending(); continue; }
+                if (!it->is_regular_file(fec) || fec) continue;
+                scanned->fetch_add(1);
+                std::vector<ScFinding> found;
+                try { AnalyzeFile(it->path(), found); } catch (...) {}
+                for (auto& f : found) {
+                    flagged->fetch_add(1);
+                    QMetaObject::invokeMethod(table, [addRow, f]() { addRow(f); }, Qt::QueuedConnection);
+                }
+                if (scanned->load() % 300 == 0) {
+                    const long long sc = scanned->load(), fl = flagged->load();
+                    QMetaObject::invokeMethod(status, [status, sc, fl]() {
+                        status->setText(QString::fromUtf8("Scanning... %1 files, %2 findings").arg(sc).arg(fl));
+                    }, Qt::QueuedConnection);
+                }
+            }
+            const long long sc = scanned->load(), fl = flagged->load();
+            scanning->store(false);
+            if (!AppQuitting().load()) {
+                QMetaObject::invokeMethod(status, [status, sc, fl]() {
+                    status->setText(QString::fromUtf8("Done. Scanned %1 files, %2 findings.").arg(sc).arg(fl));
+                }, Qt::QueuedConnection);
+            }
+        }).detach();
+    });
+
+    // Clean + Export (shared helper): Scan | Stop | Clean | Export | status.
+    auto* clean_btn  = MakeCleanButton(page, table, status);
+    auto* export_btn = MakeExportButton(page, table,
+                                        QString::fromUtf8("supplychain_findings.csv"), status);
+    ctl->insertWidget(2, clean_btn);
+    ctl->insertWidget(3, export_btn);
+
+    QObject::connect(stop_btn, &QPushButton::clicked, page, [stop_btn, status, scanning] {
+        if (!scanning->load()) return;
+        scanning->store(false);
+        stop_btn->setEnabled(false);
+        status->setText(QString::fromUtf8("Stopping..."));
+    });
+
+    auto* sync = new QTimer(page);
+    sync->setInterval(300);
+    QObject::connect(sync, &QTimer::timeout, scan_btn,
+                     [scan_btn, stop_btn, clean_btn, export_btn, table, scanning]() {
+        const bool busy = scanning->load();
+        const bool has_rows = table->rowCount() > 0;
+        scan_btn->setEnabled(!busy);
+        stop_btn->setEnabled(busy);
+        clean_btn->setEnabled(!busy && has_rows);
+        export_btn->setEnabled(!busy && has_rows);
+    });
+    sync->start();
+
+    return page;
+}
+
+} // namespace avdashboard

@@ -1,0 +1,22 @@
+{
+  "name": "avsuite",
+  "version": "0.1.0",
+  "dependencies": [
+    "sqlite3",
+    "spdlog",
+    "yara",
+    "openssl",
+    "gtest",
+    "nlohmann-json",
+    "cpp-httplib",
+    {
+      "name": "ggml",
+      "features": ["vulkan"]
+    },
+    "llama-cpp",
+    {
+      "name": "qtbase",
+      "features": ["widgets"]
+    }
+  ]
+}

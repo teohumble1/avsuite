@@ -1,0 +1,8 @@
+find_package(GTest CONFIG REQUIRED)
+
+add_subdirectory(behavior_engine_tests)
+add_subdirectory(pe_analyzer_tests)
+add_subdirectory(registry_scan_tests)
+add_subdirectory(static_scan_tests)
+add_subdirectory(realtime_watch_tests)
+add_subdirectory(remediation_tests)

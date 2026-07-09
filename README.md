@@ -28,6 +28,84 @@ This is an **educational/research project** that implements:
 
 **Đây KHÔNG phải antivirus sản xuất.** Nó minh họa kiến thức lập trình hệ thống và thiết kế kiến trúc bảo mật.
 
+---
+
+## Features | Tính Năng
+
+### Core Security | Bảo Mật Cốt Lõi
+- ✅ **Real-time Threat Detection** - Kernel-mode file monitoring with instant alerts
+- ✅ **YARA Rule Engine** - Configurable malware pattern matching
+- ✅ **Quarantine Management** - Isolate suspicious files with restore/delete options
+- ✅ **Behavior Analysis** - Track process/registry/file operations
+- ✅ **Event Logging** - SQLite database for threat audit trail
+
+### Dashboard UI | Giao Diện Người Dùng
+- ✅ **Realtime Monitoring** - Live threat detection dashboard
+- ✅ **Quarantine Panel** - View isolated files with multi-select operations
+- ✅ **System Events** - Complete event log with search/filter
+- ✅ **Threat Intelligence** - Display detected threat patterns
+- ✅ **Dark Theme** - Amber Dark theme with cyan accents
+
+---
+
+### Bảo Mật Cốt Lõi
+- ✅ **Phát hiện mối đe dọa theo thời gian thực** - Giám sát tệp ở chế độ kernel với cảnh báo tức thì
+- ✅ **Engine Quy Tắc YARA** - Khớp mô hình malware có thể cấu hình
+- ✅ **Quản lý Quarantine** - Cách ly các tệp đáng ngờ với tùy chọn khôi phục/xóa
+- ✅ **Phân tích Hành Vi** - Theo dõi hoạt động quá trình/sổ đăng ký/tệp
+- ✅ **Ghi nhật ký sự kiện** - Cơ sở dữ liệu SQLite cho đường kiểm toán mối đe dọa
+
+### Giao Diện Người Dùng Dashboard
+- ✅ **Giám sát theo thời gian thực** - Bảng điều khiển phát hiện mối đe dọa trực tiếp
+- ✅ **Bảng điều khiển Quarantine** - Xem tệp bị cách ly với các hoạt động lựa chọn nhiều
+- ✅ **Sự kiện hệ thống** - Nhật ký sự kiện hoàn chỉnh với tìm kiếm/lọc
+- ✅ **Thông tin tình báo mối đe dọa** - Hiển thị các mô hình mối đe dọa được phát hiện
+- ✅ **Chủ đề tối** - Chủ đề Amber Dark với nhấn mạnh lục lam
+
+## Installation | Cài Đặt
+
+### Option 1: Pre-built Binary (Recommended) | Tùy Chọn 1: Binary Được Xây Dựng Sẵn (Khuyến Nghị)
+
+Download latest release from GitHub:
+```bash
+# Visit: https://github.com/teohumble1/avsuite/releases
+# Download: TeoAvSuite-Setup-v1.0.0.exe
+# Run installer (requires admin + test VM only)
+```
+
+Tải phiên bản mới nhất từ GitHub:
+```bash
+# Truy cập: https://github.com/teohumble1/avsuite/releases
+# Tải: TeoAvSuite-Setup-v1.0.0.exe
+# Chạy trình cài đặt (yêu cầu quản trị viên + chỉ VM kiểm tra)
+```
+
+### Option 2: Build from Source | Tùy Chọn 2: Xây Dựng Từ Nguồn
+
+**Requirements | Yêu Cầu:**
+- Visual Studio 2022 with C++ workload
+- CMake 3.16+
+- Windows 11 SDK
+
+**Build steps | Các bước xây dựng:**
+```powershell
+# Clone repository
+git clone https://github.com/teohumble1/avsuite.git
+cd avsuite
+
+# Create build directory
+mkdir build
+cd build
+
+# Generate build files (Release)
+cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release ..
+
+# Build project
+cmake --build . --config Release
+
+# Output: build\release\src\dashboard_ui\Release\avdashboard.exe
+```
+
 ## Technical Implementation | Triển Khai Kỹ Thuật
 
 ### Kernel Driver | Driver Kernel
@@ -79,6 +157,38 @@ This is an **educational/research project** that implements:
 - Không có dương tính giả trên các tệp hệ thống sạch
 - Ổn định hệ thống được xác minh
 
+## Quarantine Management | Quản Lý Quarantine
+
+**v1.0.0 Feature: Select All with Batch Operations**
+
+The Quarantine tab provides:
+- ✅ View all isolated threats in a table
+- ✅ **Select All button** - Quickly select all quarantine items (cyan/blue styled)
+- ✅ **Multi-selection** - Hold Ctrl+Click to select multiple files
+- ✅ **Batch Restore** - Restore multiple files to their original location
+- ✅ **Batch Delete** - Permanently remove multiple quarantine items
+- ✅ **Progress Tracking** - Real-time feedback ("Restored 5/10 files", etc.)
+- ✅ **Partial Failure Handling** - Clear error reporting if some operations fail
+
+**How to use | Cách sử dụng:**
+1. Navigate to Quarantine tab
+2. Click "✓ Select All" button to select all items
+3. Click "Restore" (khôi phục) or "Xóa vĩnh viễn" (permanent delete)
+4. Progress displayed with status on completion
+
+---
+
+**v1.0.0 Tính năng: Select All với Batch Operations**
+
+Tab Quarantine cung cấp:
+- ✅ Xem tất cả các mối đe dọa bị cách ly trong một bảng
+- ✅ **Nút Select All** - Nhanh chóng chọn tất cả các mục quarantine (được định kiểu lục lam/xanh lam)
+- ✅ **Lựa chọn nhiều** - Giữ Ctrl+Click để chọn nhiều tệp
+- ✅ **Khôi phục hàng loạt** - Khôi phục nhiều tệp về vị trí ban đầu của chúng
+- ✅ **Xóa hàng loạt** - Loại bỏ vĩnh viễn nhiều mục quarantine
+- ✅ **Theo dõi tiến độ** - Phản hồi theo thời gian thực ("Đã khôi phục 5/10 tệp", v.v.)
+- ✅ **Xử lý lỗi một phần** - Báo lỗi rõ ràng nếu một số thao tác không thành công
+
 ## What's Implemented ✅ | Những Gì Được Triển Khai ✅
 
 - Minifilter driver (loads, attaches, functional)
@@ -87,6 +197,9 @@ This is an **educational/research project** that implements:
 - Event database logging
 - Installation procedures
 - VMware testing validated
+- ✅ **Select All + Multi-selection** (v1.0.0)
+- ✅ **Batch restore/delete** with progress tracking (v1.0.0)
+- ✅ **Professional installer** (Inno Setup, v1.0.0)
 
 ---
 
@@ -96,6 +209,9 @@ This is an **educational/research project** that implements:
 - Ghi nhật ký sự kiện cơ sở dữ liệu
 - Quy trình cài đặt
 - Kiểm tra VMware được xác thực
+- ✅ **Select All + Lựa chọn nhiều** (v1.0.0)
+- ✅ **Khôi phục/xóa hàng loạt** với theo dõi tiến độ (v1.0.0)
+- ✅ **Trình cài đặt chuyên nghiệp** (Inno Setup, v1.0.0)
 
 ## What's NOT Implemented ❌ | Những Gì KHÔNG Được Triển Khai ❌
 
@@ -274,6 +390,71 @@ fltmc instances
 - Không có mô hình học máy
 - Phạm vi mô hình mối đe dọa hạn chế
 
+## Troubleshooting | Khắc Phục Sự Cố
+
+### Dashboard won't start / Giao diện không khởi động
+**Problem**: App crashes on launch
+**Solution**:
+1. Delete database file: `Delete %APPDATA%\TeoAvSuite\avsuite.db*` (*.db-shm, *.db-wal)
+2. Restart application - fresh database will be created
+3. Re-apply setup steps if driver errors occur
+
+---
+
+**Vấn đề**: Ứng dụng bị sập khi khởi động
+**Giải pháp**:
+1. Xóa tệp cơ sở dữ liệu: `Xóa %APPDATA%\TeoAvSuite\avsuite.db*` (*.db-shm, *.db-wal)
+2. Khởi động lại ứng dụng - cơ sở dữ liệu mới sẽ được tạo
+3. Áp dụng lại các bước thiết lập nếu lỗi driver xảy ra
+
+### Driver fails to load / Driver không tải
+**Problem**: "Driver load failed" error
+**Possible causes**:
+- Secure Boot not disabled (VM only)
+- Test-signing mode not enabled (`bcdedit /query testsigning`)
+- Certificate not installed in Trusted Root
+- Driver altitude conflict
+
+**Solution**:
+1. Verify test-signing is ON: `bcdedit /query testsigning`
+2. If OFF, enable: `bcdedit /set testsigning on` then reboot
+3. Verify certificate: Windows Key + R → `certmgr.msc` → Trusted Root Certification Authorities
+4. Re-run setup procedures
+
+---
+
+**Vấn đề**: Lỗi "Driver load failed"
+**Nguyên nhân có thể**:
+- Khởi động bảo mật không bị tắt (chỉ VM)
+- Chế độ ký kiểm tra không được bật (`bcdedit /query testsigning`)
+- Chứng chỉ không được cài đặt trong Trusted Root
+- Xung đột độ cao của driver
+
+**Giải pháp**:
+1. Xác minh ký kiểm tra ĐƯỢC BẬT: `bcdedit /query testsigning`
+2. Nếu TẮT, bật: `bcdedit /set testsigning on` rồi khởi động lại
+3. Xác minh chứng chỉ: Windows Key + R → `certmgr.msc` → Trusted Root Certification Authorities
+4. Chạy lại các bước thiết lập
+
+### No threats detected / Không phát hiện mối đe dọa
+**Problem**: Engine running but no alerts
+**Check**:
+- Is driver loaded? Run: `fltmc instances` - should show AvMiniFilter
+- Are YARA rules present? Check: `avsuite.json` configuration
+- Is quarantine actually collecting files? Check database
+
+**Note**: This is a research project - not comprehensive malware detection
+
+---
+
+**Vấn đề**: Engine chạy nhưng không có cảnh báo
+**Kiểm tra**:
+- Driver có được tải không? Chạy: `fltmc instances` - nên hiển thị AvMiniFilter
+- Các quy tắc YARA có hiện diện không? Kiểm tra: cấu hình `avsuite.json`
+- Quarantine có thực sự thu thập tệp không? Kiểm tra cơ sở dữ liệu
+
+**Lưu ý**: Đây là một dự án nghiên cứu - không phát hiện malware toàn diện
+
 ## Testing Results | Kết Quả Kiểm Tra
 
 **Real test execution (2026-07-09):**
@@ -372,6 +553,20 @@ fltmc instances
 
 **"Bạn sẽ làm nó sản xuất như thế nào?"**
 > Kiểm tra tập hợp malware thực, giảm thiểu dương tính giả, tối ưu hóa hiệu suất, tính năng doanh nghiệp - đó là công việc 6-12 tháng của một đội.
+
+## Distribution & Releases | Phân Phối & Phát Hành
+
+**Current Version**: v1.0.0 (2026-07-09)
+- Available at: https://github.com/teohumble1/avsuite/releases
+- Format: TeoAvSuite-Setup-v1.0.0.exe (Windows 10/11 installer)
+- Installation: Admin + isolated VM recommended
+- Uninstall: Windows Control Panel → Programs and Features
+
+**Phiên bản hiện tại**: v1.0.0 (2026-07-09)
+- Có sẵn tại: https://github.com/teohumble1/avsuite/releases
+- Định dạng: TeoAvSuite-Setup-v1.0.0.exe (trình cài đặt Windows 10/11)
+- Cài đặt: Quản trị viên + VM cách ly được khuyến nghị
+- Gỡ cài đặt: Windows Control Panel → Programs and Features
 
 ## Learning Resources | Các Tài Nguyên Học Tập
 

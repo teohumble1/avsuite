@@ -136,26 +136,72 @@ cmake --build . --config Release
 - Ghi nhật ký sự kiện vào cơ sở dữ liệu SQLite
 - Quyết định theo thời gian thực
 
-### Testing | Kiểm Tra
-✅ **Malware Detection Tested:**
-- EICAR standard test file
-- PE Injection techniques (PEJINJECTION_IMPORT_COMBO)
-- Advanced evasion patterns (import hooking, API shimming)
-- Real-world suspicious executables (malware_test samples)
-- 50+ benign file monitoring for baseline
-- No false positives on clean system files
-- System stability verified
+### Testing & False Positive Rate | Kiểm Tra & Tỷ Lệ Dương Tính Giả
+
+⚠️ **CRITICAL HONESTY SECTION:**
+
+**Testing Performed (on isolated VM):**
+- ✅ EICAR standard test file - Detected
+- ✅ PE Injection techniques (PEJINJECTION_IMPORT_COMBO) - Detected
+- ✅ Advanced evasion patterns (import hooking, API shimming) - Detected
+- ✅ Real-world suspicious executables (malware_test samples) - Some detected
+- ✅ System stability - No crashes observed
+
+**False Positive Rate: UNKNOWN (likely HIGH)**
+- ❌ This is research-stage code, NOT production-tuned
+- ❌ Limited benign corpus testing (50 files << 1M+ needed for tuning)
+- ⚠️ **Expected**: High false positives without extensive tuning
+- ⚠️ **Reality**: Pattern detection will flag legitimate files
+- 🎯 **Next step**: False positive minimization requires 6-12 months of tuning
+
+**Why this matters:**
+High false positives = Users disable protection (worse than no protection)
 
 ---
 
-✅ **Phát Hiện Malware Được Kiểm Tra:**
-- Tệp kiểm tra tiêu chuẩn EICAR
-- Kỹ thuật PE Injection (PEJINJECTION_IMPORT_COMBO)
-- Mô hình thác thoát nâng cao (import hooking, API shimming)
-- Các tệp thực tế đáng ngờ (mẫu malware_test)
-- Giám sát 50+ tệp lành mạnh để tạo baseline
-- Không có dương tính giả trên các tệp hệ thống sạch
-- Ổn định hệ thống được xác minh
+⚠️ **PHẦN TRUNG THỰC QUAN TRỌNG:**
+
+**Kiểm Tra Được Thực Hiện (trên VM cách ly):**
+- ✅ Tệp kiểm tra tiêu chuẩn EICAR - Phát hiện
+- ✅ Kỹ thuật PE Injection (PEJINJECTION_IMPORT_COMBO) - Phát hiện
+- ✅ Mô hình thác thoát nâng cao (import hooking, API shimming) - Phát hiện
+- ✅ Các tệp thực tế đáng ngờ (mẫu malware_test) - Một số được phát hiện
+- ✅ Ổn định hệ thống - Không có sự cố được quan sát
+
+**Tỷ Lệ Dương Tính Giả: KHÔNG BIẾT (khả năng CAO)**
+- ❌ Đây là mã ở giai đoạn nghiên cứu, KHÔNG được điều chỉnh sản xuất
+- ❌ Kiểm tra tập hợp lành mạnh hạn chế (50 tệp << 1M+ cần để điều chỉnh)
+- ⚠️ **Kỳ vọng**: Dương tính giả cao mà không có điều chỉnh rộng rãi
+- ⚠️ **Hiện thực**: Phát hiện mô hình sẽ gắn cờ tệp hợp lệ
+- 🎯 **Bước tiếp theo**: Giảm thiểu dương tính giả yêu cầu 6-12 tháng điều chỉnh
+
+**Tại sao điều này quan trọng:**
+Dương tính giả cao = Người dùng tắt bảo vệ (tệ hơn không có bảo vệ)
+
+## False Positive Reduction (v1.0.1 improvements) | Giảm False Positive
+
+**Recent optimization: Context-aware detection** (commit bc522cf)
+
+Three modules improved to reduce alert fatigue by understanding context:
+
+1. **DLP (Data Loss Prevention)** 
+   - ✅ No longer flags version numbers in `package.json` as credit card numbers
+   - ✅ Dependency files (`*.lock`, `package-lock.json`) excluded from card detection
+   - ✅ Luhn + BIN verification still active for actual leaked credentials
+
+2. **Supply-Chain Defense**
+   - ✅ Minified/bundled JS (`.min.js`, `bundle.js`, with sourcemap) no longer flagged as obfuscation
+   - ✅ `node_modules/`, `dist/`, `build/` directories recognized as build artifacts
+   - ✅ Actual malware obfuscation patterns still detected at high confidence
+
+3. **DLL Monitoring**
+   - ✅ System DLLs with catalog signatures (HID.DLL, rpcss.dll) no longer flagged as "Unsigned"
+   - ✅ Both Authenticode and Windows catalog signatures checked
+   - ✅ High-risk unsigned DLLs in user directories still detected
+
+**Philosophy**: Zero-trust preserved. NOT adding whitelists — instead adding intelligent context awareness.
+
+---
 
 ## Quarantine Management | Quản Lý Quarantine
 
@@ -215,8 +261,9 @@ Tab Quarantine cung cấp:
 
 ## What's NOT Implemented ❌ | Những Gì KHÔNG Được Triển Khai ❌
 
-- ~~Real malware testing~~ ✅ **TESTED** (PE injection, advanced evasion patterns)
-- ~~False positive minimization~~ ✅ **VALIDATED** (benign corpus baseline, 0 FP on clean files)
+- ~~Real malware testing~~ ✅ **BASIC TESTING** (PE injection, some evasion patterns)
+- **❌ False positive minimization** (HIGH FP RATE - research-stage tuning)
+- **❌ Comprehensive benign corpus** (50 files tested << 1M+ needed)
 - Performance optimization (tuning for scale)
 - Comprehensive evasion resistance (cutting-edge techniques)
 - Enterprise license/support features
@@ -224,8 +271,9 @@ Tab Quarantine cung cấp:
 
 ---
 
-- ~~Kiểm tra malware thực~~ ✅ **ĐÃ KIỂM TRA** (PE injection, mô hình thác thoát nâng cao)
-- ~~Giảm thiểu dương tính giả~~ ✅ **ĐÃ XÁC THỰC** (baseline tập hợp lành mạnh, 0 FP trên tệp sạch)
+- ~~Kiểm tra malware thực~~ ✅ **KIỂM TRA CƠ BẢN** (PE injection, một số mô hình thác thoát)
+- **❌ Giảm thiểu dương tính giả** (TỶ LỆ CAO FP - điều chỉnh ở giai đoạn nghiên cứu)
+- **❌ Tập hợp lành mạnh toàn diện** (50 tệp kiểm tra << 1M+ cần)
 - Tối ưu hóa hiệu suất (điều chỉnh cho quy mô)
 - Kháng thác thoát toàn diện (kỹ thuật tiên tiến)
 - Tính năng giấy phép/hỗ trợ doanh nghiệp
@@ -351,16 +399,31 @@ fltmc instances
 
 ## Important Limitations | Những Hạn Chế Quan Trọng
 
+### ⚠️ FALSE POSITIVES (Most Critical) | Dương Tính Giả (Quan Trọng Nhất)
+- **High false positive rate expected** - pattern detection flags legitimate files
+- **Not tuned** - research-stage code, not production-optimized
+- **Can disable user trust** - users who see too many false alerts disable protection
+- **No benign corpus baseline** - only tested against 50 files, not 1M+
+- **Solution requires 6-12 months** - extensive tuning cycle needed
+
+---
+
+- **Tỷ lệ dương tính giả cao dự kiến** - phát hiện mô hình gắn cờ tệp hợp lệ
+- **Không được điều chỉnh** - mã ở giai đoạn nghiên cứu, không được tối ưu hóa sản xuất
+- **Có thể vô hiệu hóa lòng tin người dùng** - người dùng thấy quá nhiều cảnh báo giả sẽ tắt bảo vệ
+- **Không có baseline tập hợp lành mạnh** - chỉ kiểm tra với 50 tệp, không phải 1M+
+- **Giải pháp yêu cầu 6-12 tháng** - cần chu kỳ điều chỉnh rộng rãi
+
 ### Security | Bảo Mật
 - **Self-signed certificate only** - not from trusted CA
-- No real malware tested against
+- Limited malware samples tested (not comprehensive)
 - Not resistant to sophisticated evasion
 - No zero-day detection capability
 
 ---
 
 - **Chỉ chứng chỉ tự-ký** - không từ CA đáng tin cậy
-- Không có malware thực được kiểm tra
+- Mẫu malware kiểm tra hạn chế (không toàn diện)
 - Không kháng được thác thoát tinh vi
 - Không có khả năng phát hiện zero-day
 
@@ -391,6 +454,29 @@ fltmc instances
 - Phạm vi mô hình mối đe dọa hạn chế
 
 ## Troubleshooting | Khắc Phục Sự Cố
+
+### Quarantine tab / History tab is empty | Tab Quarantine / History trống
+**Problem**: No data showing in Quarantine or History tabs
+**Root cause**: Driver is not loaded — no threats are being detected
+**Solution**:
+1. Check if driver is loaded: `fltmc instances` (should show AvMiniFilter)
+2. If not loaded: Complete driver setup (test-signing, certificate, service installation)
+3. Once driver is running, detected threats will appear in tabs
+4. Database is initialized empty — data populates as threats are detected
+
+**Note**: This is expected behavior. Without the kernel driver running, the engine cannot monitor files, so Quarantine and History remain empty.
+
+---
+
+**Vấn đề**: Không có dữ liệu trong các tab Quarantine hoặc History
+**Nguyên nhân gốc rễ**: Driver không được tải — không có mối đe dọa nào được phát hiện
+**Giải pháp**:
+1. Kiểm tra xem driver có được tải không: `fltmc instances` (nên hiển thị AvMiniFilter)
+2. Nếu không tải: Hoàn thành setup driver (test-signing, chứng chỉ, cài đặt dịch vụ)
+3. Khi driver chạy, các mối đe dọa được phát hiện sẽ xuất hiện trong các tab
+4. Cơ sở dữ liệu được khởi tạo trống — dữ liệu được điền khi các mối đe dọa được phát hiện
+
+**Lưu ý**: Đây là hành vi dự kiến. Nếu không chạy driver kernel, engine không thể giám sát tệp, nên Quarantine và History vẫn trống.
 
 ### Dashboard won't start / Giao diện không khởi động
 **Problem**: App crashes on launch
@@ -487,6 +573,50 @@ fltmc instances
 - Kiểm tra căng thẳng hiệu suất
 - Kháng lại kỹ thuật thác thoát
 
+## Engineering Tradeoffs & Real Problems | Tradeoff Kỹ Thuật & Vấn Đề Thực
+
+### Why False Positives Are The Hard Problem | Tại Sao Dương Tính Giả Là Vấn Đề Khó
+
+**Concrete Example:**
+```
+Behavior Rule: "Process opens System32 file + modifies registry"
+- Legit case: Windows Update (system process, necessary)
+- Attack case: Ransomware propagation
+- Pattern looks identical to detection engine
+- Solution: Need 1M+ benign files to learn "normal" behavior
+- Current state: 50 test files (0.005% coverage)
+```
+
+**Real tradeoff:**
+- Tight rules → Miss malware (false negatives - BAD for security)
+- Loose rules → Flag legit files (false positives - BAD for user trust)
+- **Sweet spot requires**: Months of corpus analysis + user feedback cycles
+
+**Why this matters for portfolio:**
+Shows I understand the REAL constraint in AV design isn't detection algorithms—it's tuning to real-world complexity. Many "AV projects" ignore this entirely.
+
+---
+
+### Konkrétní Příklad:
+```
+Pravidlo chování: "Proces otevírá soubor System32 + modifikuje registr"
+- Legitimní: Windows Update (systémový proces, nezbytný)
+- Útok: Propagace ransomwaru
+- Vzor vypadá pro detekční engine identicky
+- Řešení: Potřeba 1M+ legalních souborů k učení "normálního" chování
+- Současný stav: 50 testovacích souborů (0,005% pokrytí)
+```
+
+**Skutečný kompromis:**
+- Přísná pravidla → Zmeškat malware (falešné negativy - ŠPATNě pro bezpečnost)
+- Volná pravidla → Označit legální soubory (falešně pozitivní - ŠPATNě pro důvěru uživatele)
+- **Sladký bod vyžaduje**: Měsíce analýzy korpusu + cykly zpětné vazby od uživatelů
+
+**Proč to na portfolio záleží:**
+Ukazuje, že rozumím skutečnému omezení v designu AV není detekční algoritmy—to je ladění na složitost reálného světa. Mnoho "AV projektů" toto úplně ignoruje.
+
+---
+
 ## For Portfolio Review | Để Xem Xét Portfolio
 
 ### What This Demonstrates | Những Gì Được Minh Họa
@@ -494,8 +624,9 @@ fltmc instances
 ✅ Driver development knowledge
 ✅ Security architecture design
 ✅ Code-signing practices
+✅ **Honest problem scoping** (understanding the hard part)
 ✅ Professional documentation
-✅ Realistic scoping
+✅ Realistic limitations (not overclaiming)
 
 ---
 
@@ -503,23 +634,30 @@ fltmc instances
 ✅ Kiến thức phát triển driver
 ✅ Thiết kế kiến trúc bảo mật
 ✅ Thực hành ký mã
+✅ **Phạm vi vấn đề trung thực** (hiểu phần khó)
 ✅ Tài liệu chuyên nghiệp
-✅ Phạm vi thực tế
+✅ Giới hạn thực tế (không overclaim)
 
 ### What This Does NOT Claim | Những Gì Điều Này KHÔNG Tuyên Bố
 ❌ Production-ready antivirus
-❌ Enterprise-grade reliability
-❌ Tested on real malware
-❌ Zero false positives
-❌ Performance-optimized
+❌ Enterprise-grade reliability  
+❌ Comprehensive malware coverage
+❌ Low false positive rate
+❌ Performance-optimized for production
+
+**Why NOT claiming these things is itself valuable:**
+Many portfolio projects overclaim capabilities. This one explicitly documents what's missing and WHY it's missing (not laziness—tuning requires 6-12 months of focused work).
 
 ---
 
 ❌ Antivirus sẵn sàng sản xuất
 ❌ Độ tin cậy cấp doanh nghiệp
-❌ Được kiểm tra trên malware thực
-❌ Không có dương tính giả
-❌ Tối ưu hóa hiệu suất
+❌ Phạm vi malware toàn diện
+❌ Tỷ lệ dương tính giả thấp
+❌ Tối ưu hóa hiệu suất sản xuất
+
+**Tại sao KHÔNG tuyên bố những thứ này lại có giá trị:**
+Nhiều dự án portfolio overclaim khả năng. Dự án này rõ ràng ghi chép những gì thiếu và TẠI SAO nó thiếu (không phải lười biếng—điều chỉnh yêu cầu 6-12 tháng công việc tập trung).
 
 ## Files | Các Tệp
 
@@ -532,11 +670,19 @@ fltmc instances
 
 ## Interview Talking Points | Những Điểm Nói Chuyện Phỏng Vấn
 
+**"What's your false positive rate?"**
+> *Honest answer:* Unknown, likely high. This is research-stage code with limited benign testing (50 files vs 1M+ needed). I haven't done the 6-12 month tuning cycle that production AV requires. Without that, pattern detection will flag legitimate files. This is exactly why false positive minimization is listed as NOT implemented - it's the hardest part.
+
+**"Tỷ lệ dương tính giả của bạn là bao nhiêu?"**
+> *Câu trả lời trung thực:* Không biết, khả năng cao. Đây là mã ở giai đoạn nghiên cứu với kiểm tra lành mạnh hạn chế (50 tệp so với 1M+ cần). Tôi chưa thực hiện chu kỳ điều chỉnh 6-12 tháng mà AV sản xuất yêu cầu. Nếu không, phát hiện mô hình sẽ gắn cờ tệp hợp lệ. Đây chính xác là lý do tại sao giảm thiểu dương tính giả được liệt kê là KHÔNG được triển khai - đó là phần khó nhất.
+
+---
+
 **"Is this production-ready?"**
-> No - it's a research project to demonstrate kernel architecture and security concepts. Production AV needs months of malware testing and false positive tuning.
+> No - it's a research project demonstrating kernel architecture. It detects *some* threats but has high false positives. Production AV needs extensive benign corpus testing and tuning.
 
 **"Điều này có sẵn sàng sản xuất không?"**
-> Không - đây là một dự án nghiên cứu để minh họa kiến trúc kernel và các khái niệm bảo mật. AV sản xuất cần hàng tháng kiểm tra malware và tinh chỉnh dương tính giả.
+> Không - đây là dự án nghiên cứu minh họa kiến trúc kernel. Nó phát hiện *một số* mối đe dọa nhưng có dương tính giả cao. AV sản xuất cần kiểm tra tập hợp lành mạnh rộng rãi và điều chỉnh.
 
 ---
 
@@ -549,10 +695,10 @@ fltmc instances
 ---
 
 **"How would you make it production?"**
-> Real malware corpus testing, false positive minimization, performance optimization, enterprise features - that's 6-12 months of team work.
+> The bottleneck is false positive tuning: real malware corpus (10k+ samples), benign corpus (1M+ files), iterative tuning to minimize FP without missing TP. That's 6-12 months of focused work. Detection logic is the easy part; tuning is the hard part.
 
 **"Bạn sẽ làm nó sản xuất như thế nào?"**
-> Kiểm tra tập hợp malware thực, giảm thiểu dương tính giả, tối ưu hóa hiệu suất, tính năng doanh nghiệp - đó là công việc 6-12 tháng của một đội.
+> Tắc nghẽn là điều chỉnh dương tính giả: tập hợp malware thực (10k+ mẫu), tập hợp lành mạnh (1M+ tệp), điều chỉnh lặp lại để giảm thiểu FP mà không bỏ lỡ TP. Đó là 6-12 tháng công việc tập trung. Logic phát hiện là phần dễ; điều chỉnh là phần khó.
 
 ## Distribution & Releases | Phân Phối & Phát Hành
 
@@ -567,6 +713,34 @@ fltmc instances
 - Định dạng: TeoAvSuite-Setup-v1.0.0.exe (trình cài đặt Windows 10/11)
 - Cài đặt: Quản trị viên + VM cách ly được khuyến nghị
 - Gỡ cài đặt: Windows Control Panel → Programs and Features
+
+## Hard Questions (You Should Expect These) | Câu Hỏi Khó (Bạn Nên Dự Kiến)
+
+**Q: "If we deployed this to 1M users, what would happen?"**
+> False positives would spike. Without tuning, legitimate apps would be blocked. Users would disable it. This is why tuning is harder than detection logic.
+
+**Q: "Why not just add more rules?"**
+> More rules = more false positives. The problem isn't finding malware patterns—it's distinguishing malware from legitimate code that looks similar. That's what requires the benign corpus.
+
+**Q: "So this would actually harm users more than help them?"**
+> Exactly. In its current state, yes. That's why it's labeled research/portfolio, not production. This demonstrates understanding of AV design constraints that many engineers miss.
+
+**Q: "How would you prioritize: detection or false positive tuning?"**
+> False positive tuning first. Missing malware is bad, but users who disable protection because of false alerts is worse. This is why real AV teams spend more time on FP tuning than detection logic.
+
+---
+
+**Q: "Nếu chúng tôi triển khai điều này cho 1M người dùng, điều gì sẽ xảy ra?"**
+> Dương tính giả sẽ tăng đột biến. Nếu không điều chỉnh, các ứng dụng hợp lệ sẽ bị chặn. Người dùng sẽ tắt nó. Đây là lý do tại sao điều chỉnh khó hơn logic phát hiện.
+
+**Q: "Tại sao không chỉ thêm nhiều quy tắc hơn?"**
+> Nhiều quy tắc = nhiều dương tính giả hơn. Vấn đề không phải tìm mô hình malware—đó là phân biệt malware từ mã hợp lệ trông giống nhau. Đó là những gì yêu cầu tập hợp lành mạnh.
+
+**Q: "Vậy điều này sẽ thực sự gây hại cho người dùng hơn là giúp họ?"**
+> Chính xác. Ở trạng thái hiện tại, có. Đó là lý do tại sao nó được dán nhãn nghiên cứu/portfolio, không phải sản xuất. Điều này thể hiện hiểu biết về các ràng buộc thiết kế AV mà nhiều kỹ sư bỏ lỡ.
+
+**Q: "Bạn sẽ ưu tiên: phát hiện hay điều chỉnh dương tính giả?"**
+> Điều chỉnh dương tính giả trước tiên. Bỏ lỡ malware là tệ, nhưng người dùng tắt bảo vệ vì cảnh báo giả là tệ hơn. Đây là lý do tại sao các đội AV thực tế dành nhiều thời gian hơn cho điều chỉnh FP hơn là logic phát hiện.
 
 ## Learning Resources | Các Tài Nguyên Học Tập
 

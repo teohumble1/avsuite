@@ -1841,7 +1841,7 @@ QWidget* MainWindow::BuildHomePage() {
         protection_status_label_ = new QLabel(
             QString::fromUtf8("Máy của bạn đang được bảo vệ"), card);
         protection_status_label_->setStyleSheet(
-            "font-size: 12pt; font-weight: 700; color: #ffffff; background: transparent;");
+            "font-size: 22pt; font-weight: 800; color: #4ADE80; background: transparent;");
         tc->addWidget(protection_status_label_);
 
         auto* sub = new QLabel(
@@ -1998,72 +1998,45 @@ QWidget* MainWindow::BuildHomePage() {
         c_l->addLayout(sr);
     }
 
-    // ── Protection Layers ─────────────────────────────────────────────────────
+    // ── Quick actions (Figma layout) ──────────────────────────────────────────
     {
-        auto* pc = new QFrame(c_w);
-        pc->setStyleSheet(
-            "QFrame { background: #1C1108; border: 1px solid rgba(255,170,90,0.10); "
-            "border-radius: 14px; }");
-        auto* pl = new QVBoxLayout(pc);
-        pl->setContentsMargins(14, 12, 14, 12);
-        pl->setSpacing(8);
-
-        auto* ph = new QHBoxLayout();
-        auto* pt = new QLabel(QString::fromUtf8("Protection Layers"), pc);
-        pt->setStyleSheet("font-size: 10pt; font-weight: 600; color: #ffffff; background: transparent;");
-        ph->addWidget(pt);
-        ph->addStretch();
-        auto* pcount = new QLabel(QString::fromUtf8("5 / 5 hoạt động"), pc);
-        pcount->setStyleSheet("font-size: 8pt; color: #C7B6A2; background: transparent;");
-        ph->addWidget(pcount);
-        pl->addLayout(ph);
-
-        struct PItem { IconWidget::Type ico; QString name; bool on; };
-        const PItem pitems[] = {
-            {IconWidget::Shield,   QString::fromUtf8("Real-time Protection"), true},
-            {IconWidget::Globe,    QString::fromUtf8("Web Shield"),           true},
-            {IconWidget::Lock,     QString::fromUtf8("Ransomware Guard"),     true},
-            {IconWidget::Wifi,     QString::fromUtf8("Network Monitor"),      false},
-            {IconWidget::Activity, QString::fromUtf8("Behavioral Analysis"),  true},
+        auto* qa = new QHBoxLayout();
+        qa->setSpacing(10);
+        struct QAct { IconWidget::Type ico; QString label; int page; };
+        const QAct acts[] = {
+            {IconWidget::Archive, QString::fromUtf8("Open Quarantine"), 2},
+            {IconWidget::Bell,    QString::fromUtf8("View Alerts"),     25},
+            {IconWidget::Ai,      QString::fromUtf8("AI Assistant"),    6},
+            {IconWidget::Eye,     QString::fromUtf8("Threat Intel"),    17},
         };
-        for (const auto& pi : pitems) {
-            auto* row = new QHBoxLayout();
-            row->setSpacing(10);
-
-            // Icon box
-            auto* ib_w = new QWidget(pc);
-            ib_w->setFixedSize(26, 26);
-            ib_w->setStyleSheet(pi.on
-                ? "QWidget { background: rgba(255,122,0,0.12); border-radius: 7px; }"
-                : "QWidget { background: rgba(199,182,162,0.06); border-radius: 7px; }");
-            const QColor ico_c = pi.on ? QColor(0xFF,0x9B,0x3D) : QColor(0x6B,0x54,0x44);
-            auto* ib = new IconWidget(pi.ico, 13, ico_c, ib_w);
-            ib->move((26-ib->width())/2, (26-ib->height())/2);
-            row->addWidget(ib_w);
-
-            auto* nl = new QLabel(pi.name, pc);
-            nl->setStyleSheet(pi.on
-                ? "font-size: 9pt; color: #ffffff; background: transparent;"
-                : "font-size: 9pt; color: #6B5444; background: transparent;");
-            row->addWidget(nl, 1);
-            auto* tog = new ToggleSwitch(pc);
-            tog->setChecked(pi.on);
-            row->addWidget(tog);
-            pl->addLayout(row);
+        for (const auto& a : acts) {
+            auto* btn = new QPushButton(c_w);
+            btn->setObjectName("QuickAct");
+            btn->setFixedHeight(52);
+            btn->setCursor(Qt::PointingHandCursor);
+            btn->setStyleSheet(
+                "QPushButton#QuickAct { background: #1C1108; border: 1px solid #33261A; "
+                "border-radius: 14px; text-align: left; padding: 0 14px 0 44px; "
+                "color: #C7B6A2; font-size: 9.5pt; font-weight: 500; }"
+                "QPushButton#QuickAct:hover { border: 1px solid #FF7A00; color: #ECE4DA; }");
+            btn->setText(a.label);
+            auto* ic = new IconWidget(a.ico, 15, QColor(0xFF,0x7A,0x00), btn);
+            ic->setAttribute(Qt::WA_TransparentForMouseEvents);
+            ic->move(16, (52 - ic->height()) / 2);
+            const int pg = a.page;
+            connect(btn, &QPushButton::clicked, this, [this, pg] { GoToPage(pg); });
+            qa->addWidget(btn, 1);
         }
-        c_l->addWidget(pc);
+        c_l->addLayout(qa);
     }
 
-    // ── Scan Modules ──────────────────────────────────────────────────────────
+    // ── Scan Modules (kept, wired to real scans) ───────────────────────────────
     {
         auto* mh = new QHBoxLayout();
         auto* mt = new QLabel(QString::fromUtf8("Scan Modules"), c_w);
-        mt->setStyleSheet("font-size: 10pt; font-weight: 600; color: #ffffff; background: transparent;");
+        mt->setStyleSheet("font-size: 10pt; font-weight: 600; color: #ECE4DA; background: transparent;");
         mh->addWidget(mt);
         mh->addStretch();
-        auto* va = new QLabel(QString::fromUtf8("Xem tất cả →"), c_w);
-        va->setStyleSheet("font-size: 8pt; color: #FF7A00; background: transparent;");
-        mh->addWidget(va);
         c_l->addLayout(mh);
 
         auto* mg = new QGridLayout();
@@ -2566,10 +2539,10 @@ void MainWindow::RefreshHomeStats() {
     if (threat_active) {
         protection_status_label_->setText(
             QString::fromUtf8("Đã phát hiện và cách ly %1 mối nguy hiểm").arg(stats.active_quarantine_count));
-        protection_status_label_->setStyleSheet("font-size: 14pt; font-weight: 700; color: #FF5A6A;");
+        protection_status_label_->setStyleSheet("font-size: 22pt; font-weight: 800; color: #FF5A6A; background: transparent;");
     } else {
         protection_status_label_->setText(QString::fromUtf8("Máy của bạn đang được bảo vệ"));
-        protection_status_label_->setStyleSheet("font-size: 14pt; font-weight: 700; color: #4ADE80;");
+        protection_status_label_->setStyleSheet("font-size: 22pt; font-weight: 800; color: #4ADE80; background: transparent;");
     }
 
     if (shield_widget_)

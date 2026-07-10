@@ -1325,14 +1325,10 @@ QGroupBox* MakeGroup(const QString& title) {
 
 } // namespace
 
-// Startup step tracer: appends to the same debug file main.cpp opens, so we can
-// see exactly which step blocks/crashes during construction.
-static void CtorDbg(const char* step) {
-    FILE* f = nullptr;
-    if (fopen_s(&f, "C:\\Users\\teohumble\\AppData\\Local\\Temp\\avdbg.txt", "a") == 0 && f) {
-        fprintf(f, "ctor: %s\n", step); fclose(f);
-    }
-}
+// Startup step tracer -- no-op in shipped builds. (Previously appended to a
+// hardcoded developer path C:\Users\<dev>\...\avdbg.txt, which both leaked the
+// developer's username into the binary and wrote a stray file on every launch.)
+static void CtorDbg(const char* /*step*/) {}
 
 MainWindow::MainWindow(avcore::Config config, QWidget* parent)
     : QMainWindow(parent), config_(std::move(config)) {

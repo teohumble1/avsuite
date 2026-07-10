@@ -1,10 +1,10 @@
 {
   "ai_model_path": "",
-  "database_path": "%LOCALAPPDATA%\\TeoAvSuite\\avsuite.db",
+  "database_path": "avsuite.db",
   "debounce_ms": 750,
-  "log_path": "%LOCALAPPDATA%\\TeoAvSuite\\avsuite.log",
+  "log_path": "avsuite.log",
   "malwarebazaar_api_key": "",
-  "quarantine_directory": "%LOCALAPPDATA%\\TeoAvSuite\\quarantine",
+  "quarantine_directory": "quarantine",
   "scheduled_scan": {
     "enabled": true,
     "interval": "daily",

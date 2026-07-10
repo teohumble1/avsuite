@@ -399,27 +399,16 @@ int main(int argc, char** argv) {
 
     avlogging::Logger::Init(config.log_path);
 
-    FILE* dbg = nullptr;
-    fopen_s(&dbg, "C:\\Users\\teohumble\\AppData\\Local\\Temp\\avdbg.txt", "w");
-    if (dbg) { fprintf(dbg, "Before constructor\n"); fflush(dbg); }
-
     avdashboard::MainWindow window(std::move(config));
-
-    if (dbg) { fprintf(dbg, "After constructor\n"); fflush(dbg); }
-
     window.show();
-    if (dbg) { fprintf(dbg, "After show()\n"); fflush(dbg); }
 
     HWND hwnd = reinterpret_cast<HWND>(window.winId());
-    if (dbg) { fprintf(dbg, "winId=0x%llx vis=%d\n", (unsigned long long)hwnd, hwnd ? ::IsWindowVisible(hwnd) : -1); fflush(dbg); }
 
     // Position/size is chosen in MainWindow's ctor (screen-aware + centered);
     // don't override it here.
     window.raise();
     window.activateWindow();
     if (hwnd) { ::ShowWindow(hwnd, SW_SHOW); ::SetForegroundWindow(hwnd); }
-
-    if (dbg) { fprintf(dbg, "Before exec()\n"); fclose(dbg); }
 
     return app.exec();
 }

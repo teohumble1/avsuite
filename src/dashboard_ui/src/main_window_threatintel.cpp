@@ -15,6 +15,7 @@
 
 #include "main_window.hpp"
 #include "av_quit_guard.hpp"
+#include "theme.hpp"
 
 #include <QAbstractItemView>
 #include <QColor>
@@ -37,37 +38,26 @@ namespace avdashboard {
 QWidget* BuildThreatIntelPage(QWidget* parent) {
     auto* win = qobject_cast<MainWindow*>(parent);
     auto* page = new QWidget();
-    page->setStyleSheet("background:#120B06;");
+    page->setStyleSheet(QString("background:%1;").arg(theme::Bg));
     auto* root = new QVBoxLayout(page);
-    root->setContentsMargins(28, 24, 28, 24);
-    root->setSpacing(12);
+    root->setContentsMargins(theme::Space6, theme::Space6, theme::Space6, theme::Space6);
+    root->setSpacing(theme::Space3);
 
-    auto* title = new QLabel(QString::fromUtf8("Threat Intel"), page);
-    title->setStyleSheet("color:#E8E8E8; font-size:16pt; font-weight:800; background:transparent;");
-    root->addWidget(title);
-    auto* sub = new QLabel(QString::fromUtf8(
-        "Pulls the abuse.ch MalwareBazaar recent-additions feed (public malware-hash "
-        "intel) and merges new SHA-256 hashes into the local blacklist, so scans flag "
-        "them immediately. Needs a free Auth-Key from bazaar.abuse.ch (set in Settings "
-        "-> Security)."), page);
-    sub->setStyleSheet("color:#8B8B8B; font-size:9pt; background:transparent;");
-    sub->setWordWrap(true);
-    root->addWidget(sub);
-
-    auto* ctl = new QHBoxLayout();
-    ctl->setSpacing(12);
     auto* update_btn = new QPushButton(QString::fromUtf8("Update from MalwareBazaar"), page);
+    update_btn->setObjectName("PrimaryBtn");
     update_btn->setCursor(Qt::PointingHandCursor);
-    update_btn->setStyleSheet(
-        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
-        " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
-        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
-        "QPushButton:disabled { background:#2A1F14; color:#8B8B8B; }");
-    ctl->addWidget(update_btn);
+
+    root->addWidget(theme::BuildPageHeader(
+        "Threat Intel",
+        "Pulls the abuse.ch MalwareBazaar recent-additions feed and merges new SHA-256 "
+        "hashes into the local blacklist, so scans flag them immediately. Needs a free "
+        "Auth-Key from bazaar.abuse.ch (Settings -> Security).",
+        update_btn));
+
     auto* status = new QLabel(QString::fromUtf8("Idle. Click Update to pull the latest feed."), page);
-    status->setStyleSheet("color:#C8B8A8; font-size:9.5pt; background:transparent;");
-    ctl->addWidget(status, 1);
-    root->addLayout(ctl);
+    status->setStyleSheet(QString("color:%1; font-size:%2px; background:transparent;")
+                              .arg(theme::Muted).arg(theme::FontBody));
+    root->addWidget(status);
 
     auto* table = new QTableWidget(0, 2, page);
     table->setHorizontalHeaderLabels({"SHA-256", "Signature"});
@@ -75,13 +65,16 @@ QWidget* BuildThreatIntelPage(QWidget* parent) {
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->verticalHeader()->setVisible(false);
     table->setShowGrid(false);
-    table->setAlternatingRowColors(true);
-    table->setStyleSheet(
-        "QTableWidget { background:#1C1008; color:#E8E8E8; font-size:9.5pt; border:1px solid #2A1F14;"
-        " border-radius:10px; gridline-color:#2A1F14; }"
-        "QTableWidget::item { padding:5px 8px; }"
-        "QHeaderView::section { background:#130D07; color:#8B8B8B; font-size:9pt; font-weight:700;"
-        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+    table->setStyleSheet(QString(
+        "QTableWidget { background:%1; color:%2; font-size:%3px; border:1px solid %4;"
+        " border-radius:%5px; }"
+        "QTableWidget::item { padding:8px 10px; border-bottom:1px solid %4; }"
+        "QTableWidget::item:selected { background:%6; color:%2; }"
+        "QHeaderView::section { background:%7; color:%8; font-size:%9px; font-weight:600;"
+        " padding:8px 10px; border:none; border-bottom:1px solid %4; }")
+        .arg(theme::Surface).arg(theme::Text).arg(theme::FontBody).arg(theme::Border)
+        .arg(theme::RadiusLg).arg(theme::Surface2).arg(theme::Sidebar).arg(theme::Dim)
+        .arg(theme::FontCaption));
     {
         auto* h = table->horizontalHeader();
         h->setStretchLastSection(true);

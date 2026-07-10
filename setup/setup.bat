@@ -28,12 +28,31 @@ if not exist "%INSTALL_DIR%" (
     echo Created: %INSTALL_DIR%
 )
 
-REM Copy Release files
+REM Copy files from current directory to installation directory
 echo Copying application files...
-xcopy /Y /E "release\*" "%INSTALL_DIR%\" >nul 2>&1
 
-if errorlevel 1 (
-    echo ERROR: Failed to copy files
+REM Copy all exe files
+copy /Y "*.exe" "%INSTALL_DIR%\" >nul 2>&1
+
+REM Copy driver
+copy /Y "*.sys" "%INSTALL_DIR%\" >nul 2>&1
+
+REM Copy config
+copy /Y "*.json" "%INSTALL_DIR%\" >nul 2>&1
+
+REM Copy README
+copy /Y "README.md" "%INSTALL_DIR%\" >nul 2>&1
+
+if not exist "%INSTALL_DIR%\avdashboard.exe" (
+    echo ERROR: Failed to copy files from: %CD%
+    echo.
+    echo Make sure all files are extracted from the ZIP:
+    echo   - avdashboard.exe
+    echo   - avconsolehost.exe
+    echo   - avupdateserver.exe
+    echo   - AvMiniFilter.sys
+    echo   - avsuite.json
+    echo   - README.md
     pause
     exit /b 1
 )

@@ -283,7 +283,7 @@ QWidget* BuildDlpPage(QWidget* parent) {
         "Scans a folder for plaintext sensitive data at rest: credit card numbers "
         "(Luhn-verified), private keys, cloud/API tokens (AWS/GitHub/Slack/Google), JWTs, "
         "database connection strings with embedded credentials, and email:password leak-dump lines."), page);
-    sub->setStyleSheet("color:#8B8B8B; font-size:9pt; background:transparent;");
+    sub->setStyleSheet("color:#8B7355; font-size:9pt; background:transparent;");
     sub->setWordWrap(true);
     root->addWidget(sub);
 
@@ -295,7 +295,7 @@ QWidget* BuildDlpPage(QWidget* parent) {
         "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
         " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
         "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
-        "QPushButton:disabled { background:#2A1F14; color:#8B8B8B; }");
+        "QPushButton:disabled { background:#2A1F14; color:#8B7355; }");
     ctl->addWidget(scan_btn);
 
     auto* ai_btn = new QPushButton(QString::fromUtf8("Explain with AI"), page);

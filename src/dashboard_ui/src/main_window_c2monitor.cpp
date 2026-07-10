@@ -175,7 +175,7 @@ QWidget* BuildC2MonitorPage(QWidget* parent) {
     h_layout->addWidget(title);
 
     auto* subtitle = new QLabel("Live outbound connections to non-private IPs. Reputation is checked on demand (right-click), never assumed.");
-    subtitle->setStyleSheet("color:#8B8B8B; font-size:9pt;");
+    subtitle->setStyleSheet("color:#8B7355; font-size:9pt;");
     h_layout->addWidget(subtitle);
 
     auto* export_btn = new QPushButton("Export");

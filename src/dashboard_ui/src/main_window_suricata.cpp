@@ -115,7 +115,7 @@ QWidget* BuildSuricataPage(QWidget* parent) {
         "Tich hop voi Suricata da cai san tren may (khong tu dong tai/bundle binary). "
         "Neu chua co Suricata, cai tu suricata.io roi bam 'Kiem tra lai'."), page);
     subtitle->setWordWrap(true);
-    subtitle->setStyleSheet("color:#8B8B8B; font-size:11.5px; background:transparent;");
+    subtitle->setStyleSheet("color:#8B7355; font-size:11.5px; background:transparent;");
     root->addWidget(subtitle);
 
     // ── Status card ──────────────────────────────────────────────────────────
@@ -189,7 +189,7 @@ QWidget* BuildSuricataPage(QWidget* parent) {
         "QPushButton:hover { background:#FF5A6A30; }"
         "QPushButton:disabled { background:#1C1008; border-color:#333; color:#555; }");
     auto* running_lbl = new QLabel(QString::fromUtf8(""), status_card);
-    running_lbl->setStyleSheet("color:#8B8B8B; font-size:11.5px; background:transparent;");
+    running_lbl->setStyleSheet("color:#8B7355; font-size:11.5px; background:transparent;");
     action_row->addWidget(start_btn);
     action_row->addWidget(stop_btn);
     action_row->addWidget(running_lbl, 1);

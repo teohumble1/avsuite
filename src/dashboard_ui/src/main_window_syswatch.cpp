@@ -302,7 +302,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
     clear_btn->setFixedSize(80, 32);
     clear_btn->setStyleSheet(
         "QPushButton { background:#1C1008; border:1px solid #2A1F14; border-radius:7px; "
-        "              color:#8B8B8B; font-size:12px; }"
+        "              color:#8B7355; font-size:12px; }"
         "QPushButton:hover { color:#E8E8E8; border-color:#FF7A00; }");
     hlay->addWidget(clear_btn);
 
@@ -371,7 +371,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
         *out = val;
         cl->addWidget(val);
         auto* lbl = new QLabel(QString::fromUtf8(title));
-        lbl->setStyleSheet("color:#8B8B8B; font-size:11px;");
+        lbl->setStyleSheet("color:#8B7355; font-size:11px;");
         cl->addWidget(lbl);
         cards_row->addWidget(card, 1);
     };
@@ -408,7 +408,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
         "QTableWidget { background:transparent; color:#E8E8E8; font-size:12px; "
         "               border:none; selection-background-color:#FF7A0025; }"
         "QTableWidget::item { padding:5px 8px; border-bottom:1px solid #1E1208; }"
-        "QHeaderView::section { background:#130D07; color:#8B8B8B; font-size:11px; "
+        "QHeaderView::section { background:#130D07; color:#8B7355; font-size:11px; "
         "                       padding:5px; border:none; border-bottom:1px solid #2A1F14; }");
     tcl->addWidget(tbl);
     root->addWidget(tbl_card, 1);

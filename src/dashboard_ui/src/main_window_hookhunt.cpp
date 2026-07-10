@@ -265,7 +265,7 @@ QWidget* BuildHookHuntPage(QWidget* parent) {
     layout->addWidget(progress);
 
     QLabel* status_label = new QLabel("");
-    status_label->setStyleSheet("color:#8B8B8B; font-size:11px;");
+    status_label->setStyleSheet("color:#8B7355; font-size:11px;");
     status_label->setVisible(false);
     layout->addWidget(status_label);
 

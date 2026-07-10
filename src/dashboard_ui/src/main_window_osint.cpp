@@ -176,12 +176,12 @@ QWidget* BuildOsintPage(QWidget* parent) {
         "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
         " border:none; border-radius:8px; color:#fff; font-size:10.5pt; font-weight:700; padding:9px 26px; }"
         "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
-        "QPushButton:disabled { background:#2A1F14; color:#8B8B8B; }");
+        "QPushButton:disabled { background:#2A1F14; color:#8B7355; }");
     ctl->addWidget(lookup_btn);
     root->addLayout(ctl);
 
     auto* status = new QLabel(QString::fromUtf8("Idle."), page);
-    status->setStyleSheet("color:#8B8B8B; font-size:9pt; background:transparent;");
+    status->setStyleSheet("color:#8B7355; font-size:9pt; background:transparent;");
     root->addWidget(status);
 
     auto* results = new QPlainTextEdit(page);
@@ -194,7 +194,7 @@ QWidget* BuildOsintPage(QWidget* parent) {
     root->addWidget(results);
 
     auto* port_lbl = new QLabel(QString::fromUtf8("Open ports"), page);
-    port_lbl->setStyleSheet("color:#8B8B8B; font-size:9pt; font-weight:700; background:transparent;");
+    port_lbl->setStyleSheet("color:#8B7355; font-size:9pt; font-weight:700; background:transparent;");
     root->addWidget(port_lbl);
 
     auto* table = new QTableWidget(0, 2, page);

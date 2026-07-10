@@ -310,7 +310,7 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
 
     auto* status_lbl = new QLabel(QString::fromUtf8("Idle"));
     status_lbl->setObjectName("DllStatusLbl");
-    status_lbl->setStyleSheet("color:#8B8B8B; font-size:12px;");
+    status_lbl->setStyleSheet("color:#8B7355; font-size:12px;");
     hlay->addWidget(status_lbl);
 
     auto* scan_btn = new QPushButton(QString::fromUtf8("Scan Now"));
@@ -347,7 +347,7 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
         *out = val;
         cl->addWidget(val);
         auto* lbl = new QLabel(QString::fromUtf8(title));
-        lbl->setStyleSheet("color:#8B8B8B; font-size:11px;");
+        lbl->setStyleSheet("color:#8B7355; font-size:11px;");
         cl->addWidget(lbl);
         card_row->addWidget(card, 1);
     };
@@ -379,7 +379,7 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
         b->setFixedHeight(32);
         b->setStyleSheet(
             "QPushButton { background:#1C1008; border:1px solid #2A1F14; border-radius:7px; "
-            "              color:#8B8B8B; padding:0 12px; font-size:12px; }"
+            "              color:#8B7355; padding:0 12px; font-size:12px; }"
             "QPushButton:checked { background:#FF7A0020; border-color:#FF7A00; color:#FF7A00; }"
             "QPushButton:hover { color:#E8E8E8; }");
         fl->addWidget(b);
@@ -433,7 +433,7 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
         "QTableWidget { background:transparent; color:#E8E8E8; font-size:12px; "
         "               border:none; selection-background-color:#FF7A0025; }"
         "QTableWidget::item { padding:6px 8px; border-bottom:1px solid #1E1208; }"
-        "QHeaderView::section { background:#130D07; color:#8B8B8B; font-size:11px; "
+        "QHeaderView::section { background:#130D07; color:#8B7355; font-size:11px; "
         "                       padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
     tc->addWidget(tbl);
     root->addWidget(tbl_card, 1);

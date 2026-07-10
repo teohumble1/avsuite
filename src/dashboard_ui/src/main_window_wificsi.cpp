@@ -477,7 +477,7 @@ QWidget* BuildWifiCsiPage(QWidget* parent) {
         "Sampling is coarse (~4s/scan) so it detects a change in the room, not precise gestures. "
         "CSI-capable card over serial is a separate, higher-resolution path with no confirmed "
         "wire format yet for a specific board. Simulated mode is a no-hardware demo of that path only."), page);
-    sub->setStyleSheet("color:#8B8B8B; font-size:9pt; background:transparent;");
+    sub->setStyleSheet("color:#8B7355; font-size:9pt; background:transparent;");
     sub->setWordWrap(true);
     root->addWidget(sub);
 
@@ -517,7 +517,7 @@ QWidget* BuildWifiCsiPage(QWidget* parent) {
     root->addLayout(ctl);
 
     auto* status = new QLabel(QString::fromUtf8("Idle."), page);
-    status->setStyleSheet("color:#8B8B8B; font-size:9pt; background:transparent;");
+    status->setStyleSheet("color:#8B7355; font-size:9pt; background:transparent;");
     root->addWidget(status);
 
     auto* viz_row = new QHBoxLayout();
@@ -529,7 +529,7 @@ QWidget* BuildWifiCsiPage(QWidget* parent) {
     root->addLayout(viz_row);
 
     auto* events_lbl = new QLabel(QString::fromUtf8("Motion / presence events"), page);
-    events_lbl->setStyleSheet("color:#8B8B8B; font-size:9pt; font-weight:700; background:transparent;");
+    events_lbl->setStyleSheet("color:#8B7355; font-size:9pt; font-weight:700; background:transparent;");
     root->addWidget(events_lbl);
 
     auto* events_table = new QTableWidget(0, 2, page);
@@ -545,7 +545,7 @@ QWidget* BuildWifiCsiPage(QWidget* parent) {
     root->addWidget(events_table);
 
     auto* devices_lbl = new QLabel(QString::fromUtf8("Nearby WiFi devices (real radio scan)"), page);
-    devices_lbl->setStyleSheet("color:#8B8B8B; font-size:9pt; font-weight:700; background:transparent;");
+    devices_lbl->setStyleSheet("color:#8B7355; font-size:9pt; font-weight:700; background:transparent;");
     root->addWidget(devices_lbl);
 
     auto* devices_table = new QTableWidget(0, 3, page);
@@ -564,7 +564,7 @@ QWidget* BuildWifiCsiPage(QWidget* parent) {
     raw_log->setReadOnly(true);
     raw_log->setPlaceholderText(QString::fromUtf8("Raw lines from the serial source appear here (useful for confirming the real wire format)."));
     raw_log->setStyleSheet(
-        "QPlainTextEdit { background:#1C1008; color:#8B8B8B; font-family:Consolas,monospace; font-size:8.5pt;"
+        "QPlainTextEdit { background:#1C1008; color:#8B7355; font-family:Consolas,monospace; font-size:8.5pt;"
         " border:1px solid rgba(255,122,0,20); border-radius:8px; padding:8px; }");
     raw_log->setMaximumBlockCount(300);
     raw_log->setFixedHeight(90);

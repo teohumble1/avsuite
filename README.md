@@ -288,34 +288,27 @@ Tab Quarantine cung cấp:
 - ✅ **Theo dõi tiến độ** - Phản hồi theo thời gian thực ("Đã khôi phục 5/10 tệp", v.v.)
 - ✅ **Xử lý lỗi một phần** - Báo lỗi rõ ràng nếu một số thao tác không thành công
 
-## AI Agent Integration | Tích Hợp AI Agent
+## AI Assistant (Built-in) | Trợ Lý AI (Tích Hợp Sẵn)
 
-### 1. Sentinel EDR/SIEM Integration | Tích Hợp Sentinel EDR/SIEM
-**Real-time threat intelligence via local Go SIEM**
+> **Scope note:** The only AI that ships *inside* AvSuite is the local LLM
+> assistant described below (the `ai_assistant` module). **Sentinel, EDRView and
+> BehaviorMatrix** — mentioned at the end of this section — are **separate,
+> standalone projects** by the same author; they are **not** bundled with or
+> wired into AvSuite. They are listed only as related work / possible future
+> interop, not as shipped features.
+>
+> **Ghi chú phạm vi:** AI duy nhất chạy *bên trong* AvSuite là trợ lý LLM cục bộ
+> mô tả dưới đây (module `ai_assistant`). **Sentinel, EDRView, BehaviorMatrix**
+> là **các dự án riêng biệt** của cùng tác giả — **không** được nhúng hay nối vào
+> AvSuite; chỉ liệt kê như công việc liên quan / khả năng liên thông tương lai.
 
-AvSuite integrates with **Sentinel** (Go-based SIEM/EDR deployed at `D:\Dev\Sentinel`):
-- ✅ Real-time endpoint detection and response (EDR)
-- ✅ Security information and event management (SIEM)
-- ✅ Local LLM-powered anomaly detection (no cloud dependency)
-- ✅ Event correlation across multiple endpoints
-- ✅ Threat hunting via Phi 3.5 GGUF model (llama-server)
+### Local LLM-Powered Threat Analysis | Phân Tích Mối Đe Dọa Bằng LLM Cục Bộ
+**Built-in `ai_assistant` module — embedded llama.cpp, any GGUF model**
 
-**Integration flow:**
-1. AvSuite driver detects suspicious file/process behavior
-2. Events logged to SQLite database
-3. Sentinel SIEM ingests events via local API
-4. EDR applies contextual threat correlation
-5. LLM analyzes patterns for zero-day-like anomalies
-6. Auto-quarantine triggered on high-confidence threats
-
----
-
-### 2. Local LLM-Powered Threat Analysis | Phân Tích Mối Đe Dọa Powered LLM Cục Bộ
-**Qwen2.5-7B + llama-server for AI-driven detection**
-
-AvSuite uses a **local language model** (not cloud) for intelligent threat reasoning:
-- ✅ **Model**: Qwen2.5-7B-Instruct (GGUF quantized, 7B parameters)
-- ✅ **Runtime**: llama-server (C++ inference engine, ~300-400ms/query)
+The AI Assistant page runs a **local language model** in-process (not cloud, no
+external server) for threat reasoning:
+- ✅ **Model**: any GGUF file set via `ai_model_path` (tested with Qwen2.5-7B-Instruct / Phi-3.5-mini)
+- ✅ **Runtime**: llama.cpp linked directly into the app (auto GPU/CPU), ~300-400ms/query
 - ✅ **Privacy**: Completely offline—no cloud calls, no data exfil risk
 - ✅ **Capabilities**:
   - Advanced deobfuscation reasoning (why is this code suspicious?)
@@ -362,61 +355,24 @@ Recommended Actions:
 
 ---
 
-### 3. EDRView Endpoint Monitoring | Giám Sát Endpoint EDRView
-**Process/Network telemetry dashboard + real-time forensics**
+### Related / Companion Projects (separate, NOT bundled) | Dự Án Liên Quan (riêng, KHÔNG kèm)
 
-AvSuite data feeds into **EDRView** (`D:\Dev\EDRView`—FastAPI + dark-themed dashboard):
-- ✅ **Process monitoring**: Full process tree visibility (cmd line, handles, memory)
-- ✅ **Network monitoring**: DNS queries, HTTP headers, TLS certificate validation
-- ✅ **Dark dashboard**: Real-time heatmaps, threat timeline, alert aggregation
-- ✅ **Investigation tools**: Pivot by process/network/file hash, find IOCs
+These are **standalone projects by the same author**, not part of the AvSuite
+binary. AvSuite does **not** currently send data to, depend on, or import any of
+them — they are listed as related security tooling and possible future
+integration targets only.
 
-**Dashboard integration:**
-- Real-time threat events from AvSuite (detection → EDRView within 100ms)
-- Process relationship graph (parent→child trees for ransomware chains)
-- Network flow analysis (command-and-control detection via traffic patterns)
-- Quarantine management (restore/delete from EDRView UI)
+- **Sentinel** (`D:\Dev\Sentinel`) — Go SIEM/EDR with a local LLM; event
+  correlation across endpoints.
+- **EDRView** (`D:\Dev\EDRView`) — FastAPI + dark dashboard for process/network
+  telemetry and forensics.
+- **BehaviorMatrix** (`C:\Dev\BehaviorMatrix`) — Python behavior-profiling
+  recommender exploring how a "normal" application-behavior baseline could drive
+  anomaly scoring.
 
-**Real forensics use case:**
-> User sees ransomware alert. EDRView shows:
-> - Process tree: explorer.exe → cmd.exe → taskkill.exe → powershell.exe → cryptor.exe
-> - Network: cryptor.exe DNS queries to 10+ C2 domains (all flagged)
-> - Files: 50K .encrypted files modified in last 2 minutes
-> - Action: Kill parent process, restore quarantine, block C2 IPs
-
----
-
-### 4. BehaviorMatrix Behavior Prediction | Dự Đoán Hành Vi BehaviorMatrix
-**TikTok-style recommender applied to threat behavior prediction**
-
-AvSuite leverages **BehaviorMatrix** (`C:\Dev\BehaviorMatrix`—Python behavior recommender):
-- ✅ **Behavior profiling**: Learn "normal" application behavior baseline
-- ✅ **Anomaly scoring**: Detect deviation from learned profiles
-- ✅ **MovieLens pipeline**: Collaborative filtering to find similar-looking attacks
-- ✅ **Predictive blocking**: Anticipate next malware action (polymorphic variants)
-
-**How it works:**
-```
-1. Ingest benign app behaviors (Chrome, VS Code, Explorer)
-   - File access patterns
-   - Registry modifications
-   - Process creation sequences
-   - Network connection types
-
-2. Build behavioral profiles
-   - "Normal" for each app
-   - Statistical models (Gaussian, Poisson for event frequencies)
-
-3. Score incoming detections
-   - Process behaves like Chrome? Low score
-   - Process behaves like unknown malware + ransomware? High score
-   - Reuse MovieLens CF to find "similar attacks"
-
-4. Predict next action
-   - If file encryption detected → expect DLL injection next
-   - If lsass.exe access → expect credential exfil
-   - If registry persistence → expect service creation
-```
+Đây là **các dự án độc lập của cùng tác giả**, không nằm trong binary AvSuite.
+Hiện AvSuite **không** gửi dữ liệu tới, phụ thuộc, hay import bất kỳ dự án nào ở
+trên — chỉ liệt kê như công cụ bảo mật liên quan và mục tiêu tích hợp tương lai.
 
 ---
 
@@ -431,10 +387,8 @@ AvSuite leverages **BehaviorMatrix** (`C:\Dev\BehaviorMatrix`—Python behavior 
 - ✅ **Select All + Multi-selection** (v1.0.0)
 - ✅ **Batch restore/delete** with progress tracking (v1.0.0)
 - ✅ **Professional installer** (Inno Setup, v1.0.0)
-- ✅ **Sentinel SIEM/EDR integration** (event correlation, Go-based)
-- ✅ **Local LLM threat analysis** (Qwen2.5-7B GGUF + llama-server, offline)
-- ✅ **EDRView dashboard integration** (real-time endpoint monitoring)
-- ✅ **BehaviorMatrix prediction** (behavioral anomaly scoring)
+- ✅ **Built-in local LLM assistant** (`ai_assistant` module, embedded llama.cpp + GGUF, offline)
+- ✅ **Behavior rule engine with weighted/tiered scoring** (false-positive-aware, unit-tested)
 
 ---
 

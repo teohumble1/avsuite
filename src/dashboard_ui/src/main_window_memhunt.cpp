@@ -278,7 +278,7 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
         "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
         " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
         "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
-        "QPushButton:disabled { background:#3A2A1C; color:#8B7355; }");
+        "QPushButton:disabled { background:#33261A; color:#8B7355; }");
     ctl->addWidget(scan_btn);
 
     // Stop: cancels an in-progress scan (the worker already honours the
@@ -288,10 +288,10 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
     stop_btn->setCursor(Qt::PointingHandCursor);
     stop_btn->setEnabled(false);
     stop_btn->setStyleSheet(
-        "QPushButton { background:#2A2010; border:1px solid #E6C24A; border-radius:10px;"
+        "QPushButton { background:#241708; border:1px solid #E6C24A; border-radius:10px;"
         " color:#E6C24A; font-size:10pt; font-weight:700; padding:10px 20px; }"
-        "QPushButton:hover { background:#3A2C14; }"
-        "QPushButton:disabled { background:#241814; color:#6B5444; border-color:#3A2A1C; }");
+        "QPushButton:hover { background:#33261A; }"
+        "QPushButton:disabled { background:#241708; color:#6B5444; border-color:#33261A; }");
     ctl->addWidget(stop_btn);
 
     auto* kill_btn = new QPushButton(QString::fromUtf8("Kill selected process"), page);
@@ -301,7 +301,7 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
         "QPushButton { background:#3A1414; border:1px solid #FF5A6A; border-radius:10px;"
         " color:#FF5A6A; font-size:10pt; font-weight:700; padding:10px 20px; }"
         "QPushButton:hover { background:#4A1818; }"
-        "QPushButton:disabled { background:#241814; color:#6B5444; border-color:#3A2A1C; }");
+        "QPushButton:disabled { background:#241708; color:#6B5444; border-color:#33261A; }");
     ctl->addWidget(kill_btn);
 
     // Clean: clears the results table so the next scan starts fresh.
@@ -309,10 +309,10 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
     clean_btn->setCursor(Qt::PointingHandCursor);
     clean_btn->setEnabled(false);
     clean_btn->setStyleSheet(
-        "QPushButton { background:#241814; border:1px solid rgba(255,170,90,60); border-radius:10px;"
+        "QPushButton { background:#241708; border:1px solid rgba(255,170,90,60); border-radius:10px;"
         " color:#C7B6A2; font-size:10pt; font-weight:700; padding:10px 20px; }"
         "QPushButton:hover { background:#2F2016; }"
-        "QPushButton:disabled { background:#241814; color:#6B5444; border-color:#3A2A1C; }");
+        "QPushButton:disabled { background:#241708; color:#6B5444; border-color:#33261A; }");
     ctl->addWidget(clean_btn);
 
     // Export: writes the current findings to a CSV file for reporting.
@@ -323,7 +323,7 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
         "QPushButton { background:#152A1A; border:1px solid #4ADE80; border-radius:10px;"
         " color:#4ADE80; font-size:10pt; font-weight:700; padding:10px 20px; }"
         "QPushButton:hover { background:#1A331F; }"
-        "QPushButton:disabled { background:#241814; color:#6B5444; border-color:#3A2A1C; }");
+        "QPushButton:disabled { background:#241708; color:#6B5444; border-color:#33261A; }");
     ctl->addWidget(export_btn);
 
     auto* status = new QLabel(QString::fromUtf8("Idle."), page);

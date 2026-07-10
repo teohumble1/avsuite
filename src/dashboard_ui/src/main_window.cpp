@@ -2092,7 +2092,7 @@ QWidget* MainWindow::BuildHomePage() {
             auto* btn = new QPushButton(c_w);
             btn->setObjectName("ModuleTile");
             btn->setStyleSheet(
-                "QPushButton#ModuleTile { background: #24170E; "
+                "QPushButton#ModuleTile { background: #241708; "
                 "border: 1px solid rgba(255,170,90,0.10); border-radius: 12px; }"
                 "QPushButton#ModuleTile:hover { background: rgba(255,122,0,0.08); "
                 "border: 1px solid rgba(255,122,0,0.25); }"
@@ -2611,7 +2611,7 @@ void MainWindow::RefreshHomeDetections() {
 
         auto* card = new QFrame(home_detections_layout_->parentWidget());
         card->setStyleSheet(
-            "QFrame { background: #24170E; border: 1px solid rgba(255,170,90,0.08); "
+            "QFrame { background: #241708; border: 1px solid rgba(255,170,90,0.08); "
             "border-radius: 10px; }");
         auto* cl = new QVBoxLayout(card);
         cl->setContentsMargins(10, 8, 10, 8);

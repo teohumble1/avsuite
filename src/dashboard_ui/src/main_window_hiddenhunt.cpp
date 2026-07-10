@@ -205,7 +205,7 @@ QWidget* BuildHiddenHuntPage(QWidget* parent) {
         "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
         " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 26px; }"
         "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
-        "QPushButton:disabled { background:#3A2A1C; color:#8B7355; }");
+        "QPushButton:disabled { background:#33261A; color:#8B7355; }");
     ctl->addWidget(hunt_btn);
 
     // Stop: this page's worker polls `scanning`, so clearing it cancels the walk.
@@ -213,10 +213,10 @@ QWidget* BuildHiddenHuntPage(QWidget* parent) {
     stop_btn->setCursor(Qt::PointingHandCursor);
     stop_btn->setEnabled(false);
     stop_btn->setStyleSheet(
-        "QPushButton { background:#2A2010; border:1px solid #E6C24A; border-radius:10px;"
+        "QPushButton { background:#241708; border:1px solid #E6C24A; border-radius:10px;"
         " color:#E6C24A; font-size:10pt; font-weight:700; padding:10px 20px; }"
-        "QPushButton:hover { background:#3A2C14; }"
-        "QPushButton:disabled { background:#241814; color:#6B5444; border-color:#3A2A1C; }");
+        "QPushButton:hover { background:#33261A; }"
+        "QPushButton:disabled { background:#241708; color:#6B5444; border-color:#33261A; }");
     ctl->addWidget(stop_btn);
 
     auto* status = new QLabel(QString::fromUtf8("Idle. Pick a folder to scan."), page);

@@ -81,7 +81,7 @@ QWidget* BuildDnsIntelPage(QWidget* parent) {
         "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
         " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
         "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
-        "QPushButton:disabled { background:#3A2A1C; color:#8B7355; }");
+        "QPushButton:disabled { background:#33261A; color:#8B7355; }");
     ctl->addWidget(start_btn);
 
     auto* status = new QLabel(QString::fromUtf8("Loading threat intel..."), page);

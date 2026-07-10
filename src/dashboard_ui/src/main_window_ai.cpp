@@ -669,7 +669,7 @@ QWidget* MainWindow::BuildAiPage() {
     // "RECENT" heading
     auto* recent_lbl = new QLabel("RECENT", sb_inner);
     recent_lbl->setStyleSheet(
-        "color:#3A2A1A; font-size:9pt; font-weight:700; letter-spacing:1px;"
+        "color:#33261A; font-size:9pt; font-weight:700; letter-spacing:1px;"
         " background:transparent; padding:4px 4px 4px 4px;");
     sb_inner_l->addWidget(recent_lbl);
 
@@ -754,7 +754,7 @@ QWidget* MainWindow::BuildAiPage() {
         il->addLayout(text_col, 1);
         auto* age_lbl = new QLabel(age, item);
         age_lbl->setFixedWidth(24);
-        age_lbl->setStyleSheet("color:#3A2A1A; font-size:9pt; background:transparent;");
+        age_lbl->setStyleSheet("color:#33261A; font-size:9pt; background:transparent;");
         age_lbl->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
         il->addWidget(age_lbl, 0, Qt::AlignVCenter);
         return item;
@@ -781,7 +781,7 @@ QWidget* MainWindow::BuildAiPage() {
     // "TOOLS" heading
     auto* tools_lbl = new QLabel("TOOLS", sb_inner);
     tools_lbl->setStyleSheet(
-        "color:#3A2A1A; font-size:9pt; font-weight:700; letter-spacing:1px;"
+        "color:#33261A; font-size:9pt; font-weight:700; letter-spacing:1px;"
         " background:transparent; padding:4px 4px 4px 4px;");
     sb_inner_l->addWidget(tools_lbl);
 
@@ -1033,7 +1033,7 @@ QWidget* MainWindow::BuildAiPage() {
         "TeoAV Assistant may make mistakes. Verify critical security decisions independently.",
         input_area);
     footer_note->setAlignment(Qt::AlignCenter);
-    footer_note->setStyleSheet("color:#3A2A1A; font-size:8pt; background:transparent;");
+    footer_note->setStyleSheet("color:#33261A; font-size:8pt; background:transparent;");
     input_area_l->addWidget(footer_note);
     center_l->addWidget(input_area);
     root->addWidget(center, 1);
@@ -1384,7 +1384,7 @@ QWidget* MainWindow::BuildAiPage() {
     footer_row->addWidget(new AiPageIcon(AiPageIcon::Hash, 11, QColor(0x3A,0x2A,0x1A), rp_inner));
     auto* footer_lbl = new QLabel("Session " "\xc2\xb7" " Encrypted", rp_inner);
     footer_lbl->setStyleSheet(
-        "color:#3A2A1A; font-size:8.5pt;"
+        "color:#33261A; font-size:8.5pt;"
         " font-family:Consolas,monospace; background:transparent;");
     footer_row->addWidget(footer_lbl);
     footer_row->addStretch();

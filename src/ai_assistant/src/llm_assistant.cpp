@@ -102,8 +102,15 @@ struct LlmAssistant::Impl {
     std::mutex        gen_mutex;
     std::atomic<bool> abort_flag{false};
     std::atomic<bool> generating{false};
+    std::thread       worker;   // owns the in-flight generation thread
 
     ~Impl() {
+        // Signal any in-flight generation to stop and WAIT for it before we free
+        // the model/context it is still reading. Without this join the worker
+        // (previously detached) would dereference freed llama_model/llama_context
+        // pointers -> use-after-free crash on shutdown mid-generation.
+        abort_flag = true;
+        if (worker.joinable()) worker.join();
         if (ctx)   llama_free(ctx);
         if (model) llama_model_free(model);
         llama_backend_free();
@@ -169,14 +176,19 @@ void LlmAssistant::GenerateAsync(std::vector<ChatMessage> history, TokenCallback
     if (impl_->generating.exchange(true)) return; // already running
     impl_->abort_flag = false;
 
-    std::thread([this, history = std::move(history), cb = std::move(cb)] {
-        std::lock_guard<std::mutex> lock(impl_->gen_mutex);
+    // Join the previous (now-finished) worker before reassigning, so the thread
+    // is always owned/joinable and is never detached.
+    if (impl_->worker.joinable()) impl_->worker.join();
 
-        const llama_vocab* vocab = llama_model_get_vocab(impl_->model);
-        const int n_ctx = static_cast<int>(llama_n_ctx(impl_->ctx));
+    Impl* impl = impl_.get();
+    impl_->worker = std::thread([impl, history = std::move(history), cb = std::move(cb)] {
+        std::lock_guard<std::mutex> lock(impl->gen_mutex);
+
+        const llama_vocab* vocab = llama_model_get_vocab(impl->model);
+        const int n_ctx = static_cast<int>(llama_n_ctx(impl->ctx));
 
         // Build and tokenize the full prompt
-        const std::string prompt = BuildPrompt(impl_->model, history);
+        const std::string prompt = BuildPrompt(impl->model, history);
 
         std::vector<llama_token> tokens(static_cast<size_t>(n_ctx));
         const int n_tokens = llama_tokenize(
@@ -188,19 +200,19 @@ void LlmAssistant::GenerateAsync(std::vector<ChatMessage> history, TokenCallback
 
         if (n_tokens < 0 || n_tokens >= n_ctx) {
             cb("(Lỗi: prompt quá dài cho context window.)", true);
-            impl_->generating = false;
+            impl->generating = false;
             return;
         }
         tokens.resize(static_cast<size_t>(n_tokens));
 
         // Clear KV cache before prefill
-        llama_memory_clear(llama_get_memory(impl_->ctx), /*data=*/false);
+        llama_memory_clear(llama_get_memory(impl->ctx), /*data=*/false);
 
         // Prefill (decode the prompt in one batch)
         llama_batch batch = llama_batch_get_one(tokens.data(), n_tokens);
-        if (llama_decode(impl_->ctx, batch) != 0) {
+        if (llama_decode(impl->ctx, batch) != 0) {
             cb("(Lỗi decode prompt.)", true);
-            impl_->generating = false;
+            impl->generating = false;
             return;
         }
 
@@ -249,8 +261,8 @@ void LlmAssistant::GenerateAsync(std::vector<ChatMessage> history, TokenCallback
         bool stop_found = false;
 
         // Auto-regressive decode loop
-        for (int n = 0; n < kMaxGenTokens && !impl_->abort_flag.load() && !stop_found; ++n) {
-            const llama_token tok = llama_sampler_sample(smpl, impl_->ctx, -1);
+        for (int n = 0; n < kMaxGenTokens && !impl->abort_flag.load() && !stop_found; ++n) {
+            const llama_token tok = llama_sampler_sample(smpl, impl->ctx, -1);
             llama_sampler_accept(smpl, tok);
 
             if (llama_vocab_is_eog(vocab, tok)) break;
@@ -281,7 +293,7 @@ void LlmAssistant::GenerateAsync(std::vector<ChatMessage> history, TokenCallback
             // Feed token back for next step
             llama_token arr[1] = {tok};
             llama_batch next = llama_batch_get_one(arr, 1);
-            if (llama_decode(impl_->ctx, next) != 0) break;
+            if (llama_decode(impl->ctx, next) != 0) break;
         }
 
         // Final flush of whatever remains in carry
@@ -289,8 +301,8 @@ void LlmAssistant::GenerateAsync(std::vector<ChatMessage> history, TokenCallback
 
         llama_sampler_free(smpl);
         cb({}, /*done=*/true);
-        impl_->generating = false;
-    }).detach();
+        impl->generating = false;
+    });
 }
 
 } // namespace avai

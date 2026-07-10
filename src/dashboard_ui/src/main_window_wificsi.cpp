@@ -485,7 +485,7 @@ QWidget* BuildWifiCsiPage(QWidget* parent) {
     ctl->setSpacing(10);
     auto* source_combo = new QComboBox(page);
     source_combo->setStyleSheet(
-        "QComboBox { background:#1C1008; color:#E8E8E8; border:1px solid rgba(255,122,0,40);"
+        "QComboBox { background:#1C1108; color:#ECE4DA; border:1px solid rgba(255,122,0,40);"
         " border-radius:8px; padding:7px 10px; font-size:9.5pt; }");
     source_combo->addItem(QString::fromUtf8("Quet song vo tuyen - real WiFi scan + motion sensing (recommended)"));
     source_combo->addItem(QString::fromUtf8("Simulated CSI (demo only, no hardware)"));
@@ -494,16 +494,16 @@ QWidget* BuildWifiCsiPage(QWidget* parent) {
     auto* refresh_btn = new QPushButton(QString::fromUtf8("Refresh ports"), page);
     refresh_btn->setCursor(Qt::PointingHandCursor);
     refresh_btn->setStyleSheet(
-        "QPushButton { background:#1C1008; border:1px solid rgba(255,122,0,40); border-radius:8px;"
+        "QPushButton { background:#1C1108; border:1px solid rgba(255,122,0,40); border-radius:8px;"
         " color:#FF9030; font-size:9.5pt; padding:8px 14px; }"
-        "QPushButton:hover { background:#2A1F14; }");
+        "QPushButton:hover { background:#33261A; }");
     ctl->addWidget(refresh_btn);
 
     auto* baud_spin = new QSpinBox(page);
     baud_spin->setRange(1200, 921600);
     baud_spin->setValue(115200);
     baud_spin->setStyleSheet(
-        "QSpinBox { background:#1C1008; color:#E8E8E8; border:1px solid rgba(255,122,0,40);"
+        "QSpinBox { background:#1C1108; color:#ECE4DA; border:1px solid rgba(255,122,0,40);"
         " border-radius:8px; padding:7px 8px; font-size:9.5pt; }");
     ctl->addWidget(baud_spin);
 
@@ -564,7 +564,7 @@ QWidget* BuildWifiCsiPage(QWidget* parent) {
     raw_log->setReadOnly(true);
     raw_log->setPlaceholderText(QString::fromUtf8("Raw lines from the serial source appear here (useful for confirming the real wire format)."));
     raw_log->setStyleSheet(
-        "QPlainTextEdit { background:#1C1008; color:#8B7355; font-family:Consolas,monospace; font-size:8.5pt;"
+        "QPlainTextEdit { background:#1C1108; color:#8B7355; font-family:Consolas,monospace; font-size:8.5pt;"
         " border:1px solid rgba(255,122,0,20); border-radius:8px; padding:8px; }");
     raw_log->setMaximumBlockCount(300);
     raw_log->setFixedHeight(90);

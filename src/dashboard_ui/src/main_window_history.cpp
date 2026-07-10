@@ -689,7 +689,7 @@ static QPushButton* MakeHdrBtn(HistIcon::Type ico, const QString& tip,
     btn->setFixedSize(32,32);
     btn->setToolTip(tip);
     btn->setStyleSheet(
-        "QPushButton { background:#1A120C; border:1px solid rgba(255,170,90,26);"
+        "QPushButton { background:#1C1108; border:1px solid rgba(255,170,90,26);"
         " border-radius:8px; }"
         "QPushButton:hover { background:rgba(255,122,0,30);"
         " border-color:rgba(255,122,0,80); }");
@@ -803,7 +803,7 @@ QWidget* MainWindow::BuildHistoryPage() {
     search_field->setPlaceholderText("Search scans...");
     search_field->setFixedHeight(32);
     search_field->setStyleSheet(
-        "QLineEdit { background:#1A120C; border:1px solid rgba(255,170,90,46);"
+        "QLineEdit { background:#1C1108; border:1px solid rgba(255,170,90,46);"
         " border-radius:8px; padding:4px 12px 4px 32px;"
         " color:#ffffff; font-size:9.5pt; }"
         "QLineEdit:focus { border-color:rgba(255,122,0,120); }"
@@ -950,7 +950,7 @@ QWidget* MainWindow::BuildHistoryPage() {
     // View mode toggle
     auto* view_toggle = new QFrame(left);
     view_toggle->setStyleSheet(
-        "QFrame { background:#1A120C; border:1px solid rgba(255,170,90,26); border-radius:8px; }");
+        "QFrame { background:#1C1108; border:1px solid rgba(255,170,90,26); border-radius:8px; }");
     auto* vt_l = new QHBoxLayout(view_toggle);
     vt_l->setContentsMargins(2,2,2,2);
     vt_l->setSpacing(2);
@@ -1097,8 +1097,8 @@ QWidget* MainWindow::BuildHistoryPage() {
     detections_table_->verticalHeader()->setVisible(false);
     detections_table_->setShowGrid(false);
     detections_table_->setStyleSheet(
-        "QTableWidget { background:#1A120C; border:1px solid rgba(255,170,90,26);"
-        " border-radius:12px; gridline-color:transparent; color:#E8D5C0;"
+        "QTableWidget { background:#1C1108; border:1px solid rgba(255,170,90,26);"
+        " border-radius:12px; gridline-color:transparent; color:#ECE4DA;"
         " font-size:9.5pt; selection-background-color:rgba(255,122,0,30); }"
         "QTableWidget::item { padding:6px 8px; border-bottom:1px solid rgba(255,170,90,15); }"
         "QTableWidget::item:selected { background:rgba(255,122,0,30); color:#fff; }"
@@ -1293,7 +1293,7 @@ QWidget* MainWindow::BuildHistoryPage() {
             txt_col->setSpacing(1);
             auto* nm = new QLabel(QString::fromUtf8(ev.rule_id.c_str()), item);
             nm->setStyleSheet(
-                "color:#E8D5C0; font-size:9pt; font-family:Consolas,monospace;"
+                "color:#ECE4DA; font-size:9pt; font-family:Consolas,monospace;"
                 " background:transparent;");
             nm->setMaximumWidth(170);
             auto* sv = new QLabel(SevToStr(ev.severity), item);
@@ -1379,7 +1379,7 @@ QWidget* MainWindow::BuildHistoryPage() {
 
         auto* row = new QFrame(feed);
         row->setStyleSheet(QString(
-            "QFrame { background:#1A120C;"
+            "QFrame { background:#1C1108;"
             " border:1px solid rgba(255,170,90,18); border-radius:8px; }"));
         auto* row_l = new QHBoxLayout(row);
         row_l->setContentsMargins(10,8,10,8);
@@ -1404,7 +1404,7 @@ QWidget* MainWindow::BuildHistoryPage() {
         text_col->setSpacing(2);
         auto* rule_lbl = new QLabel(QString::fromUtf8(ev.rule_id.c_str()), row);
         rule_lbl->setWordWrap(true);
-        rule_lbl->setStyleSheet("color:#E8D5C0; font-size:9pt; background:transparent;");
+        rule_lbl->setStyleSheet("color:#ECE4DA; font-size:9pt; background:transparent;");
         auto path_short = QString::fromUtf8(ev.target_path.c_str());
         if (path_short.length() > 40) path_short = "..." + path_short.right(37);
         auto* path_lbl = new QLabel(path_short, row);

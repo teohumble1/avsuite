@@ -482,7 +482,7 @@ QWidget* MainWindow::BuildNetworkPage() {
         card->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         card->setFixedHeight(60);
         card->setStyleSheet(
-            QString("QFrame{background:#1A120C;border:1px solid rgba(%1,%2,%3,0.22);"
+            QString("QFrame{background:#1C1108;border:1px solid rgba(%1,%2,%3,0.22);"
                     "border-radius:10px;}")
                 .arg(sd.accent.red()).arg(sd.accent.green()).arg(sd.accent.blue()));
         auto* cl = new QVBoxLayout(card);
@@ -546,8 +546,8 @@ QWidget* MainWindow::BuildNetworkPage() {
         thr_spin->setFixedWidth(52);
         thr_spin->setFixedHeight(28);
         thr_spin->setStyleSheet(
-            "QSpinBox{background:#1A120C;border:1px solid rgba(255,170,90,0.25);"
-            "border-radius:7px;padding:2px 4px;color:#E8D5C0;font-size:8.5pt;}"
+            "QSpinBox{background:#1C1108;border:1px solid rgba(255,170,90,0.25);"
+            "border-radius:7px;padding:2px 4px;color:#ECE4DA;font-size:8.5pt;}"
             "QSpinBox::up-button,QSpinBox::down-button{width:14px;border:none;"
             "background:rgba(255,122,0,0.12);}");
         QObject::connect(thr_spin, QOverload<int>::of(&QSpinBox::valueChanged), this,
@@ -565,8 +565,8 @@ QWidget* MainWindow::BuildNetworkPage() {
     proc_search->setFixedWidth(180);
     proc_search->setFixedHeight(28);
     proc_search->setStyleSheet(
-        "QLineEdit{background:#1A120C;border:1px solid rgba(255,170,90,0.25);border-radius:8px;"
-        "padding:2px 10px;color:#E8D5C0;font-size:8.5pt;}"
+        "QLineEdit{background:#1C1108;border:1px solid rgba(255,170,90,0.25);border-radius:8px;"
+        "padding:2px 10px;color:#ECE4DA;font-size:8.5pt;}"
         "QLineEdit:focus{border-color:rgba(255,122,0,0.5);}");
     filter_row->addWidget(proc_search);
     root->addLayout(filter_row);
@@ -574,7 +574,7 @@ QWidget* MainWindow::BuildNetworkPage() {
     // ── Connection table ──────────────────────────────────────────────────────
     auto* tbl_card = new QFrame(page);
     tbl_card->setStyleSheet(
-        "QFrame{background:#1A120C;border:1px solid rgba(255,170,90,0.15);border-radius:10px;}");
+        "QFrame{background:#1C1108;border:1px solid rgba(255,170,90,0.15);border-radius:10px;}");
     auto* tbl_vl = new QVBoxLayout(tbl_card);
     tbl_vl->setContentsMargins(0,0,0,0);
     tbl_vl->setSpacing(0);
@@ -639,7 +639,7 @@ QWidget* MainWindow::BuildNetworkPage() {
     auto* scan_card = new QFrame(page);
     scan_card->setFixedHeight(44);
     scan_card->setStyleSheet(
-        "QFrame{background:#1A120C;border:1px solid rgba(255,122,0,0.15);border-radius:10px;}");
+        "QFrame{background:#1C1108;border:1px solid rgba(255,122,0,0.15);border-radius:10px;}");
     auto* scan_row = new QHBoxLayout(scan_card);
     scan_row->setContentsMargins(14,0,14,0); scan_row->setSpacing(8);
 

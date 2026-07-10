@@ -303,7 +303,7 @@ QWidget* BuildKernelBiosPage(QWidget* parent) {
     // ── Firmware card ────────────────────────────────────────────────────
     auto* fw_card = new QFrame(page);
     fw_card->setStyleSheet(
-        "QFrame { background:#1A120C; border:1px solid rgba(255,170,90,26); border-radius:10px; }");
+        "QFrame { background:#1C1108; border:1px solid rgba(255,170,90,26); border-radius:10px; }");
     auto* fw_l = new QGridLayout(fw_card);
     fw_l->setContentsMargins(16, 14, 16, 14);
     fw_l->setHorizontalSpacing(24);
@@ -313,7 +313,7 @@ QWidget* BuildKernelBiosPage(QWidget* parent) {
         auto* l = new QLabel(label);
         l->setStyleSheet("color:#8B7355; font-size:8.5pt; background:transparent;");
         auto* v = new QLabel(value.isEmpty() ? QString("-") : value);
-        v->setStyleSheet("color:#E8D5C0; font-size:9.5pt; font-weight:600; background:transparent;");
+        v->setStyleSheet("color:#ECE4DA; font-size:9.5pt; font-weight:600; background:transparent;");
         v->setWordWrap(true);
         auto* box = new QVBoxLayout();
         box->setSpacing(1);

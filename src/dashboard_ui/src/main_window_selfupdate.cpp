@@ -250,7 +250,7 @@ QWidget* BuildSelfUpdatePage(QWidget* parent) {
 
     auto* card = new QFrame(page);
     card->setStyleSheet(
-        "QFrame { background:#1A120C; border:1px solid rgba(255,170,90,26); border-radius:10px; }");
+        "QFrame { background:#1C1108; border:1px solid rgba(255,170,90,26); border-radius:10px; }");
     auto* cl = new QVBoxLayout(card);
     cl->setContentsMargins(18, 16, 18, 16);
     cl->setSpacing(10);
@@ -258,7 +258,7 @@ QWidget* BuildSelfUpdatePage(QWidget* parent) {
     auto* ver_row = new QHBoxLayout();
     auto* current_lbl = new QLabel(
         QString::fromUtf8("Current version: %1").arg(QString::fromLatin1(avcore::kAppVersion)), card);
-    current_lbl->setStyleSheet("color:#E8D5C0; font-size:10pt; font-weight:600; background:transparent;");
+    current_lbl->setStyleSheet("color:#ECE4DA; font-size:10pt; font-weight:600; background:transparent;");
     ver_row->addWidget(current_lbl);
     ver_row->addStretch();
     cl->addLayout(ver_row);

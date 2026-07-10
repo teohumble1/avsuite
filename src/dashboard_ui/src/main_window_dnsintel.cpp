@@ -120,15 +120,15 @@ QWidget* BuildDnsIntelPage(QWidget* parent) {
     auto* domain_edit = new QLineEdit(page);
     domain_edit->setPlaceholderText(QString::fromUtf8("Check a domain against ThreatFox..."));
     domain_edit->setStyleSheet(
-        "QLineEdit { background:#1C1008; color:#E8E8E8; border:1px solid rgba(255,122,0,40);"
+        "QLineEdit { background:#1C1108; color:#ECE4DA; border:1px solid rgba(255,122,0,40);"
         " border-radius:8px; padding:8px 10px; font-size:9.5pt; }");
     check_row->addWidget(domain_edit, 1);
     auto* check_btn = new QPushButton(QString::fromUtf8("Check reputation"), page);
     check_btn->setCursor(Qt::PointingHandCursor);
     check_btn->setStyleSheet(
-        "QPushButton { background:#1C1008; border:1px solid rgba(255,122,0,40); border-radius:8px;"
+        "QPushButton { background:#1C1108; border:1px solid rgba(255,122,0,40); border-radius:8px;"
         " color:#FF9030; font-size:9.5pt; padding:8px 16px; }"
-        "QPushButton:hover { background:#2A1F14; }");
+        "QPushButton:hover { background:#33261A; }");
     check_row->addWidget(check_btn);
     root->addLayout(check_row);
 

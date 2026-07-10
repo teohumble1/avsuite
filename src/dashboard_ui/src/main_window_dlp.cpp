@@ -295,21 +295,21 @@ QWidget* BuildDlpPage(QWidget* parent) {
         "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
         " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
         "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
-        "QPushButton:disabled { background:#2A1F14; color:#8B7355; }");
+        "QPushButton:disabled { background:#33261A; color:#8B7355; }");
     ctl->addWidget(scan_btn);
 
     auto* ai_btn = new QPushButton(QString::fromUtf8("Explain with AI"), page);
     ai_btn->setCursor(Qt::PointingHandCursor);
     ai_btn->setEnabled(false);
     ai_btn->setStyleSheet(
-        "QPushButton { background:#1C1008; border:1px solid rgba(255,122,0,60); border-radius:10px;"
+        "QPushButton { background:#1C1108; border:1px solid rgba(255,122,0,60); border-radius:10px;"
         " color:#FF9030; font-size:10pt; font-weight:600; padding:10px 20px; }"
-        "QPushButton:hover:enabled { background:#2A1F14; }"
+        "QPushButton:hover:enabled { background:#33261A; }"
         "QPushButton:disabled { color:#5A5A5A; border-color:rgba(139,139,139,40); }");
     ctl->addWidget(ai_btn);
 
     auto* status = new QLabel(QString::fromUtf8("Idle. Pick a folder to scan for exposed secrets/PII."), page);
-    status->setStyleSheet("color:#C8B8A8; font-size:9.5pt; background:transparent;");
+    status->setStyleSheet("color:#C7B6A2; font-size:9.5pt; background:transparent;");
     ctl->addWidget(status, 1);
     root->addLayout(ctl);
 

@@ -172,25 +172,25 @@ static const char* kLineEditStyle =
     "QLineEdit:focus { border-color:rgba(255,122,0,120); }";
 
 static const char* kComboStyle =
-    "QComboBox { background:#1A120C; border:1px solid rgba(255,170,90,46);"
-    " border-radius:8px; padding:4px 12px; color:#E8D5C0; font-size:10pt; min-width:140px; }"
+    "QComboBox { background:#1C1108; border:1px solid rgba(255,170,90,46);"
+    " border-radius:8px; padding:4px 12px; color:#ECE4DA; font-size:10pt; min-width:140px; }"
     "QComboBox::drop-down { border:none; }"
-    "QComboBox QAbstractItemView { background:#1A120C; color:#E8D5C0;"
+    "QComboBox QAbstractItemView { background:#1C1108; color:#ECE4DA;"
     " selection-background-color:rgba(255,122,0,38); border:1px solid rgba(255,170,90,46); }";
 
 static const char* kSpinStyle =
     "QSpinBox { background:#120B06; border:1px solid rgba(255,170,90,46);"
-    " border-radius:8px; padding:4px 8px; color:#E8D5C0; font-size:10pt; }";
+    " border-radius:8px; padding:4px 8px; color:#ECE4DA; font-size:10pt; }";
 
 static const char* kCheckStyle =
-    "QCheckBox { color:#E8D5C0; font-size:10pt; spacing:8px; }"
+    "QCheckBox { color:#ECE4DA; font-size:10pt; spacing:8px; }"
     "QCheckBox::indicator { width:18px; height:18px; border:1px solid rgba(255,170,90,46);"
     " border-radius:4px; background:#120B06; }"
     "QCheckBox::indicator:checked { background:#FF7A00; border-color:#FF7A00; }";
 
 static const char* kListStyle =
-    "QListWidget { background:#1A120C; border:1px solid rgba(255,170,90,26);"
-    " border-radius:8px; color:#E8D5C0; font-size:10pt; }"
+    "QListWidget { background:#1C1108; border:1px solid rgba(255,170,90,26);"
+    " border-radius:8px; color:#ECE4DA; font-size:10pt; }"
     "QListWidget::item { padding:6px 10px; border-bottom:1px solid rgba(255,170,90,12); }"
     "QListWidget::item:selected { background:rgba(255,122,0,38); color:#fff; }";
 
@@ -214,7 +214,7 @@ static const char* kDangerBtnStyle =
 static QPair<QFrame*, QVBoxLayout*> makeCard(const QString& title, QWidget* parent) {
     auto* card = new QFrame(parent);
     card->setStyleSheet(
-        "QFrame { background:#1A120C; border:1px solid rgba(255,170,90,26); border-radius:12px; }");
+        "QFrame { background:#1C1108; border:1px solid rgba(255,170,90,26); border-radius:12px; }");
     auto* cl = new QVBoxLayout(card);
     cl->setContentsMargins(20, 16, 20, 20);
     cl->setSpacing(12);
@@ -389,7 +389,7 @@ QWidget* MainWindow::BuildSettingsPage() {
     scroll->setFrameShape(QFrame::NoFrame);
     scroll->setStyleSheet(
         "QScrollArea { background:#120B06; border:none; }"
-        "QScrollBar:vertical { background:#1A120C; width:6px; border-radius:3px; }"
+        "QScrollBar:vertical { background:#1C1108; width:6px; border-radius:3px; }"
         "QScrollBar::handle:vertical { background:rgba(255,122,0,80); border-radius:3px; }"
         "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height:0; }");
     scroll->setWidget(stacked);

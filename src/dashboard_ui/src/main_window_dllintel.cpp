@@ -338,7 +338,7 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
     auto makeCard = [&](const char* title, const char* color, QLabel** out) {
         auto* card = new QWidget;
         card->setFixedHeight(72);
-        card->setStyleSheet(QString("background:#1C1008; border:1px solid #2A1F14; border-radius:10px;"));
+        card->setStyleSheet(QString("background:#1C1108; border:1px solid #33261A; border-radius:10px;"));
         auto* cl = new QVBoxLayout(card);
         cl->setContentsMargins(14, 10, 14, 10);
         cl->setSpacing(4);
@@ -368,8 +368,8 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
     search_edit->setPlaceholderText(QString::fromUtf8("Filter by process or DLL name..."));
     search_edit->setFixedHeight(32);
     search_edit->setStyleSheet(
-        "QLineEdit { background:#1C1008; border:1px solid #2A1F14; border-radius:7px; "
-        "            color:#E8E8E8; padding:0 10px; font-size:12px; }"
+        "QLineEdit { background:#1C1108; border:1px solid #33261A; border-radius:7px; "
+        "            color:#ECE4DA; padding:0 10px; font-size:12px; }"
         "QLineEdit:focus { border-color:#FF7A00; }");
     fl->addWidget(search_edit, 1);
 
@@ -378,10 +378,10 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
         b->setCheckable(true);
         b->setFixedHeight(32);
         b->setStyleSheet(
-            "QPushButton { background:#1C1008; border:1px solid #2A1F14; border-radius:7px; "
+            "QPushButton { background:#1C1108; border:1px solid #33261A; border-radius:7px; "
             "              color:#8B7355; padding:0 12px; font-size:12px; }"
             "QPushButton:checked { background:#FF7A0020; border-color:#FF7A00; color:#FF7A00; }"
-            "QPushButton:hover { color:#E8E8E8; }");
+            "QPushButton:hover { color:#ECE4DA; }");
         fl->addWidget(b);
         return b;
     };
@@ -396,7 +396,7 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
 
     // ── Threat table ──────────────────────────────────────────────────────────
     auto* tbl_card = new QWidget;
-    tbl_card->setStyleSheet("background:#1C1008; border:1px solid #2A1F14; border-radius:12px;");
+    tbl_card->setStyleSheet("background:#1C1108; border:1px solid #33261A; border-radius:12px;");
     auto* tc = new QVBoxLayout(tbl_card);
     tc->setContentsMargins(0, 0, 0, 0);
 
@@ -430,11 +430,11 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
     });
     export_sync->start();
     tbl->setStyleSheet(
-        "QTableWidget { background:transparent; color:#E8E8E8; font-size:12px; "
+        "QTableWidget { background:transparent; color:#ECE4DA; font-size:12px; "
         "               border:none; selection-background-color:#FF7A0025; }"
         "QTableWidget::item { padding:6px 8px; border-bottom:1px solid #1E1208; }"
-        "QHeaderView::section { background:#130D07; color:#8B7355; font-size:11px; "
-        "                       padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+        "QHeaderView::section { background:#0E0804; color:#8B7355; font-size:11px; "
+        "                       padding:6px; border:none; border-bottom:1px solid #33261A; }");
     tc->addWidget(tbl);
     root->addWidget(tbl_card, 1);
 

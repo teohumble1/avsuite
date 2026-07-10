@@ -185,7 +185,7 @@ QWidget* BuildWafPage(QWidget* parent) {
     // Request input
     auto* input = new QPlainTextEdit(page);
     input->setStyleSheet(
-        "QPlainTextEdit { background:#1A120C; color:#E8D5C0; border:1px solid rgba(255,170,90,26);"
+        "QPlainTextEdit { background:#1C1108; color:#ECE4DA; border:1px solid rgba(255,170,90,26);"
         " border-radius:10px; padding:8px; font-family:Consolas,monospace; font-size:10pt; }");
     input->setPlaceholderText(QString::fromUtf8("Paste a raw HTTP request (path, query, headers, body)..."));
     input->setPlainText(QString::fromUtf8(

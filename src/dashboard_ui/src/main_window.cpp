@@ -1790,7 +1790,7 @@ QWidget* MainWindow::BuildHomePage() {
 
         auto* sf = new QFrame(c_w);
         sf->setStyleSheet(
-            "QFrame { background: #1A120C; border: 1px solid rgba(255,170,90,0.12); "
+            "QFrame { background: #1C1108; border: 1px solid rgba(255,170,90,0.12); "
             "border-radius: 10px; }");
         auto* sfl = new QHBoxLayout(sf);
         sfl->setContentsMargins(10, 5, 10, 5);
@@ -2002,7 +2002,7 @@ QWidget* MainWindow::BuildHomePage() {
     {
         auto* pc = new QFrame(c_w);
         pc->setStyleSheet(
-            "QFrame { background: #1A120C; border: 1px solid rgba(255,170,90,0.10); "
+            "QFrame { background: #1C1108; border: 1px solid rgba(255,170,90,0.10); "
             "border-radius: 14px; }");
         auto* pl = new QVBoxLayout(pc);
         pl->setContentsMargins(14, 12, 14, 12);
@@ -2160,7 +2160,7 @@ QWidget* MainWindow::BuildHomePage() {
     auto makeRightCard = [](QWidget* parent) -> std::pair<QFrame*, QVBoxLayout*> {
         auto* card = new QFrame(parent);
         card->setStyleSheet(
-            "QFrame { background: #1A120C; border: 1px solid rgba(255,170,90,0.10); "
+            "QFrame { background: #1C1108; border: 1px solid rgba(255,170,90,0.10); "
             "border-radius: 14px; }");
         auto* cl = new QVBoxLayout(card);
         cl->setContentsMargins(12, 12, 12, 12);

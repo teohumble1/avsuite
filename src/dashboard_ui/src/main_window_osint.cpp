@@ -166,7 +166,7 @@ QWidget* BuildOsintPage(QWidget* parent) {
     auto* input = new QLineEdit(page);
     input->setPlaceholderText(QString::fromUtf8("hash / IP / domain / URL..."));
     input->setStyleSheet(
-        "QLineEdit { background:#1C1008; color:#E8E8E8; border:1px solid rgba(255,122,0,40);"
+        "QLineEdit { background:#1C1108; color:#ECE4DA; border:1px solid rgba(255,122,0,40);"
         " border-radius:8px; padding:9px 12px; font-size:10pt; }"
         "QLineEdit:focus { border-color:#FF7A00; }");
     ctl->addWidget(input, 1);
@@ -176,7 +176,7 @@ QWidget* BuildOsintPage(QWidget* parent) {
         "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
         " border:none; border-radius:8px; color:#fff; font-size:10.5pt; font-weight:700; padding:9px 26px; }"
         "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
-        "QPushButton:disabled { background:#2A1F14; color:#8B7355; }");
+        "QPushButton:disabled { background:#33261A; color:#8B7355; }");
     ctl->addWidget(lookup_btn);
     root->addLayout(ctl);
 
@@ -187,8 +187,8 @@ QWidget* BuildOsintPage(QWidget* parent) {
     auto* results = new QPlainTextEdit(page);
     results->setReadOnly(true);
     results->setStyleSheet(
-        "QPlainTextEdit { background:#1C1008; color:#E8E8E8; font-family:Consolas,monospace;"
-        " font-size:9.5pt; border:1px solid #2A1F14; border-radius:10px; padding:10px; }");
+        "QPlainTextEdit { background:#1C1108; color:#ECE4DA; font-family:Consolas,monospace;"
+        " font-size:9.5pt; border:1px solid #33261A; border-radius:10px; padding:10px; }");
     results->setMaximumBlockCount(500);
     results->setFixedHeight(160);
     root->addWidget(results);

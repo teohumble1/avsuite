@@ -301,16 +301,16 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
     auto* clear_btn = new QPushButton(QString::fromUtf8("Clear"));
     clear_btn->setFixedSize(80, 32);
     clear_btn->setStyleSheet(
-        "QPushButton { background:#1C1008; border:1px solid #2A1F14; border-radius:7px; "
+        "QPushButton { background:#1C1108; border:1px solid #33261A; border-radius:7px; "
         "              color:#8B7355; font-size:12px; }"
-        "QPushButton:hover { color:#E8E8E8; border-color:#FF7A00; }");
+        "QPushButton:hover { color:#ECE4DA; border-color:#FF7A00; }");
     hlay->addWidget(clear_btn);
 
     root->addWidget(hdr);
 
     // ── Watch targets ─────────────────────────────────────────────────────────
     auto* targets_card = new QWidget;
-    targets_card->setStyleSheet("background:#1C1008; border:1px solid #2A1F14; border-radius:10px;");
+    targets_card->setStyleSheet("background:#1C1108; border:1px solid #33261A; border-radius:10px;");
     auto* tc = new QVBoxLayout(targets_card);
     tc->setContentsMargins(14, 10, 14, 10);
     tc->setSpacing(8);
@@ -362,7 +362,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
     auto makeStatCard = [&](const char* title, const char* color, QLabel** out) {
         auto* card = new QWidget;
         card->setFixedHeight(68);
-        card->setStyleSheet("background:#1C1008; border:1px solid #2A1F14; border-radius:10px;");
+        card->setStyleSheet("background:#1C1108; border:1px solid #33261A; border-radius:10px;");
         auto* cl = new QVBoxLayout(card);
         cl->setContentsMargins(14, 8, 14, 8);
         cl->setSpacing(3);
@@ -376,7 +376,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
         cards_row->addWidget(card, 1);
     };
 
-    makeStatCard("Total Events",     "#E8E8E8",  &s_total);
+    makeStatCard("Total Events",     "#ECE4DA",  &s_total);
     makeStatCard("High Risk",        "#FF5A6A",  &s_high);
     makeStatCard("New Files",        "#FF7A00",  &s_new);
     makeStatCard("Quarantined",      "#4ADE80",  &s_quarantined);
@@ -384,7 +384,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
 
     // ── Event table ───────────────────────────────────────────────────────────
     auto* tbl_card = new QWidget;
-    tbl_card->setStyleSheet("background:#1C1008; border:1px solid #2A1F14; border-radius:12px;");
+    tbl_card->setStyleSheet("background:#1C1108; border:1px solid #33261A; border-radius:12px;");
     auto* tcl = new QVBoxLayout(tbl_card);
     tcl->setContentsMargins(0, 0, 0, 0);
 
@@ -405,11 +405,11 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
     tbl->setShowGrid(false);
     tbl->verticalHeader()->hide();
     tbl->setStyleSheet(
-        "QTableWidget { background:transparent; color:#E8E8E8; font-size:12px; "
+        "QTableWidget { background:transparent; color:#ECE4DA; font-size:12px; "
         "               border:none; selection-background-color:#FF7A0025; }"
         "QTableWidget::item { padding:5px 8px; border-bottom:1px solid #1E1208; }"
-        "QHeaderView::section { background:#130D07; color:#8B7355; font-size:11px; "
-        "                       padding:5px; border:none; border-bottom:1px solid #2A1F14; }");
+        "QHeaderView::section { background:#0E0804; color:#8B7355; font-size:11px; "
+        "                       padding:5px; border:none; border-bottom:1px solid #33261A; }");
     tcl->addWidget(tbl);
     root->addWidget(tbl_card, 1);
 

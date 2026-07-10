@@ -198,7 +198,7 @@ QWidget* BuildFirewallPage(QWidget* parent) {
     auto* unblock_btn = new QPushButton(QString::fromUtf8("Unblock remote IP"), page);
     unblock_btn->setCursor(Qt::PointingHandCursor);
     unblock_btn->setStyleSheet(
-        "QPushButton { background:#1C1008; border:1px solid #4ADE80; border-radius:10px;"
+        "QPushButton { background:#1C1108; border:1px solid #4ADE80; border-radius:10px;"
         "              color:#4ADE80; font-size:10.5pt; font-weight:700; padding:9px 22px; }"
         "QPushButton:hover { background:#4ADE8030; }");
     ctl->addWidget(refresh_btn);
@@ -279,7 +279,7 @@ QWidget* BuildFirewallPage(QWidget* parent) {
             auto* btn = new QPushButton(QString::fromUtf8("Unblock"), blocked_table);
             btn->setCursor(Qt::PointingHandCursor);
             btn->setStyleSheet(
-                "QPushButton { background:#1C1008; border:1px solid #4ADE80; border-radius:6px;"
+                "QPushButton { background:#1C1108; border:1px solid #4ADE80; border-radius:6px;"
                 "              color:#4ADE80; font-size:9pt; padding:3px 10px; }"
                 "QPushButton:hover { background:#4ADE8030; }");
             QObject::connect(btn, &QPushButton::clicked, blocked_table, [ip, unblockIp, refresh_fn] {

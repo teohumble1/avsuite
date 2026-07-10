@@ -108,7 +108,7 @@ QWidget* BuildSuricataPage(QWidget* parent) {
     root->setSpacing(12);
 
     auto* title = new QLabel(QString::fromUtf8("Suricata IDS/IPS"), page);
-    title->setStyleSheet("color:#E8E8E8; font-size:18px; font-weight:700; background:transparent;");
+    title->setStyleSheet("color:#ECE4DA; font-size:18px; font-weight:700; background:transparent;");
     root->addWidget(title);
 
     auto* subtitle = new QLabel(QString::fromUtf8(
@@ -120,18 +120,18 @@ QWidget* BuildSuricataPage(QWidget* parent) {
 
     // ── Status card ──────────────────────────────────────────────────────────
     auto* status_card = new QWidget(page);
-    status_card->setStyleSheet("background:#1C1008; border:1px solid #2A1F14; border-radius:10px;");
+    status_card->setStyleSheet("background:#1C1108; border:1px solid #33261A; border-radius:10px;");
     auto* sc_l = new QVBoxLayout(status_card);
     sc_l->setContentsMargins(14, 12, 14, 12);
     sc_l->setSpacing(8);
 
     auto* status_row = new QHBoxLayout();
     auto* status_lbl = new QLabel(QString::fromUtf8("Dang kiem tra..."), status_card);
-    status_lbl->setStyleSheet("color:#E8E8E8; font-size:13px; background:transparent;");
+    status_lbl->setStyleSheet("color:#ECE4DA; font-size:13px; background:transparent;");
     auto* recheck_btn = new QPushButton(QString::fromUtf8("Kiem tra lai"), status_card);
     recheck_btn->setFixedHeight(28);
     recheck_btn->setStyleSheet(
-        "QPushButton { background:#1C1008; border:1px solid #FF7A00; border-radius:6px; "
+        "QPushButton { background:#1C1108; border:1px solid #FF7A00; border-radius:6px; "
         "              color:#FF9030; font-size:12px; padding:0 12px; }"
         "QPushButton:hover { background:#FF7A0030; }");
     status_row->addWidget(status_lbl, 1);
@@ -143,24 +143,24 @@ QWidget* BuildSuricataPage(QWidget* parent) {
     auto* cfg_edit = new QLineEdit(status_card);
     cfg_edit->setPlaceholderText(QString::fromUtf8("Duong dan suricata.yaml"));
     cfg_edit->setStyleSheet(
-        "QLineEdit { background:#130D07; border:1px solid #2A1F14; border-radius:6px; "
-        "            color:#E8E8E8; padding:5px 8px; font-size:12px; }");
+        "QLineEdit { background:#0E0804; border:1px solid #33261A; border-radius:6px; "
+        "            color:#ECE4DA; padding:5px 8px; font-size:12px; }");
     auto* cfg_browse = new QPushButton("...", status_card);
     cfg_browse->setFixedSize(30, 28);
     cfg_browse->setStyleSheet(
-        "QPushButton { background:#1C1008; border:1px solid #2A1F14; border-radius:6px; color:#ccc; }"
-        "QPushButton:hover { background:#2A1F14; }");
+        "QPushButton { background:#1C1108; border:1px solid #33261A; border-radius:6px; color:#ccc; }"
+        "QPushButton:hover { background:#33261A; }");
     auto* iface_combo = new QComboBox(status_card);
     iface_combo->setMinimumWidth(220);
     iface_combo->setStyleSheet(
-        "QComboBox { background:#130D07; border:1px solid #2A1F14; border-radius:6px; "
-        "            color:#E8E8E8; padding:5px 8px; font-size:12px; }");
+        "QComboBox { background:#0E0804; border:1px solid #33261A; border-radius:6px; "
+        "            color:#ECE4DA; padding:5px 8px; font-size:12px; }");
     auto* list_ifaces_btn = new QPushButton(QString::fromUtf8("Lay danh sach interface"), status_card);
     list_ifaces_btn->setFixedHeight(28);
     list_ifaces_btn->setStyleSheet(
-        "QPushButton { background:#1C1008; border:1px solid #2A1F14; border-radius:6px; "
+        "QPushButton { background:#1C1108; border:1px solid #33261A; border-radius:6px; "
         "              color:#ccc; font-size:12px; padding:0 10px; }"
-        "QPushButton:hover { background:#2A1F14; }");
+        "QPushButton:hover { background:#33261A; }");
     cfg_row->addWidget(new QLabel(QString::fromUtf8("Config:"), status_card));
     cfg_row->addWidget(cfg_edit, 1);
     cfg_row->addWidget(cfg_browse);
@@ -179,7 +179,7 @@ QWidget* BuildSuricataPage(QWidget* parent) {
         "QPushButton { background:#1C2226; border:1px solid #4ADE80; border-radius:6px; "
         "              color:#4ADE80; font-size:12px; padding:0 14px; }"
         "QPushButton:hover { background:#4ADE8030; }"
-        "QPushButton:disabled { background:#1C1008; border-color:#333; color:#555; }");
+        "QPushButton:disabled { background:#1C1108; border-color:#333; color:#555; }");
     auto* stop_btn = new QPushButton(QString::fromUtf8("Dung"), status_card);
     stop_btn->setFixedHeight(30);
     stop_btn->setEnabled(false);
@@ -187,7 +187,7 @@ QWidget* BuildSuricataPage(QWidget* parent) {
         "QPushButton { background:#1C2226; border:1px solid #FF5A6A; border-radius:6px; "
         "              color:#FF5A6A; font-size:12px; padding:0 14px; }"
         "QPushButton:hover { background:#FF5A6A30; }"
-        "QPushButton:disabled { background:#1C1008; border-color:#333; color:#555; }");
+        "QPushButton:disabled { background:#1C1108; border-color:#333; color:#555; }");
     auto* running_lbl = new QLabel(QString::fromUtf8(""), status_card);
     running_lbl->setStyleSheet("color:#8B7355; font-size:11.5px; background:transparent;");
     action_row->addWidget(start_btn);

@@ -23,10 +23,13 @@ constexpr CredPattern kPatterns[] = {
     {"reg.exe",       "save hklm\\sam",       "reg.exe saving SAM hive (credential dump)"},
     {"reg.exe",       "save hklm\\system",    "reg.exe saving SYSTEM hive (credential dump)"},
     {"reg.exe",       "save hklm\\security",  "reg.exe saving SECURITY hive (credential dump)"},
-    // PowerShell credential dump helpers
-    {"powershell.exe","lsass",         "PowerShell referencing lsass.exe (credential dump)"},
+    // PowerShell credential dump helpers. NOTE: a bare "lsass" substring is
+    // deliberately NOT used here -- legitimate admin one-liners like
+    // "Get-Process lsass" reference lsass without dumping it. Only specific
+    // dump techniques are matched.
     {"powershell.exe","sekurlsa",      "PowerShell with Mimikatz sekurlsa (credential dump)"},
     {"powershell.exe","invoke-mimikatz","PowerShell Invoke-Mimikatz (credential dump)"},
+    {"powershell.exe","out-minidump",  "PowerShell Out-Minidump (process memory dump)"},
     {"powershell.exe","dcsync",        "PowerShell DCSync attack (credential dump)"},
     // ntdsutil for NTDS.dit copy
     {"ntdsutil.exe",  "ac i ntds",     "ntdsutil accessing NTDS.dit (AD credential dump)"},

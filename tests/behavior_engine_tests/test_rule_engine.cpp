@@ -369,3 +369,43 @@ TEST(DefenseEvasionRuleTest, AttribReadOnlyRemovalIsSuspiciousNotMalicious) {
     const auto d = engine.OnProcessCreate(e);
     EXPECT_EQ(avcore::Severity::Suspicious, SeverityOf(d, "BEH.DEFENSE_EVASION"));
 }
+
+// ---------------------------------------------------------------------------
+// Credential-access rule: referencing lsass is not the same as dumping it.
+// ---------------------------------------------------------------------------
+
+TEST(CredentialAccessRuleTest, GetProcessLsassNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    // Benign admin check -- references lsass but does not dump it.
+    const auto d = RunPowerShell(engine, 500, "powershell.exe Get-Process lsass");
+    EXPECT_FALSE(HasRule(d, "BEH.CREDENTIAL_ACCESS"));
+}
+
+TEST(CredentialAccessRuleTest, MimikatzSekurlsaIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 501,
+        "powershell.exe Invoke-Mimikatz -Command '\"sekurlsa::logonpasswords\"'");
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.CREDENTIAL_ACCESS"));
+}
+
+TEST(CredentialAccessRuleTest, ProcdumpLsassIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    ProcessEvent e;
+    e.process_id = 502;
+    e.parent_process_id = 1;
+    e.image_path = "C:\\Tools\\procdump.exe";
+    e.command_line = "procdump.exe -accepteula -ma lsass.exe lsass.dmp";
+    const auto d = engine.OnProcessCreate(e);
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.CREDENTIAL_ACCESS"));
+}
+
+TEST(CredentialAccessRuleTest, RegSaveSamHiveIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    ProcessEvent e;
+    e.process_id = 503;
+    e.parent_process_id = 1;
+    e.image_path = "C:\\Windows\\System32\\reg.exe";
+    e.command_line = "reg.exe save hklm\\sam C:\\temp\\sam.hive";
+    const auto d = engine.OnProcessCreate(e);
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.CREDENTIAL_ACCESS"));
+}

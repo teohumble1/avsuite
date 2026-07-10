@@ -296,33 +296,53 @@ AvSuite integrates with **Sentinel** (Go-based SIEM/EDR deployed at `D:\Dev\Sent
 ---
 
 ### 2. Local LLM-Powered Threat Analysis | Phân Tích Mối Đe Dọa Powered LLM Cục Bộ
-**Phi 3.5 GGUF + llama-server for AI-driven detection**
+**Qwen2.5-7B + llama-server for AI-driven detection**
 
 AvSuite uses a **local language model** (not cloud) for intelligent threat reasoning:
-- ✅ **Model**: Phi-3.5 (GGUF quantized, 5-10B parameters)
-- ✅ **Runtime**: llama-server (C++ inference engine, ~500ms/query)
+- ✅ **Model**: Qwen2.5-7B-Instruct (GGUF quantized, 7B parameters)
+- ✅ **Runtime**: llama-server (C++ inference engine, ~300-400ms/query)
 - ✅ **Privacy**: Completely offline—no cloud calls, no data exfil risk
 - ✅ **Capabilities**:
-  - Deobfuscation reasoning (why is this code suspicious?)
-  - Exploit pattern recognition (memory corruption, privilege escalation signatures)
-  - Supply-chain context awareness (legitimate vs. malicious build artifacts)
-  - Behavioral anomaly scoring (statistical model of "normal" process trees)
+  - Advanced deobfuscation reasoning (why is this code suspicious?)
+  - Expert exploit pattern recognition (memory corruption, privilege escalation signatures)
+  - Supply-chain threat context awareness (legitimate vs. malicious build artifacts)
+  - Behavioral anomaly scoring with statistical process tree analysis
+  - Multi-step threat chain correlation
 
-**Example query:**
+**Example threat analysis query (Qwen2.5-7B):**
 ```
-Query: "File C:\Users\Default\AppData\Local\Temp\xyz.exe has these behaviors:
-- Opens System32\lsass.exe (read handle)
-- Injects shellcode into csrss.exe
-- Modifies HKLM\System\CurrentControlSet\Services
-- Exfiltrates data to 203.0.113.45:443
+Query: "Analyze this detected process behavior:
+Process: C:\Users\Default\AppData\Local\Temp\xyz.exe (PID 4821)
+  - Opens HANDLE to System32\lsass.exe (read mode)
+  - Code injection into csrss.exe (shellcode detected)
+  - Registry persistence: HKLM\System\CurrentControlSet\Services\xyz
+  - Network: DNS queries to 5+ C2 domains
+  - File activity: Encrypting .docx, .xlsx files (pattern: ransomware)
+  - Parent process: explorer.exe → cmd.exe → powershell.exe → xyz.exe
+  
+Assess: malware type, confidence, and recommended action."
 
-Is this malware?"
+Qwen2.5 Response: 
+"THREAT LEVEL: CRITICAL (0.98 confidence)
 
-LLM Response: "High confidence malware (0.94). Pattern matches: 
-  1. Credential dumper (lsass.exe access = mimikatz-like)
-  2. Process injection (classic worm propagation)
-  3. Persistence via registry (rootkit behavior)
-  Recommendation: BLOCK + Restore from backup"
+Classification: Multi-stage ransomware with C2 exfiltration
+
+Attack Chain Analysis:
+  1. Initial Access: User execution via explorer.exe context
+  2. Privilege Escalation: lsass.exe access indicates local account dumping intent
+  3. Defense Evasion: Process injection (csrss.exe) for stealth
+  4. Persistence: Registry service installation (survives reboot)
+  5. Exfiltration: C2 communication detected (DNS + direct IP)
+  6. Impact: File encryption (ransomware payload confirmed)
+
+Similar Malware Families: Emotet, Conti, LockBit (variant analysis)
+
+Recommended Actions:
+  ✓ QUARANTINE immediately
+  ✓ Block C2 IPs at firewall
+  ✓ Disable affected user account
+  ✓ Scan for lateral movement
+  ✓ Restore from backup (pre-infection snapshot)"
 ```
 
 ---
@@ -397,7 +417,7 @@ AvSuite leverages **BehaviorMatrix** (`C:\Dev\BehaviorMatrix`—Python behavior 
 - ✅ **Batch restore/delete** with progress tracking (v1.0.0)
 - ✅ **Professional installer** (Inno Setup, v1.0.0)
 - ✅ **Sentinel SIEM/EDR integration** (event correlation, Go-based)
-- ✅ **Local LLM threat analysis** (Phi-3.5 GGUF + llama-server)
+- ✅ **Local LLM threat analysis** (Qwen2.5-7B GGUF + llama-server, offline)
 - ✅ **EDRView dashboard integration** (real-time endpoint monitoring)
 - ✅ **BehaviorMatrix prediction** (behavioral anomaly scoring)
 

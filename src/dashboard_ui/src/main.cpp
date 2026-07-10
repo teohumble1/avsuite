@@ -11,6 +11,7 @@
 #include "avcore/config.hpp"
 #include "avlogging/logger.hpp"
 #include "main_window.hpp"
+#include "theme.hpp"
 
 namespace {
 
@@ -388,7 +389,11 @@ QProgressBar::chunk {
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
-    app.setStyleSheet(kStyleSheet);
+    // Base look + shared design-token component styles (theme.hpp). The token
+    // layer is additive: it only styles opt-in objectNames (Card, PrimaryBtn,
+    // PageHeaderTitle, ...) so existing widgets are unaffected while pages are
+    // migrated onto the system tab by tab.
+    app.setStyleSheet(QString::fromUtf8(kStyleSheet) + theme::ComponentQss());
 
     const auto exe_dir = ExecutableDirectory();
     avcore::Config config = avcore::Config::LoadFromFile((exe_dir / "avsuite.json").string());

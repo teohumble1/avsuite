@@ -20,6 +20,8 @@
 #include <QTextStream>
 #include <QWidget>
 
+#include "theme.hpp"
+
 namespace avdashboard {
 
 // Creates a "Clean" button that clears `table`. Returns it so the caller can
@@ -29,11 +31,13 @@ inline QPushButton* MakeCleanButton(QWidget* page, QTableWidget* table,
     auto* btn = new QPushButton(QString::fromUtf8("Clean"), page);
     btn->setCursor(Qt::PointingHandCursor);
     btn->setEnabled(false);
-    btn->setStyleSheet(
-        "QPushButton { background:#241814; border:1px solid rgba(255,170,90,60); border-radius:10px;"
-        " color:#C7B6A2; font-size:10pt; font-weight:700; padding:10px 20px; }"
-        "QPushButton:hover { background:#2F2016; }"
-        "QPushButton:disabled { background:#241814; color:#6B5444; border-color:#3A2A1C; }");
+    btn->setStyleSheet(QString(
+        "QPushButton { background:transparent; border:1px solid %1; border-radius:%2px;"
+        " color:%3; font-size:%4px; font-weight:600; padding:9px 18px; }"
+        "QPushButton:hover { border-color:%5; color:%5; }"
+        "QPushButton:disabled { background:%6; color:%7; border-color:%1; }")
+        .arg(theme::Border).arg(theme::RadiusMd).arg(theme::Text).arg(theme::FontBody)
+        .arg(theme::Accent).arg(theme::Surface).arg(theme::Dim));
     QObject::connect(btn, &QPushButton::clicked, page, [table, status] {
         table->setRowCount(0);
         if (status) status->setText(QString::fromUtf8("Idle."));
@@ -49,11 +53,13 @@ inline QPushButton* MakeExportButton(QWidget* page, QTableWidget* table,
     auto* btn = new QPushButton(QString::fromUtf8("Export"), page);
     btn->setCursor(Qt::PointingHandCursor);
     btn->setEnabled(false);
-    btn->setStyleSheet(
-        "QPushButton { background:#152A1A; border:1px solid #4ADE80; border-radius:10px;"
-        " color:#4ADE80; font-size:10pt; font-weight:700; padding:10px 20px; }"
-        "QPushButton:hover { background:#1A331F; }"
-        "QPushButton:disabled { background:#241814; color:#6B5444; border-color:#3A2A1C; }");
+    btn->setStyleSheet(QString(
+        "QPushButton { background:transparent; border:1px solid %1; border-radius:%2px;"
+        " color:%1; font-size:%3px; font-weight:600; padding:9px 18px; }"
+        "QPushButton:hover { background:rgba(74,222,128,0.12); }"
+        "QPushButton:disabled { background:%4; color:%5; border-color:%6; }")
+        .arg(theme::Safe).arg(theme::RadiusMd).arg(theme::FontBody)
+        .arg(theme::Surface).arg(theme::Dim).arg(theme::Border));
     QObject::connect(btn, &QPushButton::clicked, page, [page, table, default_name, status] {
         if (table->rowCount() == 0) return;
         const QString fn = QFileDialog::getSaveFileName(

@@ -2106,178 +2106,50 @@ QWidget* MainWindow::BuildHomePage() {
         c_l->addLayout(mg);
     }
 
+    // ── Recent activity (Figma single-column) ─────────────────────────────────
+    {
+        auto* rc = new QFrame(c_w);
+        rc->setStyleSheet("QFrame { background: #1C1108; border: 1px solid #33261A; border-radius: 14px; }");
+        auto* rl = new QVBoxLayout(rc);
+        rl->setContentsMargins(0, 0, 0, 6);
+        rl->setSpacing(0);
+
+        auto* rh = new QWidget(rc);
+        rh->setStyleSheet("QWidget { background: transparent; border-bottom: 1px solid #33261A; }");
+        auto* rhl = new QHBoxLayout(rh);
+        rhl->setContentsMargins(16, 12, 16, 12);
+        auto* rt = new QLabel(QString::fromUtf8("Recent activity"), rh);
+        rt->setStyleSheet("font-size: 11pt; font-weight: 600; color: #ECE4DA; background: transparent; border: none;");
+        rhl->addWidget(rt);
+        rhl->addStretch();
+        auto* va = new QPushButton(QString::fromUtf8("View all"), rh);
+        va->setCursor(Qt::PointingHandCursor);
+        va->setStyleSheet(
+            "QPushButton { background: transparent; color: #FF7A00; border: none; font-size: 9pt; padding: 0; }"
+            "QPushButton:hover { color: #FF9B3D; }");
+        connect(va, &QPushButton::clicked, this, [this] { GoToPage(1); });
+        rhl->addWidget(va);
+        rl->addWidget(rh);
+
+        auto* body = new QWidget(rc);
+        body->setStyleSheet("QWidget { background: transparent; border: none; }");
+        auto* body_l = new QVBoxLayout(body);
+        body_l->setContentsMargins(10, 8, 10, 4);
+        home_detections_layout_ = new QVBoxLayout();
+        home_detections_layout_->setSpacing(6);
+        auto* ph = new QLabel(QString::fromUtf8("Chưa có phát hiện nào"), body);
+        ph->setStyleSheet("font-size: 9pt; color: #8B7355; background: transparent; border: none;");
+        ph->setAlignment(Qt::AlignCenter);
+        home_detections_layout_->addWidget(ph);
+        body_l->addLayout(home_detections_layout_);
+        rl->addWidget(body);
+
+        c_l->addWidget(rc);
+    }
+
     c_l->addStretch();
     c_scroll->setWidget(c_w);
     outer->addWidget(c_scroll, 1);
-
-    // ── Divider ───────────────────────────────────────────────────────────────
-    auto* divider = new QFrame();
-    divider->setFixedWidth(1);
-    divider->setStyleSheet("QFrame { background: rgba(255,170,90,0.08); border: none; }");
-    outer->addWidget(divider);
-
-    // ── Right Panel (300px) ───────────────────────────────────────────────────
-    auto* rp_scroll = new QScrollArea();
-    rp_scroll->setFixedWidth(300);
-    rp_scroll->setWidgetResizable(true);
-    rp_scroll->setFrameShape(QFrame::NoFrame);
-    rp_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    rp_scroll->setStyleSheet("QScrollArea { background: transparent; border: none; }");
-
-    auto* rp_w = new QWidget();
-    rp_w->setStyleSheet("QWidget { background: transparent; }");
-    auto* rp_l = new QVBoxLayout(rp_w);
-    rp_l->setContentsMargins(10, 18, 16, 20);
-    rp_l->setSpacing(10);
-
-    auto makeRightCard = [](QWidget* parent) -> std::pair<QFrame*, QVBoxLayout*> {
-        auto* card = new QFrame(parent);
-        card->setStyleSheet(
-            "QFrame { background: #1C1108; border: 1px solid rgba(255,170,90,0.10); "
-            "border-radius: 14px; }");
-        auto* cl = new QVBoxLayout(card);
-        cl->setContentsMargins(12, 12, 12, 12);
-        cl->setSpacing(8);
-        return {card, cl};
-    };
-
-    // ── Realtime Monitor ─────────────────────────────────────────────────────
-    {
-        auto [rt_card, rt_cl] = makeRightCard(rp_w);
-
-        auto* rt_hrow = new QHBoxLayout();
-        rt_hrow->setSpacing(6);
-        rt_hrow->addWidget(new IconWidget(IconWidget::Activity, 13, QColor(0xFF,0x7A,0x00), rt_card));
-        auto* rt_title = new QLabel("Realtime Monitor", rt_card);
-        rt_title->setStyleSheet(
-            "font-size: 9.5pt; font-weight: 600; color: #ffffff; background: transparent;");
-        rt_hrow->addWidget(rt_title);
-        rt_hrow->addStretch();
-        auto* rt_live = new QLabel(QString::fromUtf8("● Live"), rt_card);
-        rt_live->setStyleSheet("font-size: 7.5pt; color: #4ADE80; background: transparent;");
-        rt_hrow->addWidget(rt_live);
-        rt_cl->addLayout(rt_hrow);
-
-        auto* rt_chart_w = new MiniAreaChart(QColor(255, 122, 0), 80, rt_card);
-        realtime_chart_ = rt_chart_w;
-        rt_cl->addWidget(rt_chart_w);
-
-        auto* rt_foot = new QHBoxLayout();
-        auto* rt_unit = new QLabel("Events / sec", rt_card);
-        rt_unit->setStyleSheet("font-size: 7pt; color: #6B5444; background: transparent;");
-        auto* rt_avg = new QLabel("Avg: 11.4", rt_card);
-        rt_avg->setStyleSheet("font-size: 7pt; color: #C7B6A2; background: transparent;");
-        rt_foot->addWidget(rt_unit); rt_foot->addStretch(); rt_foot->addWidget(rt_avg);
-        rt_cl->addLayout(rt_foot);
-
-        rp_l->addWidget(rt_card);
-
-        auto* rt_timer = new QTimer(rt_card);
-        rt_timer->setInterval(1800);
-        connect(rt_timer, &QTimer::timeout, rt_card,
-                [rt_chart_w] { rt_chart_w->tick(); });
-        rt_timer->start();
-    }
-
-    // ── Threat Analytics ─────────────────────────────────────────────────────
-    {
-        auto [ta_card, ta_cl] = makeRightCard(rp_w);
-
-        auto* ta_hrow = new QHBoxLayout();
-        ta_hrow->setSpacing(6);
-        ta_hrow->addWidget(new IconWidget(IconWidget::TrendingUp, 13, QColor(0xFF,0x9B,0x3D), ta_card));
-        auto* ta_title = new QLabel("Threat Analytics", ta_card);
-        ta_title->setStyleSheet(
-            "font-size: 9.5pt; font-weight: 600; color: #ffffff; background: transparent;");
-        ta_hrow->addWidget(ta_title);
-        ta_hrow->addStretch();
-        auto* ta_badge = new QLabel("24h", ta_card);
-        ta_badge->setStyleSheet(
-            "QLabel { background: rgba(255,122,0,0.10); color: #FF9B3D; "
-            "border-radius: 5px; padding: 2px 6px; font-size: 7.5pt; border: none; }");
-        ta_hrow->addWidget(ta_badge);
-        ta_cl->addLayout(ta_hrow);
-
-        detection_chart_ = new DetectionBarChart(ta_card);
-        detection_chart_->setMaximumHeight(145);
-        ta_cl->addWidget(detection_chart_);
-
-        auto* leg = new QHBoxLayout();
-        leg->setSpacing(12);
-        auto addLegend = [&](const QString& label, const QString& color) {
-            auto* h = new QHBoxLayout(); h->setSpacing(4);
-            auto* d = new QLabel(QString::fromUtf8("●"), ta_card);
-            d->setStyleSheet(
-                QString("color: %1; font-size: 8pt; background: transparent;").arg(color));
-            auto* lbl = new QLabel(label, ta_card);
-            lbl->setStyleSheet("font-size: 7.5pt; color: #C7B6A2; background: transparent;");
-            h->addWidget(d); h->addWidget(lbl);
-            leg->addLayout(h);
-        };
-        addLegend("Blocked", "#FF9B3D");
-        addLegend("Detected", "#FF5A6A");
-        leg->addStretch();
-        ta_cl->addLayout(leg);
-        rp_l->addWidget(ta_card);
-    }
-
-    // ── Security Score line chart ─────────────────────────────────────────────
-    {
-        auto [sc_card, sc_cl] = makeRightCard(rp_w);
-
-        auto* sc_hrow = new QHBoxLayout();
-        auto* sc_icon = new QLabel(QString::fromUtf8("📊"), sc_card);
-        sc_icon->setStyleSheet(
-            "font-size: 10pt; color: #FFB766; background: transparent;");
-        sc_hrow->addWidget(sc_icon);
-        auto* sc_title = new QLabel("Security Score", sc_card);
-        sc_title->setStyleSheet(
-            "font-size: 9.5pt; font-weight: 600; color: #ffffff; background: transparent;");
-        sc_hrow->addWidget(sc_title);
-        sc_hrow->addStretch();
-        sc_cl->addLayout(sc_hrow);
-
-        auto* sc_chart = new MiniLineChart(sc_card);
-        sc_cl->addWidget(sc_chart);
-
-        rp_l->addWidget(sc_card);
-    }
-
-    // ── Recent Detections ────────────────────────────────────────────────────
-    {
-        auto [det_card, det_cl] = makeRightCard(rp_w);
-
-        auto* det_hrow = new QHBoxLayout();
-        det_hrow->setSpacing(6);
-        det_hrow->addWidget(new IconWidget(IconWidget::List, 13, QColor(0xFF,0x7A,0x00), det_card));
-        auto* det_title = new QLabel("Recent Detections", det_card);
-        det_title->setStyleSheet(
-            "font-size: 9.5pt; font-weight: 600; color: #ffffff; background: transparent;");
-        det_hrow->addWidget(det_title);
-        det_hrow->addStretch();
-        auto* va_btn = new QPushButton(QString::fromUtf8("Xem tất cả"), det_card);
-        va_btn->setStyleSheet(
-            "QPushButton { background: transparent; color: #FF7A00; border: none; "
-            "font-size: 8pt; padding: 0; }"
-            "QPushButton:hover { color: #FF9B3D; }");
-        connect(va_btn, &QPushButton::clicked, this, [this] { GoToPage(1); });
-        det_hrow->addWidget(va_btn);
-        det_cl->addLayout(det_hrow);
-
-        home_detections_layout_ = new QVBoxLayout();
-        home_detections_layout_->setSpacing(6);
-        auto* ph = new QLabel(QString::fromUtf8("Chưa có phát hiện nào"), det_card);
-        ph->setStyleSheet("font-size: 8.5pt; color: #6B5444; background: transparent;");
-        ph->setAlignment(Qt::AlignCenter);
-        home_detections_layout_->addWidget(ph);
-        det_cl->addLayout(home_detections_layout_);
-
-        rp_l->addWidget(det_card);
-    }
-
-    rp_l->addStretch();
-    rp_scroll->setWidget(rp_w);
-    outer->addWidget(rp_scroll);
 
     return page;
 }

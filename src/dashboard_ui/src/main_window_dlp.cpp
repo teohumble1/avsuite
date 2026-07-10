@@ -277,7 +277,7 @@ QWidget* BuildDlpPage(QWidget* parent) {
     root->setSpacing(12);
 
     auto* title = new QLabel(QString::fromUtf8("Data Loss Prevention"), page);
-    title->setStyleSheet("color:#E8E8E8; font-size:16pt; font-weight:800; background:transparent;");
+    title->setStyleSheet("color:#ECE4DA; font-size:16pt; font-weight:700; background:transparent;");
     root->addWidget(title);
     auto* sub = new QLabel(QString::fromUtf8(
         "Scans a folder for plaintext sensitive data at rest: credit card numbers "

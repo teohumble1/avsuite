@@ -169,7 +169,7 @@ QWidget* BuildWafPage(QWidget* parent) {
     root->setSpacing(12);
 
     auto* title = new QLabel(QString::fromUtf8("Web Application Firewall (WAF)"), page);
-    title->setStyleSheet("color:#FFFFFF; font-size:16pt; font-weight:800; background:transparent;");
+    title->setStyleSheet("color:#ECE4DA; font-size:16pt; font-weight:700; background:transparent;");
     root->addWidget(title);
 
     int l1 = 0, l2 = 0;

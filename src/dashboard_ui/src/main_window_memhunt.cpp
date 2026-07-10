@@ -258,7 +258,7 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
     root->setSpacing(12);
 
     auto* title = new QLabel(QString::fromUtf8("Memory Injection Hunt"), page);
-    title->setStyleSheet("color:#FFFFFF; font-size:16pt; font-weight:800; background:transparent;");
+    title->setStyleSheet("color:#ECE4DA; font-size:16pt; font-weight:700; background:transparent;");
     root->addWidget(title);
     auto* sub = new QLabel(QString::fromUtf8(
         "Finds fileless/injected code: executable memory with no backing file on disk "

@@ -237,7 +237,7 @@ QWidget* BuildSelfUpdatePage(QWidget* parent) {
     root->setSpacing(14);
 
     auto* title = new QLabel(QString::fromUtf8("Self-Update"), page);
-    title->setStyleSheet("color:#FFFFFF; font-size:16pt; font-weight:800; background:transparent;");
+    title->setStyleSheet("color:#ECE4DA; font-size:16pt; font-weight:700; background:transparent;");
     root->addWidget(title);
     auto* sub = new QLabel(QString::fromUtf8(
         "Checks a configured update server for a newer signed app build. Downloads are verified "

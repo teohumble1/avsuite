@@ -11,6 +11,7 @@
 // without /utf-8 for narrow string literals elsewhere in this codebase).
 
 #include "main_window.hpp"
+#include "theme.hpp"
 
 #include <QAbstractItemView>
 #include <QComboBox>
@@ -212,11 +213,7 @@ QWidget* BuildSuricataPage(QWidget* parent) {
     tbl->setShowGrid(false);
     tbl->verticalHeader()->hide();
     tbl->setStyleSheet(
-        "QTableWidget { background:#1C1008; color:#E8E8E8; font-size:12px; "
-        "               border:1px solid #2A1F14; border-radius:10px; }"
-        "QTableWidget::item { padding:5px 8px; border-bottom:1px solid #2A1F14; }"
-        "QHeaderView::section { background:#130D07; color:#8B8B8B; font-size:11px; "
-        "                       padding:5px; border:none; border-bottom:1px solid #2A1F14; }");
+        theme::TableQss());
     root->addWidget(tbl, 1);
 
     // ── Shared state ─────────────────────────────────────────────────────────

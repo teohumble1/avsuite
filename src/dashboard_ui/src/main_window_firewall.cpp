@@ -242,11 +242,7 @@ QWidget* BuildFirewallPage(QWidget* parent) {
     blocked_table->setShowGrid(false);
     blocked_table->setAlternatingRowColors(true);
     blocked_table->setStyleSheet(
-        "QTableWidget { background:#1A120C; color:#FF7A80; font-size:9.5pt; border:1px solid rgba(255,90,106,40);"
-        " border-radius:10px; gridline-color:#2A1F14; }"
-        "QTableWidget::item { padding:5px 8px; }"
-        "QHeaderView::section { background:#130D07; color:#8B7355; font-size:9pt; font-weight:700;"
-        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+        theme::TableQss());
     blocked_table->horizontalHeader()->setStretchLastSection(false);
     blocked_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     blocked_table->setColumnWidth(1, 100);

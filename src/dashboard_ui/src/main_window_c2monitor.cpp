@@ -11,6 +11,7 @@
 // the OSINT Hub page) -- no fabricated threat verdicts.
 
 #include "main_window.hpp"
+#include "theme.hpp"
 #include "av_quit_guard.hpp"
 
 #include <QWidget>
@@ -206,9 +207,7 @@ QWidget* BuildC2MonitorPage(QWidget* parent) {
         "QHeaderView::section { background:#222; color:#FFF; padding:6px; "
         "border-right:1px solid #333; font-weight:bold; }");
     table->setStyleSheet(
-        "QTableWidget { background:#0a0a0a; alternate-background-color:#141414; }"
-        "QTableWidget::item { padding:6px; color:#CCC; border-right:1px solid #222; }"
-        "QTableWidget::item:selected { background:#FF6B6B; color:#000; }");
+        theme::TableQss());
     table->setAlternatingRowColors(true);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setSelectionMode(QAbstractItemView::ExtendedSelection);

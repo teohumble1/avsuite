@@ -64,21 +64,37 @@ This is an **educational/research project** that implements:
 
 ## Installation | Cài Đặt
 
-### Option 1: Pre-built Binary (Recommended) | Tùy Chọn 1: Binary Được Xây Dựng Sẵn (Khuyến Nghị)
+### Option 1: Portable Installer (Recommended) | Tùy Chọn 1: Portable Installer (Khuyến Nghị)
+
+**Easiest method - No installation required**
 
 Download latest release from GitHub:
 ```bash
 # Visit: https://github.com/teohumble1/avsuite/releases
-# Download: TeoAvSuite-Setup-v1.0.0.exe
-# Run installer (requires admin + test VM only)
+# Download: TeoAvSuite-v1.0.1-Portable.zip
+# Extract ZIP file
+# Right-click setup.bat → Run as Administrator
+# Follow on-screen instructions
 ```
 
-Tải phiên bản mới nhất từ GitHub:
+**Phương pháp dễ nhất - Không cần cài đặt**
+
 ```bash
 # Truy cập: https://github.com/teohumble1/avsuite/releases
-# Tải: TeoAvSuite-Setup-v1.0.0.exe
-# Chạy trình cài đặt (yêu cầu quản trị viên + chỉ VM kiểm tra)
+# Tải: TeoAvSuite-v1.0.1-Portable.zip
+# Giải nén file ZIP
+# Right-click setup.bat → Run as Administrator
+# Làm theo hướng dẫn trên màn hình
 ```
+
+**What's included in the ZIP:**
+- ✅ Dashboard UI (avdashboard.exe)
+- ✅ Console host (avconsolehost.exe)
+- ✅ Update server (avupdateserver.exe)
+- ✅ Kernel driver (AvMiniFilter.sys)
+- ✅ Configuration (avsuite.json)
+- ✅ Setup script (setup.bat)
+- ✅ Full documentation (README.md)
 
 ### Option 2: Build from Source | Tùy Chọn 2: Xây Dựng Từ Nguồn
 

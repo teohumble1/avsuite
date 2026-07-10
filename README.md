@@ -64,39 +64,54 @@ This is an **educational/research project** that implements:
 
 ## Installation | Cài Đặt
 
-### Option 1: Portable Installer (Recommended) | Tùy Chọn 1: Portable Installer (Khuyến Nghị)
+**Compatible with Windows 10 & Windows 11 (x64)** | **Tương thích Windows 10 & Windows 11 (x64)**
 
-**Easiest method - No installation required**
+### Option 1: Setup Installer .exe (Recommended) | Tùy Chọn 1: Trình Cài Đặt .exe (Khuyến Nghị)
 
-Download latest release from GitHub:
+**One-click professional installer - like any normal app**
+
+Download and run:
 ```bash
 # Visit: https://github.com/teohumble1/avsuite/releases
-# Download: TeoAvSuite-v1.0.1-Portable.zip
-# Extract ZIP file
-# Right-click setup.bat → Run as Administrator
-# Follow on-screen instructions
+# Download: TeoAvSuite-Setup-v1.0.1.exe
+# Double-click to run installer
+# Follow the setup wizard (Next → Next → Install)
+# Launch from Start Menu or Desktop shortcut
 ```
 
-**Phương pháp dễ nhất - Không cần cài đặt**
+**Trình cài đặt chuyên nghiệp một-click - như app bình thường**
 
 ```bash
 # Truy cập: https://github.com/teohumble1/avsuite/releases
-# Tải: TeoAvSuite-v1.0.1-Portable.zip
-# Giải nén file ZIP
-# Right-click setup.bat → Run as Administrator
-# Làm theo hướng dẫn trên màn hình
+# Tải: TeoAvSuite-Setup-v1.0.1.exe
+# Double-click để chạy trình cài đặt
+# Làm theo hướng dẫn (Next → Next → Install)
+# Mở từ Start Menu hoặc Desktop shortcut
 ```
 
-**What's included in the ZIP:**
-- ✅ Dashboard UI (avdashboard.exe)
-- ✅ Console host (avconsolehost.exe)
-- ✅ Update server (avupdateserver.exe)
-- ✅ Kernel driver (AvMiniFilter.sys)
-- ✅ Configuration (avsuite.json)
-- ✅ Setup script (setup.bat)
-- ✅ Full documentation (README.md)
+**Installer features | Tính năng trình cài đặt:**
+- ✅ Automatic installation to Program Files
+- ✅ Start Menu + Desktop shortcuts
+- ✅ Optional startup-on-boot
+- ✅ Clean uninstall via Control Panel
+- ✅ Windows 10 & 11 compatible
+- ✅ All dependencies bundled (Qt6, AI libs, YARA rules)
 
-### Option 2: Build from Source | Tùy Chọn 2: Xây Dựng Từ Nguồn
+### Option 2: Portable ZIP | Tùy Chọn 2: Portable ZIP
+
+**No installation - extract and run**
+
+```bash
+# Download: TeoAvSuite-v1.0.1-Portable.zip
+# Extract ZIP file
+# Right-click setup.bat → Run as Administrator
+```
+
+**What's included:**
+- ✅ Dashboard UI + Console host + Update server
+- ✅ Configuration + Setup script + Documentation
+
+### Option 3: Build from Source | Tùy Chọn 3: Xây Dựng Từ Nguồn
 
 **Requirements | Yêu Cầu:**
 - Visual Studio 2022 with C++ workload

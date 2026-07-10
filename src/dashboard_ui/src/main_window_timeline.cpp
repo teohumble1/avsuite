@@ -15,6 +15,7 @@
 #include <cmath>
 
 #include "avcore/severity.hpp"
+#include "theme.hpp"
 
 namespace avdashboard {
 
@@ -46,7 +47,8 @@ class TimelineCanvas : public QWidget {
 public:
     explicit TimelineCanvas(QWidget* parent = nullptr) : QWidget(parent) {
         setMinimumHeight(200);
-        setStyleSheet("background:#1C1008; border:1px solid #2A1F14; border-radius:10px;");
+        setStyleSheet(QString("background:%1; border:1px solid %2; border-radius:%3px;")
+                          .arg(theme::Surface).arg(theme::Border).arg(theme::RadiusLg));
     }
 
     void setEvents(QVector<TimelineEvent> events) {
@@ -65,12 +67,12 @@ protected:
         if (w < 100 || h < 100) return;  // Prevent crash on uninitialized size
 
         // Draw timeline axis
-        painter.setPen(QPen(QColor("#2A1F14"), 2));
+        painter.setPen(QPen(QColor(theme::Border), 2));
         painter.drawLine(50, h - 50, w - 50, h - 50);
 
         if (events_.empty()) {
-            painter.setPen(QPen(QColor("#8B8B8B")));
-            painter.setFont(QFont("Arial", 9));
+            painter.setPen(QPen(QColor(theme::Dim)));
+            painter.setFont(QFont("Segoe UI", 9));
             painter.drawText(rect(), Qt::AlignCenter, "No detections in the last 24 hours.");
             return;
         }
@@ -80,7 +82,7 @@ protected:
         QDateTime start = now.addSecs(-86400);
 
         // Draw time labels
-        painter.setPen(QPen(QColor("#8B8B8B")));
+        painter.setPen(QPen(QColor(theme::Dim)));
         painter.setFont(QFont("Arial", 8));
         for (int i = 0; i <= 24; i += 6) {
             int x = 50 + (i * (w - 100)) / 24;
@@ -97,13 +99,13 @@ protected:
             int x = 50 + static_cast<int>(progress * (w - 100));
             int y = h - 50;
 
-            // Color by severity
+            // Color by severity (semantic tokens)
             QColor color;
             switch (evt.severity) {
-                case 3: color = QColor("#FF4444"); break;  // critical red
-                case 2: color = QColor("#FF9900"); break;  // high orange
-                case 1: color = QColor("#FFCC00"); break;  // medium yellow
-                default: color = QColor("#44FF44"); break; // low green
+                case 3: color = QColor(theme::Danger); break;  // malicious
+                case 2: color = QColor(theme::Warn);   break;  // suspicious
+                case 1: color = QColor(theme::Info);   break;  // medium (unused)
+                default: color = QColor(theme::Safe);  break;  // low / info
             }
 
             painter.setBrush(color);
@@ -111,8 +113,8 @@ protected:
             painter.drawEllipse(x - 6, y - 30 - (evt.severity * 10), 12, 12);
 
             // Draw tooltip hint
-            painter.setPen(QPen(QColor("#8B8B8B")));
-            painter.setFont(QFont("Arial", 7));
+            painter.setPen(QPen(QColor(theme::Dim)));
+            painter.setFont(QFont("Segoe UI", 7));
             painter.drawText(x - 20, y - 50 - (evt.severity * 10), 40, 20, Qt::AlignCenter,
                            evt.threat_type.left(5));
         }
@@ -126,18 +128,12 @@ QWidget* BuildTimelinePage(QWidget* parent) {
     auto* win = qobject_cast<MainWindow*>(parent);
     auto* page = new QWidget();
     auto* layout = new QVBoxLayout(page);
-    layout->setSpacing(12);
-    layout->setContentsMargins(20, 20, 20, 20);
+    layout->setSpacing(theme::Space3);
+    layout->setContentsMargins(theme::Space6, theme::Space6, theme::Space6, theme::Space6);
 
-    // Title
-    auto* title = new QLabel("Threat Detection Timeline (24h)");
-    title->setStyleSheet("color:#FF7A00; font-size:14pt; font-weight:700;");
-    layout->addWidget(title);
-
-    // Subtitle
-    auto* subtitle = new QLabel("Detection history over the last 24 hours — severity clustered by color");
-    subtitle->setStyleSheet("color:#8B8B8B; font-size:10pt;");
-    layout->addWidget(subtitle);
+    layout->addWidget(theme::BuildPageHeader(
+        "Threat Detection Timeline",
+        "Detection history over the last 24 hours — severity clustered by color"));
 
     // Timeline canvas
     auto* canvas = new TimelineCanvas(page);
@@ -154,24 +150,23 @@ QWidget* BuildTimelinePage(QWidget* parent) {
         box->setLayout(h);
 
         auto* lbl = new QLabel(label);
-        lbl->setStyleSheet("color:#8B8B8B; font-size:9pt;");
+        lbl->setStyleSheet(QString("color:%1; font-size:%2px;").arg(theme::Muted).arg(theme::FontCaption));
 
         legend->addWidget(box);
         legend->addWidget(lbl);
     };
-    add_legend("#FF4444", "Critical");
-    add_legend("#FF9900", "High");
-    add_legend("#FFCC00", "Medium");
-    add_legend("#44FF44", "Low");
+    add_legend(theme::Danger, "Malicious");
+    add_legend(theme::Warn, "Suspicious");
+    add_legend(theme::Safe, "Info");
     legend->addStretch();
     layout->addLayout(legend);
 
     // Stats (computed from real detection history below)
     auto* stats = new QLabel("Loading...");
-    stats->setStyleSheet("color:#8B8B8B; font-size:9pt; padding:10px;");
+    stats->setStyleSheet(QString("color:%1; font-size:%2px; padding:10px;").arg(theme::Dim).arg(theme::FontCaption));
     layout->addWidget(stats);
 
-    page->setStyleSheet("background:#120B06;");
+    page->setStyleSheet(QString("background:%1;").arg(theme::Bg));
 
     if (!win) return page;
 

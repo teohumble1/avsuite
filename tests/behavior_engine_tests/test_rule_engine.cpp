@@ -474,3 +474,102 @@ TEST(WmiRuleTest, WmicFormatListNotFlagged) {
     const auto d = engine.OnProcessCreate(e);
     EXPECT_FALSE(HasRule(d, "BEH.WMI_EXECUTION"));
 }
+
+// ---------------------------------------------------------------------------
+// Registry persistence: Run-key auto-start is dual-use (Suspicious); stealth
+// hijacks (Winlogon/AppInit/IFEO) stay Malicious.
+// ---------------------------------------------------------------------------
+
+namespace {
+std::vector<avcore::DetectionEvent> RunReg(RuleEngine& engine, std::uint32_t pid,
+                                           const std::string& cmd) {
+    ProcessEvent e;
+    e.process_id = pid;
+    e.parent_process_id = 1;
+    e.image_path = "C:\\Windows\\System32\\reg.exe";
+    e.command_line = cmd;
+    return engine.OnProcessCreate(e);
+}
+} // namespace
+
+TEST(PersistenceRuleTest, RunKeyIsSuspiciousNotMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    // Legit auto-start entry (updaters, sync clients do this constantly).
+    const auto d = RunReg(engine, 700,
+        "reg.exe add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\" /v MyApp /d \"C:\\App\\app.exe\"");
+    EXPECT_EQ(avcore::Severity::Suspicious, SeverityOf(d, "BEH.PERSISTENCE_REG_RUN"));
+}
+
+TEST(PersistenceRuleTest, WinlogonHijackIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunReg(engine, 701,
+        "reg.exe add \"HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v Shell /d evil.exe /f");
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.PERSISTENCE_REG_RUN"));
+}
+
+// ---------------------------------------------------------------------------
+// Shadow copy rule: a generic .Delete() call is not shadow-copy destruction.
+// ---------------------------------------------------------------------------
+
+TEST(ShadowCopyRuleTest, GenericDotDeleteNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 702,
+        "powershell.exe $f = Get-Item C:\\temp\\old.txt; $f.Delete()");
+    EXPECT_FALSE(HasRule(d, "BEH.SHADOW_COPY_DELETE"));
+}
+
+TEST(ShadowCopyRuleTest, VssadminDeleteStillMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    ProcessEvent e;
+    e.process_id = 703;
+    e.parent_process_id = 1;
+    e.image_path = "C:\\Windows\\System32\\vssadmin.exe";
+    e.command_line = "vssadmin.exe delete shadows /all /quiet";
+    const auto d = engine.OnProcessCreate(e);
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.SHADOW_COPY_DELETE"));
+}
+
+// ---------------------------------------------------------------------------
+// Lateral movement: built-in remote admin is Suspicious, offensive tooling is
+// Malicious, and mapping a normal file share is not flagged at all.
+// ---------------------------------------------------------------------------
+
+TEST(LateralMovementRuleTest, NetUseNormalShareNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    ProcessEvent e;
+    e.process_id = 704;
+    e.parent_process_id = 1;
+    e.image_path = "C:\\Windows\\System32\\net.exe";
+    e.command_line = "net.exe use Z: \\\\fileserver\\documents /persistent:yes";
+    const auto d = engine.OnProcessCreate(e);
+    EXPECT_FALSE(HasRule(d, "BEH.LATERAL_MOVEMENT"));
+}
+
+TEST(LateralMovementRuleTest, NetUseAdminShareIsSuspicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    ProcessEvent e;
+    e.process_id = 705;
+    e.parent_process_id = 1;
+    e.image_path = "C:\\Windows\\System32\\net.exe";
+    e.command_line = "net.exe use \\\\victim\\C$ /user:admin pass";
+    const auto d = engine.OnProcessCreate(e);
+    EXPECT_EQ(avcore::Severity::Suspicious, SeverityOf(d, "BEH.LATERAL_MOVEMENT"));
+}
+
+TEST(LateralMovementRuleTest, InvokeCommandIsSuspicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 706,
+        "powershell.exe Invoke-Command -ComputerName srv01 -ScriptBlock { Get-Service }");
+    EXPECT_EQ(avcore::Severity::Suspicious, SeverityOf(d, "BEH.LATERAL_MOVEMENT"));
+}
+
+TEST(LateralMovementRuleTest, CrackMapExecIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    ProcessEvent e;
+    e.process_id = 707;
+    e.parent_process_id = 1;
+    e.image_path = "C:\\Tools\\crackmapexec.exe";
+    e.command_line = "crackmapexec.exe smb 10.0.0.0/24 -u admin -p pass";
+    const auto d = engine.OnProcessCreate(e);
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.LATERAL_MOVEMENT"));
+}

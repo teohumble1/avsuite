@@ -2,73 +2,59 @@
 ; Build with: Inno Setup (https://jrsoftware.org/isdl.php)
 ; Command: "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" TeoAvSuite.iss
 
+#define RelDir "..\build\release\src\dashboard_ui\Release"
+
 [Setup]
 AppName=TeoAvSuite
-AppVersion=1.0.0
+AppVersion=1.0.1
 AppPublisher=TeoHumble Security
 AppPublisherURL=https://github.com/teohumble1/avsuite
 AppSupportURL=https://github.com/teohumble1/avsuite/issues
 AppUpdatesURL=https://github.com/teohumble1/avsuite/releases
-DefaultDirName={pf}\TeoAvSuite
+DefaultDirName={autopf}\TeoAvSuite
 DefaultGroupName=TeoAvSuite
 AllowNoIcons=yes
 OutputDir=.\Output
-OutputBaseFilename=TeoAvSuite-Setup-v1.0.0
-SetupIconFile=..\src\dashboard_ui\resources\icon.ico
-UninstallIconFile={app}\uninstall.ico
+OutputBaseFilename=TeoAvSuite-Setup-v1.0.1
 Compression=lzma2
 SolidCompression=yes
 PrivilegesRequired=admin
 ShowLanguageDialog=auto
 WizardStyle=modern
 LicenseFile=..\LICENSE
-InfoBeforeFile=..\README.md
+MinVersion=10.0
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
-Name: "vietnamese"; MessagesFile: "compiler:Languages\Vietnamese.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 Name: "startupicon"; Description: "Start TeoAvSuite on system startup"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
 ; Main executable
-Source: "..\build\release\src\dashboard_ui\Release\avdashboard.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#RelDir}\avdashboard.exe"; DestDir: "{app}"; Flags: ignoreversion
 
-; Qt libraries
-Source: "..\build\release\src\dashboard_ui\Release\Qt6Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\build\release\src\dashboard_ui\Release\Qt6Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\build\release\src\dashboard_ui\Release\Qt6Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+; All DLL dependencies (Qt, ML/AI, crypto, etc.)
+Source: "{#RelDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 
-; ML/AI libraries
-Source: "..\build\release\src\dashboard_ui\Release\ggml*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\build\release\src\dashboard_ui\Release\llama.dll"; DestDir: "{app}"; Flags: ignoreversion
+; Qt platform plugins
+Source: "{#RelDir}\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; Security & crypto libraries
-Source: "..\build\release\src\dashboard_ui\Release\libcrypto*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\build\release\src\dashboard_ui\Release\sqlite3.dll"; DestDir: "{app}"; Flags: ignoreversion
+; YARA rules
+Source: "{#RelDir}\yara_rules\*"; DestDir: "{app}\yara_rules"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; Other dependencies
-Source: "..\build\release\src\dashboard_ui\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\build\release\src\dashboard_ui\Release\platforms\qwindows*.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
-
-; YARA rules & resources
-Source: "..\build\release\src\dashboard_ui\Release\yara_rules\*"; DestDir: "{app}\yara_rules"; Flags: ignoreversion recursesubdirs createallsubdirs
-
-; Config files
-Source: "..\build\release\src\dashboard_ui\Release\avsuite.json"; DestDir: "{app}"; Flags: ignoreversion
+; Config file
+Source: "{#RelDir}\avsuite.json"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Documentation
 Source: "..\README.md"; DestDir: "{app}"; DestName: "README.txt"; Flags: isreadme
 Source: "..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"
 
 [Icons]
-Name: "{group}\TeoAvSuite"; Filename: "{app}\avdashboard.exe"; IconIndex: 0
+Name: "{group}\TeoAvSuite"; Filename: "{app}\avdashboard.exe"
 Name: "{group}\{cm:UninstallProgram,TeoAvSuite}"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\TeoAvSuite"; Filename: "{app}\avdashboard.exe"; Tasks: desktopicon; IconIndex: 0
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\TeoAvSuite"; Filename: "{app}\avdashboard.exe"; Tasks: quicklaunchicon; IconIndex: 0
+Name: "{commondesktop}\TeoAvSuite"; Filename: "{app}\avdashboard.exe"; Tasks: desktopicon
 Name: "{commonstartup}\TeoAvSuite"; Filename: "{app}\avdashboard.exe"; Tasks: startupicon
 
 [Run]
@@ -80,41 +66,20 @@ Type: filesandordirs; Name: "{app}\platforms"
 
 [Registry]
 Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "InstallPath"; ValueData: "{app}"; Flags: createvalueifdoesntexist
-Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "Version"; ValueData: "1.0.0"; Flags: createvalueifdoesntexist
+Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "Version"; ValueData: "1.0.1"; Flags: createvalueifdoesntexist
 
 [Code]
-function InitializeSetup: Boolean;
-begin
-  { Check Windows version }
-  if not (IsWin10 or IsWin11) then
-  begin
-    MsgBox('TeoAvSuite requires Windows 10 or later.', mbCriticalError, MB_OK);
-    Result := False;
-  end else
-    Result := True;
-end;
-
-function IsWin10: Boolean;
-begin
-  Result := (GetWindowsVersion and $FFFFFF) = $000A00;
-end;
-
-function IsWin11: Boolean;
-begin
-  Result := (GetWindowsVersion and $FFFFFF) = $000B00;
-end;
-
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
     MsgBox('TeoAvSuite installed successfully!' + #13 + #13 +
            'Features:' + #13 +
-           '• Realtime malware detection' + #13 +
-           '• YARA rule scanning' + #13 +
-           '• Quarantine management with Select All' + #13 +
-           '• AI-powered threat analysis' + #13 +
-           '• ETW monitoring' + #13 +
+           '- Realtime malware detection' + #13 +
+           '- YARA rule scanning' + #13 +
+           '- Quarantine management with Select All' + #13 +
+           '- AI-powered threat analysis (Qwen2.5-7B)' + #13 +
+           '- ETW monitoring' + #13 +
            '' + #13 +
            'Visit: https://github.com/teohumble1/avsuite', mbInformation, MB_OK);
   end;

@@ -8,6 +8,7 @@
 // on a background thread so the UI never blocks. ASCII labels (MSVC no /utf-8).
 
 #include "main_window.hpp"
+#include "theme.hpp"
 #include "hunt_toolbar.hpp"
 
 #include <QAbstractItemView>
@@ -153,28 +154,21 @@ QWidget* BuildLanMonitorPage(QWidget* parent) {
     root->setContentsMargins(28, 24, 28, 24);
     root->setSpacing(12);
 
-    auto* title = new QLabel(QString::fromUtf8("LAN Device Monitor"), page);
-    title->setStyleSheet("color:#FFFFFF; font-size:16pt; font-weight:800; background:transparent;");
-    root->addWidget(title);
-    auto* sub = new QLabel(QString::fromUtf8(
-        "Inventories devices on your local network (ARP) and flags anomalies linked to "
-        "compromised/botnet devices or MITM: duplicate MAC across IPs (ARP spoofing), etc."), page);
-    sub->setStyleSheet("color:#8B7355; font-size:9pt; background:transparent;");
-    sub->setWordWrap(true);
-    root->addWidget(sub);
-
-    auto* ctl = new QHBoxLayout();
-    ctl->setSpacing(12);
     auto* refresh_btn = new QPushButton(QString::fromUtf8("Refresh devices"), page);
+    refresh_btn->setObjectName("PrimaryBtn");
     refresh_btn->setCursor(Qt::PointingHandCursor);
-    refresh_btn->setStyleSheet(
-        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
-        " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
-        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
-        "QPushButton:disabled { background:#3A2A1C; color:#8B7355; }");
-    ctl->addWidget(refresh_btn);
+    root->addWidget(theme::BuildPageHeader(
+        "LAN Device Monitor",
+        "Inventories devices on your local network (ARP) and flags anomalies linked to "
+        "compromised/botnet devices or MITM: duplicate MAC across IPs (ARP spoofing), etc.",
+        refresh_btn));
+
     auto* status = new QLabel(QString::fromUtf8("Idle."), page);
-    status->setStyleSheet("color:#C7B6A2; font-size:9.5pt; background:transparent;");
+    status->setStyleSheet(QString("color:%1; font-size:%2px; background:transparent;")
+                              .arg(theme::Muted).arg(theme::FontBody));
+    // Row for status + the shared Clean/Export buttons (inserted at index 1/2 below).
+    auto* ctl = new QHBoxLayout();
+    ctl->setSpacing(theme::Space3);
     ctl->addWidget(status, 1);
     root->addLayout(ctl);
 
@@ -184,13 +178,7 @@ QWidget* BuildLanMonitorPage(QWidget* parent) {
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->verticalHeader()->setVisible(false);
     table->setShowGrid(false);
-    table->setAlternatingRowColors(true);
-    table->setStyleSheet(
-        "QTableWidget { background:#1A120C; color:#E8D5C0; font-size:9.5pt; border:1px solid rgba(255,170,90,26);"
-        " border-radius:10px; gridline-color:#2A1F14; }"
-        "QTableWidget::item { padding:5px 8px; }"
-        "QHeaderView::section { background:#130D07; color:#8B7355; font-size:9pt; font-weight:700;"
-        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+    table->setStyleSheet(theme::TableQss());
     {
         auto* h = table->horizontalHeader();
         h->setStretchLastSection(true);

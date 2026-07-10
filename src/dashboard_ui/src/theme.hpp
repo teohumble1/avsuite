@@ -123,6 +123,21 @@ inline QString ComponentQss() {
         .arg(Danger);       // %13
 }
 
+// Standard stylesheet for a QTableWidget on the dashboard. Pages call
+// table->setStyleSheet(theme::TableQss()) instead of hand-rolling colors, so
+// every table (row padding, header, hover, selection) looks identical.
+inline QString TableQss() {
+    return QString(
+        "QTableWidget { background:%1; color:%2; font-size:%3px; border:1px solid %4;"
+        " border-radius:%5px; gridline-color:%4; }"
+        "QTableWidget::item { padding:8px 10px; border-bottom:1px solid %4; }"
+        "QTableWidget::item:selected { background:%6; color:%2; }"
+        "QHeaderView::section { background:%7; color:%8; font-size:%9px; font-weight:600;"
+        " padding:8px 10px; border:none; border-bottom:1px solid %4; }")
+        .arg(Surface).arg(Text).arg(FontBody).arg(Border)
+        .arg(RadiusLg).arg(Surface2).arg(Sidebar).arg(Dim).arg(FontCaption);
+}
+
 // Builds the standard page header: a title, an optional one-line subtitle, and
 // an optional right-aligned action widget (button, search, etc). Reused by every
 // page so titles/spacing stay identical across tabs.

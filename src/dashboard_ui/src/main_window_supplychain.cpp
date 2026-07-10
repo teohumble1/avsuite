@@ -10,6 +10,7 @@
 // Detection-only (defensive). ASCII labels (MSVC builds without /utf-8).
 
 #include "main_window.hpp"
+#include "theme.hpp"
 #include "av_quit_guard.hpp"
 #include "hunt_toolbar.hpp"
 
@@ -198,41 +199,35 @@ QWidget* BuildSupplyChainPage(QWidget* parent) {
     root->setContentsMargins(28, 24, 28, 24);
     root->setSpacing(12);
 
-    auto* title = new QLabel(QString::fromUtf8("Supply-chain & Infostealer Defense"), page);
-    title->setStyleSheet("color:#FFFFFF; font-size:16pt; font-weight:800; background:transparent;");
-    root->addWidget(title);
-    auto* sub = new QLabel(QString::fromUtf8(
+    root->addWidget(theme::BuildPageHeader(
+        "Supply-chain & Infostealer Defense",
         "Scans a project folder for hijacked npm packages (malicious install hooks), "
         "malicious VS Code tasks (auto-run on open), and Python/JS infostealers "
-        "(exfil webhooks, browser credential theft, obfuscated exec, pipe-to-shell)."), page);
-    sub->setStyleSheet("color:#8B7355; font-size:9pt; background:transparent;");
-    sub->setWordWrap(true);
-    root->addWidget(sub);
+        "(exfil webhooks, browser credential theft, obfuscated exec, pipe-to-shell)."));
 
     auto* ctl = new QHBoxLayout();
-    ctl->setSpacing(12);
+    ctl->setSpacing(theme::Space3);
     auto* scan_btn = new QPushButton(QString::fromUtf8("Choose project folder & scan"), page);
+    scan_btn->setObjectName("PrimaryBtn");
     scan_btn->setCursor(Qt::PointingHandCursor);
-    scan_btn->setStyleSheet(
-        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
-        " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
-        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
-        "QPushButton:disabled { background:#3A2A1C; color:#8B7355; }");
     ctl->addWidget(scan_btn);
 
     // Stop: this page's worker polls `scanning`, so clearing it cancels the walk.
     auto* stop_btn = new QPushButton(QString::fromUtf8("Stop"), page);
     stop_btn->setCursor(Qt::PointingHandCursor);
     stop_btn->setEnabled(false);
-    stop_btn->setStyleSheet(
-        "QPushButton { background:#2A2010; border:1px solid #E6C24A; border-radius:10px;"
-        " color:#E6C24A; font-size:10pt; font-weight:700; padding:10px 20px; }"
-        "QPushButton:hover { background:#3A2C14; }"
-        "QPushButton:disabled { background:#241814; color:#6B5444; border-color:#3A2A1C; }");
+    stop_btn->setStyleSheet(QString(
+        "QPushButton { background:transparent; border:1px solid %1; border-radius:%2px;"
+        " color:%1; font-size:%3px; font-weight:600; padding:9px 18px; }"
+        "QPushButton:hover { background:rgba(251,191,36,0.12); }"
+        "QPushButton:disabled { background:%4; color:%5; border-color:%6; }")
+        .arg(theme::Warn).arg(theme::RadiusMd).arg(theme::FontBody)
+        .arg(theme::Surface).arg(theme::Dim).arg(theme::Border));
     ctl->addWidget(stop_btn);
 
     auto* status = new QLabel(QString::fromUtf8("Idle. Pick a project/repo folder."), page);
-    status->setStyleSheet("color:#C7B6A2; font-size:9.5pt; background:transparent;");
+    status->setStyleSheet(QString("color:%1; font-size:%2px; background:transparent;")
+                              .arg(theme::Muted).arg(theme::FontBody));
     ctl->addWidget(status, 1);
     root->addLayout(ctl);
 
@@ -242,13 +237,7 @@ QWidget* BuildSupplyChainPage(QWidget* parent) {
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->verticalHeader()->setVisible(false);
     table->setShowGrid(false);
-    table->setAlternatingRowColors(true);
-    table->setStyleSheet(
-        "QTableWidget { background:#1A120C; color:#E8D5C0; font-size:9.5pt; border:1px solid rgba(255,170,90,26);"
-        " border-radius:10px; gridline-color:#2A1F14; }"
-        "QTableWidget::item { padding:5px 8px; }"
-        "QHeaderView::section { background:#130D07; color:#8B7355; font-size:9pt; font-weight:700;"
-        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+    table->setStyleSheet(theme::TableQss());
     {
         auto* h = table->horizontalHeader();
         h->setStretchLastSection(true);

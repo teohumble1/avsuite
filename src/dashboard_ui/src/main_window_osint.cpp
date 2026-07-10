@@ -11,6 +11,7 @@
 // scanner). ASCII labels (MSVC builds without /utf-8).
 
 #include "main_window.hpp"
+#include "theme.hpp"
 #include "av_quit_guard.hpp"
 
 #include <QAbstractItemView>
@@ -154,16 +155,11 @@ QWidget* BuildOsintPage(QWidget* parent) {
     root->setContentsMargins(28, 24, 28, 24);
     root->setSpacing(12);
 
-    auto* title = new QLabel(QString::fromUtf8("OSINT Hub"), page);
-    title->setStyleSheet("color:#E8E8E8; font-size:16pt; font-weight:800; background:transparent;");
-    root->addWidget(title);
-    auto* sub = new QLabel(QString::fromUtf8(
+    root->addWidget(theme::BuildPageHeader(
+        "OSINT Hub",
         "Paste a file hash, IP, domain, or URL. Looks up reputation on VirusTotal "
         "(needs API key in Settings), resolves DNS, and probes ~20 well-known TCP "
-        "ports on the resolved IP so you can see what's actually listening."), page);
-    sub->setStyleSheet("color:#8B8B8B; font-size:9pt; background:transparent;");
-    sub->setWordWrap(true);
-    root->addWidget(sub);
+        "ports on the resolved IP so you can see what's actually listening."));
 
     auto* ctl = new QHBoxLayout();
     ctl->setSpacing(10);
@@ -207,13 +203,7 @@ QWidget* BuildOsintPage(QWidget* parent) {
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->verticalHeader()->setVisible(false);
     table->setShowGrid(false);
-    table->setAlternatingRowColors(true);
-    table->setStyleSheet(
-        "QTableWidget { background:#1C1008; color:#E8E8E8; font-size:9.5pt; border:1px solid #2A1F14;"
-        " border-radius:10px; gridline-color:#2A1F14; }"
-        "QTableWidget::item { padding:5px 8px; }"
-        "QHeaderView::section { background:#130D07; color:#8B8B8B; font-size:9pt; font-weight:700;"
-        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+    table->setStyleSheet(theme::TableQss());
     {
         auto* h = table->horizontalHeader();
         h->setStretchLastSection(true);

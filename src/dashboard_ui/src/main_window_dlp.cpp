@@ -321,11 +321,7 @@ QWidget* BuildDlpPage(QWidget* parent) {
     table->setShowGrid(false);
     table->setAlternatingRowColors(true);
     table->setStyleSheet(
-        "QTableWidget { background:#1C1008; color:#E8E8E8; font-size:9.5pt; border:1px solid #2A1F14;"
-        " border-radius:10px; gridline-color:#2A1F14; }"
-        "QTableWidget::item { padding:5px 8px; }"
-        "QHeaderView::section { background:#130D07; color:#8B8B8B; font-size:9pt; font-weight:700;"
-        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+        theme::TableQss());
     {
         auto* h = table->horizontalHeader();
         h->setStretchLastSection(true);

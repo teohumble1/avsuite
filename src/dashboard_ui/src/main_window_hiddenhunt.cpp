@@ -234,11 +234,7 @@ QWidget* BuildHiddenHuntPage(QWidget* parent) {
     table->verticalHeader()->setVisible(false);
     table->setShowGrid(false);
     table->setStyleSheet(
-        "QTableWidget { background:#1A120C; color:#E8D5C0; font-size:9.5pt; border:1px solid rgba(255,170,90,26);"
-        " border-radius:10px; gridline-color:#2A1F14; selection-background-color:rgba(255,122,0,38); }"
-        "QTableWidget::item { padding:5px 8px; }"
-        "QHeaderView::section { background:#130D07; color:#8B7355; font-size:9pt; font-weight:700;"
-        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+        theme::TableQss());
     {
         auto* h = table->horizontalHeader();
         h->setStretchLastSection(false);

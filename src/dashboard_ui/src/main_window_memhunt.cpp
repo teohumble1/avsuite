@@ -28,6 +28,7 @@
 // ASCII labels (MSVC builds without /utf-8).
 
 #include "main_window.hpp"
+#include "theme.hpp"
 #include "av_quit_guard.hpp"
 
 #include <QAbstractItemView>
@@ -338,11 +339,7 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
     table->setShowGrid(false);
     table->setAlternatingRowColors(true);
     table->setStyleSheet(
-        "QTableWidget { background:#1A120C; color:#E8D5C0; font-size:9.5pt; border:1px solid rgba(255,170,90,26);"
-        " border-radius:10px; gridline-color:#2A1F14; }"
-        "QTableWidget::item { padding:5px 8px; }"
-        "QHeaderView::section { background:#130D07; color:#8B7355; font-size:9pt; font-weight:700;"
-        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+        theme::TableQss());
     {
         auto* h = table->horizontalHeader();
         h->setStretchLastSection(true);

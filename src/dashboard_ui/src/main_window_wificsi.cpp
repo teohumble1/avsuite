@@ -17,6 +17,7 @@
 // builds without /utf-8).
 
 #include "main_window.hpp"
+#include "theme.hpp"
 
 #include <QAbstractItemView>
 #include <QColor>
@@ -538,11 +539,7 @@ QWidget* BuildWifiCsiPage(QWidget* parent) {
     events_table->setShowGrid(false);
     events_table->setAlternatingRowColors(true);
     events_table->setStyleSheet(
-        "QTableWidget { background:#1C1008; color:#E8E8E8; font-size:9.5pt; border:1px solid #2A1F14;"
-        " border-radius:10px; gridline-color:#2A1F14; }"
-        "QTableWidget::item { padding:5px 8px; }"
-        "QHeaderView::section { background:#130D07; color:#8B8B8B; font-size:9pt; font-weight:700;"
-        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+        theme::TableQss());
     events_table->horizontalHeader()->setStretchLastSection(true);
     events_table->setMaximumHeight(140);
     root->addWidget(events_table);
@@ -558,11 +555,7 @@ QWidget* BuildWifiCsiPage(QWidget* parent) {
     devices_table->setShowGrid(false);
     devices_table->setAlternatingRowColors(true);
     devices_table->setStyleSheet(
-        "QTableWidget { background:#1C1008; color:#E8E8E8; font-size:9.5pt; border:1px solid #2A1F14;"
-        " border-radius:10px; gridline-color:#2A1F14; }"
-        "QTableWidget::item { padding:5px 8px; }"
-        "QHeaderView::section { background:#130D07; color:#8B8B8B; font-size:9pt; font-weight:700;"
-        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+        theme::TableQss());
     devices_table->horizontalHeader()->setStretchLastSection(true);
     devices_table->setMaximumHeight(140);
     root->addWidget(devices_table);

@@ -15,6 +15,7 @@
 // ASCII labels (MSVC builds without /utf-8).
 
 #include "main_window.hpp"
+#include "theme.hpp"
 #include "av_quit_guard.hpp"
 #include "hunt_toolbar.hpp"
 #include "dns_etw_monitor.hpp"
@@ -66,17 +67,11 @@ QWidget* BuildDnsIntelPage(QWidget* parent) {
     root->setContentsMargins(28, 24, 28, 24);
     root->setSpacing(12);
 
-    auto* title = new QLabel(QString::fromUtf8("DNS & C2 Intel"), page);
-    title->setStyleSheet("color:#FFFFFF; font-size:16pt; font-weight:800; background:transparent;");
-    root->addWidget(title);
-    auto* sub = new QLabel(QString::fromUtf8(
+    root->addWidget(theme::BuildPageHeader(
+        "DNS & C2 Intel",
         "Live DNS query capture via ETW (Microsoft-Windows-DNS-Client), flagged against a real "
         "abuse.ch ThreatFox IOC feed -- not a simulated or hardcoded domain list. Starting live "
-        "capture requires Administrator. Domain checks below are on-demand IOC lookups, not "
-        "traffic/behavior analysis."), page);
-    sub->setStyleSheet("color:#8B7355; font-size:9pt; background:transparent;");
-    sub->setWordWrap(true);
-    root->addWidget(sub);
+        "capture requires Administrator. Domain checks below are on-demand IOC lookups."));
 
     auto* ctl = new QHBoxLayout();
     ctl->setSpacing(12);
@@ -101,12 +96,7 @@ QWidget* BuildDnsIntelPage(QWidget* parent) {
     table->verticalHeader()->setVisible(false);
     table->setShowGrid(false);
     table->setAlternatingRowColors(true);
-    table->setStyleSheet(
-        "QTableWidget { background:#1A120C; color:#E8D5C0; font-size:9.5pt; border:1px solid rgba(255,170,90,26);"
-        " border-radius:10px; gridline-color:#2A1F14; }"
-        "QTableWidget::item { padding:5px 8px; }"
-        "QHeaderView::section { background:#130D07; color:#8B7355; font-size:9pt; font-weight:700;"
-        " padding:6px; border:none; border-bottom:1px solid #2A1F14; }");
+    table->setStyleSheet(theme::TableQss());
     {
         auto* h = table->horizontalHeader();
         h->setStretchLastSection(true);

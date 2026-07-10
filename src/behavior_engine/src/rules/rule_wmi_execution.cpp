@@ -12,6 +12,10 @@ struct WmiPattern {
     const char* description;
 };
 
+// Only WMI *execution* and *persistence* patterns belong here. Read-only WMI
+// queries (Get-WmiObject / Get-CimInstance / a bare "wmi" substring) are
+// standard administrative and inventory activity, so the previous patterns that
+// matched them produced constant Suspicious false positives and were removed.
 constexpr WmiPattern kPatterns[] = {
     // wmic process call create (execution)
     {"wmic.exe", "process call create",        "wmic spawning a process via WMI (T1047)"},
@@ -20,17 +24,16 @@ constexpr WmiPattern kPatterns[] = {
     {"wmic.exe", "eventfilter",                "wmic WMI event filter creation (persistence)"},
     {"wmic.exe", "commandlineeventconsumer",   "wmic CommandLineEventConsumer creation (persistence)"},
     {"wmic.exe", "activescripteventconsumer",  "wmic ActiveScriptEventConsumer creation (persistence)"},
-    // wmic /format for XSL scriptlet execution
-    {"wmic.exe", "/format:",                   "wmic /format: XSL execution (T1220 XSL Script Processing)"},
+    // wmic /format XSL scriptlet execution -- only the remote/.xsl abuse form,
+    // not benign built-in formats like /format:list.
+    {"wmic.exe", "/format:http",               "wmic remote XSL execution (T1220 XSL Script Processing)"},
+    {"wmic.exe", ".xsl",                       "wmic XSL script processing (T1220)"},
     // wmiprvse spawning unusual children (detected by parent check)
     {"cmd.exe",         "wmiprvse",             "cmd.exe spawned by wmiprvse.exe (WMI lateral movement)"},
-    {"powershell.exe",  "wmi",                  "PowerShell WMI invocation (T1047)"},
-    {"powershell.exe",  "get-wmiobject",        "PowerShell Get-WmiObject (WMI query)"},
+    // PowerShell WMI *method invocation* (execution), not read queries
     {"powershell.exe",  "invoke-wmimethod",     "PowerShell Invoke-WmiMethod (WMI execution)"},
     {"powershell.exe",  "[wmiclass]",           "PowerShell WmiClass instantiation (WMI execution)"},
     {"pwsh.exe",        "invoke-wmimethod",     "pwsh Invoke-WmiMethod (WMI execution)"},
-    // mofcomp.exe (MOF compilation for persistence)
-    {"mofcomp.exe",     "",                     "mofcomp.exe MOF compilation (WMI persistence)"},
 };
 
 } // namespace

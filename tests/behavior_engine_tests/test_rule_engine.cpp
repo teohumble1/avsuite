@@ -409,3 +409,68 @@ TEST(CredentialAccessRuleTest, RegSaveSamHiveIsMalicious) {
     const auto d = engine.OnProcessCreate(e);
     EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.CREDENTIAL_ACCESS"));
 }
+
+// ---------------------------------------------------------------------------
+// Malware-behavior rules: file deletion is not ransomware; FOR /F is not
+// obfuscation; but backup destruction still is.
+// ---------------------------------------------------------------------------
+
+TEST(MalwareBehaviorRuleTest, PlainRemoveItemNotRansomware) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    // Standard cleanup -- must not be flagged as ransomware.
+    const auto d = RunPowerShell(engine, 600,
+        "powershell.exe Remove-Item -Recurse -Force C:\\Users\\me\\AppData\\Local\\Temp\\build");
+    EXPECT_FALSE(HasRule(d, "BEH.RANSOMWARE_FILE_OPS"));
+}
+
+TEST(MalwareBehaviorRuleTest, VssadminDeleteShadowsIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    ProcessEvent e;
+    e.process_id = 601;
+    e.parent_process_id = 1;
+    e.image_path = "C:\\Windows\\System32\\vssadmin.exe";
+    e.command_line = "vssadmin.exe delete shadows /all /quiet";
+    const auto d = engine.OnProcessCreate(e);
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.RANSOMWARE_FILE_OPS"));
+}
+
+TEST(MalwareBehaviorRuleTest, BatchForLoopNotObfuscation) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    ProcessEvent e;
+    e.process_id = 602;
+    e.parent_process_id = 1;
+    e.image_path = "C:\\Windows\\System32\\cmd.exe";
+    e.command_line = "cmd.exe /c for /f \"tokens=1,2\" %%a in (list.txt) do echo %%a";
+    const auto d = engine.OnProcessCreate(e);
+    EXPECT_FALSE(HasRule(d, "BEH.COMMAND_OBFUSCATION"));
+}
+
+// ---------------------------------------------------------------------------
+// WMI rule: read-only queries are benign; method invocation / persistence fire.
+// ---------------------------------------------------------------------------
+
+TEST(WmiRuleTest, GetWmiObjectQueryNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    // Ubiquitous inventory query -- must not alert.
+    const auto d = RunPowerShell(engine, 603,
+        "powershell.exe Get-WmiObject Win32_OperatingSystem");
+    EXPECT_FALSE(HasRule(d, "BEH.WMI_EXECUTION"));
+}
+
+TEST(WmiRuleTest, InvokeWmiMethodIsFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 604,
+        "powershell.exe Invoke-WmiMethod -Class Win32_Process -Name Create -ArgumentList calc.exe");
+    EXPECT_NE(avcore::Severity::Info, SeverityOf(d, "BEH.WMI_EXECUTION"));
+}
+
+TEST(WmiRuleTest, WmicFormatListNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    ProcessEvent e;
+    e.process_id = 605;
+    e.parent_process_id = 1;
+    e.image_path = "C:\\Windows\\System32\\wbem\\wmic.exe";
+    e.command_line = "wmic.exe process list /format:list";
+    const auto d = engine.OnProcessCreate(e);
+    EXPECT_FALSE(HasRule(d, "BEH.WMI_EXECUTION"));
+}

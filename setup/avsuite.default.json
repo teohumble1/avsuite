@@ -1,0 +1,22 @@
+{
+  "ai_model_path": "",
+  "database_path": "%LOCALAPPDATA%\\TeoAvSuite\\avsuite.db",
+  "debounce_ms": 750,
+  "log_path": "%LOCALAPPDATA%\\TeoAvSuite\\avsuite.log",
+  "malwarebazaar_api_key": "",
+  "quarantine_directory": "%LOCALAPPDATA%\\TeoAvSuite\\quarantine",
+  "scheduled_scan": {
+    "enabled": true,
+    "interval": "daily",
+    "target_path": "",
+    "time_hhmm": "02:00"
+  },
+  "update_server_url": "http://localhost:8443",
+  "virustotal_api_key": "",
+  "watch_directories": [
+    "%LOCALAPPDATA%\\Temp",
+    "%APPDATA%",
+    "%USERPROFILE%\\Downloads"
+  ],
+  "yara_rules_directory": "yara_rules"
+}

@@ -4,6 +4,21 @@
 *.key
 *.pem
 *.der
+*.snk
+*.crt
+id_rsa*
+
+# Security: runtime config may hold API keys (VirusTotal, MalwareBazaar) -- never commit
+avsuite.json
+*.env
+.env
+
+# Security: local data / logs (quarantine history, detections)
+*.db
+*.db-shm
+*.db-wal
+*.log
+quarantine/
 
 # Build artifacts
 build/

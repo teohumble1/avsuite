@@ -44,8 +44,11 @@ Source: "{#RelDir}\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversio
 ; YARA rules
 Source: "{#RelDir}\yara_rules\*"; DestDir: "{app}\yara_rules"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; Config file
-Source: "{#RelDir}\avsuite.json"; DestDir: "{app}"; Flags: ignoreversion
+; Config file -- ship a sanitized default (empty API keys, portable paths), NOT
+; the developer's build-tree avsuite.json which contains a real VirusTotal key
+; and absolute D:\Dev paths. onlyifdoesntexist preserves a user's own settings
+; on upgrade.
+Source: "avsuite.default.json"; DestDir: "{app}"; DestName: "avsuite.json"; Flags: onlyifdoesntexist
 
 ; Documentation
 Source: "..\README.md"; DestDir: "{app}"; DestName: "README.txt"; Flags: isreadme

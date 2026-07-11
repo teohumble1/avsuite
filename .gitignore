@@ -7,6 +7,8 @@
 *.snk
 *.crt
 id_rsa*
+*.password.txt
+avsuite_cert.*
 
 # Security: runtime config may hold API keys (VirusTotal, MalwareBazaar) -- never commit
 avsuite.json

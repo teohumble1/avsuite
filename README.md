@@ -14,10 +14,18 @@
 ![AI](https://img.shields.io/badge/AI-Qwen2.5%20GGUF%20·%20llama.cpp%20runtime%20·%20100%25%20offline-8B5CF6)
 ![Status](https://img.shields.io/badge/status-research%20project-8B7355)
 
-[**⬇ Download**](https://github.com/teohumble1/avsuite/releases) ·
+<br/>
+
+[![Download TeoAvSuite](https://img.shields.io/badge/⬇%20%20DOWNLOAD%20TeoAvSuite--Setup--v1.0.2.exe%20%20(26.85%20MB)-FF7A00?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/teohumble1/avsuite/releases/download/v1.0.2/TeoAvSuite-Setup-v1.0.2.exe)
+
+**Tải trực tiếp 1 click — Windows 10/11 x64 · Direct download, no signup**
+
+<br/>
+
 [**✨ Features**](#features--tính-năng) ·
 [**🚀 Install**](#installation--cài-đặt) ·
 [**🖼 Screenshots**](#screenshots--ảnh-chụp-màn-hình) ·
+[**📦 All releases**](https://github.com/teohumble1/avsuite/releases) ·
 [**⚠ Limitations**](#important-limitations--những-hạn-chế-quan-trọng)
 
 <img src="docs/images/dashboard-home.png" alt="TeoAvSuite dashboard — amber dark theme" width="860"/>
@@ -100,6 +108,8 @@ This is an **educational/research project** that implements:
 ### Option 1: Setup Installer .exe (Recommended) | Tùy Chọn 1: Trình Cài Đặt .exe (Khuyến Nghị)
 
 **One-click professional installer - like any normal app**
+
+**Direct link | Link tải thẳng:** https://github.com/teohumble1/avsuite/releases/download/v1.0.2/TeoAvSuite-Setup-v1.0.2.exe
 
 Download and run:
 ```bash

@@ -168,7 +168,7 @@ static QLabel* makeFormLabel(const QString& text, QWidget* parent) {
 
 static const char* kLineEditStyle =
     "QLineEdit { background:#120B06; border:1px solid rgba(255,170,90,46);"
-    " border-radius:8px; padding:6px 12px; color:#ffffff; font-size:10pt; }"
+    " border-radius:8px; padding:6px 12px; color:#ECE4DA; font-size:10pt; }"
     "QLineEdit:focus { border-color:rgba(255,122,0,120); }";
 
 static const char* kComboStyle =
@@ -195,10 +195,10 @@ static const char* kListStyle =
     "QListWidget::item:selected { background:rgba(255,122,0,38); color:#fff; }";
 
 static const char* kSaveBtnStyle =
-    "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
+    "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #FF7A00);"
     " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700;"
     " padding:10px 32px; }"
-    "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }";
+    "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9B3D,stop:1 #FF7A00); }";
 
 static const char* kSmallBtnStyle =
     "QPushButton { background:rgba(255,122,0,22); border:1px solid rgba(255,122,0,60);"
@@ -220,7 +220,7 @@ static QPair<QFrame*, QVBoxLayout*> makeCard(const QString& title, QWidget* pare
     cl->setSpacing(12);
     auto* title_lbl = new QLabel(title, card);
     title_lbl->setStyleSheet(
-        "color:#6B5B4E; font-size:9pt; font-weight:700; letter-spacing:1px; background:transparent;");
+        "color:#8B7355; font-size:9pt; font-weight:700; letter-spacing:1px; background:transparent;");
     cl->addWidget(title_lbl);
     return {card, cl};
 }
@@ -242,7 +242,7 @@ QWidget* MainWindow::BuildSettingsPage() {
     auto* hdr = new QWidget(page);
     hdr->setFixedHeight(64);
     hdr->setStyleSheet(
-        "background:#0E0904; border-bottom:1px solid rgba(255,170,90,20);");
+        "background:#0E0804; border-bottom:1px solid rgba(255,170,90,20);");
     auto* hdr_l = new QHBoxLayout(hdr);
     hdr_l->setContentsMargins(24, 0, 24, 0);
     hdr_l->setSpacing(14);
@@ -285,7 +285,7 @@ QWidget* MainWindow::BuildSettingsPage() {
     auto* logo_box = new QWidget(sidebar);
     logo_box->setFixedSize(36, 36);
     logo_box->setStyleSheet(
-        "background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #FF7A00,stop:1 #CC5500);"
+        "background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #FF7A00,stop:1 #FF7A00);"
         " border-radius:10px;");
     logo_row->addWidget(logo_box);
     auto* logo_texts = new QVBoxLayout();
@@ -293,7 +293,7 @@ QWidget* MainWindow::BuildSettingsPage() {
     auto* logo_name = new QLabel("TeoAVSuite", sidebar);
     logo_name->setStyleSheet("color:#FF9B3D; font-size:9.5pt; font-weight:700; background:transparent;");
     auto* logo_sub2 = new QLabel("Settings", sidebar);
-    logo_sub2->setStyleSheet("color:#6B5B4E; font-size:8pt; background:transparent;");
+    logo_sub2->setStyleSheet("color:#8B7355; font-size:8pt; background:transparent;");
     logo_texts->addWidget(logo_name);
     logo_texts->addWidget(logo_sub2);
     logo_row->addLayout(logo_texts);
@@ -552,7 +552,7 @@ QWidget* MainWindow::BuildSettingsPage() {
             auto* hint = new QLabel(
                 QString::fromUtf8("Th\xe1\xbb\x9di gian ch\xe1\xbb\x9d tr\xc6\xb0\xe1\xbb\x9b" "c khi ph\xe1\xba\xa3n h\xe1\xbb\x93i s\xe1\xbb\xb1 ki\xe1\xbb\x87n filesystem"),
                 card);
-            hint->setStyleSheet("color:#4B3B2E; font-size:8.5pt; background:transparent;");
+            hint->setStyleSheet("color:#33261A; font-size:8.5pt; background:transparent;");
             row->addWidget(hint, 1);
             cl->addLayout(row);
         }
@@ -613,7 +613,7 @@ QWidget* MainWindow::BuildSettingsPage() {
             QString::fromUtf8("H\xe1\xbb\x97 tr\xe1\xbb\xa3: Qwen2.5, Phi-3.5, Mistral (GGUF format). "
                                "Kh\xe1\xbb\x9fi \xc4\x91\xe1\xbb\x99ng l\xe1\xba\xa1i \xe1\xbb\xa9ng d\xe1\xbb\xa5ng sau khi \xc4\x91\xe1\xbb\x95i model."),
             card);
-        note->setStyleSheet("color:#4B3B2E; font-size:8.5pt; background:transparent;");
+        note->setStyleSheet("color:#33261A; font-size:8.5pt; background:transparent;");
         note->setWordWrap(true);
         cl->addWidget(note);
 
@@ -670,7 +670,7 @@ QWidget* MainWindow::BuildSettingsPage() {
             QString::fromUtf8("L\xe1\xba\xa5y API key mi\xe1\xbb\x85n ph\xc3\xad t\xe1\xba\xa1i virustotal.com \xe2\x80\x94 "
                                "gi\xe1\xbb\x9bi h\xe1\xba\xa1n 500 requests/ng\xc3\xa0y."),
             card);
-        vt_note->setStyleSheet("color:#4B3B2E; font-size:8.5pt; background:transparent;");
+        vt_note->setStyleSheet("color:#33261A; font-size:8.5pt; background:transparent;");
         vt_note->setWordWrap(true);
         cl->addWidget(vt_note);
 
@@ -705,7 +705,7 @@ QWidget* MainWindow::BuildSettingsPage() {
             QString::fromUtf8("D\xc3\xb9ng cho trang Threat Intel (n\xe1\xba\xa1p h\xe1\xba\xa5h m\xe1\xbb\x9bi t\xe1\xbb\xab abuse.ch MalwareBazaar v\xc3\xa0o blacklist). "
                                "L\xe1\xba\xa5y key mi\xe1\xbb\x85n ph\xc3\xad t\xe1\xba\xa1i bazaar.abuse.ch (Account -> API Key)."),
             mb_card);
-        mb_note->setStyleSheet("color:#4B3B2E; font-size:8.5pt; background:transparent;");
+        mb_note->setStyleSheet("color:#33261A; font-size:8.5pt; background:transparent;");
         mb_note->setWordWrap(true);
         mb_cl->addWidget(mb_note);
         pl->addWidget(mb_card);

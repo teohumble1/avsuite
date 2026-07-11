@@ -295,9 +295,9 @@ QWidget* BuildDlpPage(QWidget* parent) {
     auto* scan_btn = new QPushButton(QString::fromUtf8("Choose folder & scan"), page);
     scan_btn->setCursor(Qt::PointingHandCursor);
     scan_btn->setStyleSheet(
-        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
+        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #FF7A00);"
         " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
-        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
+        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9B3D,stop:1 #FF7A00); }"
         "QPushButton:disabled { background:#33261A; color:#8B7355; }");
     ctl->addWidget(scan_btn);
 
@@ -306,9 +306,9 @@ QWidget* BuildDlpPage(QWidget* parent) {
     ai_btn->setEnabled(false);
     ai_btn->setStyleSheet(
         "QPushButton { background:#1C1108; border:1px solid rgba(255,122,0,60); border-radius:10px;"
-        " color:#FF9030; font-size:10pt; font-weight:600; padding:10px 20px; }"
+        " color:#FF9B3D; font-size:10pt; font-weight:600; padding:10px 20px; }"
         "QPushButton:hover:enabled { background:#33261A; }"
-        "QPushButton:disabled { color:#5A5A5A; border-color:rgba(139,139,139,40); }");
+        "QPushButton:disabled { color:#8B7355; border-color:rgba(139,139,139,40); }");
     ctl->addWidget(ai_btn);
 
     auto* status = new QLabel(QString::fromUtf8("Idle. Pick a folder to scan for exposed secrets/PII."), page);
@@ -381,10 +381,10 @@ QWidget* BuildDlpPage(QWidget* parent) {
 
         // Background color by risk
         QString bg;
-        if (f.risk >= 90) bg = "#3A1F1F";
-        else if (f.risk >= 70) bg = "#3A2F1F";
-        else if (f.risk >= 50) bg = "#2F3A1F";
-        else bg = "#1F2F1F";
+        if (f.risk >= 90) bg = "#33261A";
+        else if (f.risk >= 70) bg = "#33261A";
+        else if (f.risk >= 50) bg = "#33261A";
+        else bg = "#33261A";
 
         table->setItem(row, 0, risk);
         auto* type = new QTableWidgetItem(QString::fromStdString(f.type));

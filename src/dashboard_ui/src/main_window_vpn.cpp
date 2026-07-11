@@ -318,7 +318,7 @@ QWidget* MainWindow::BuildVpnPage() {
                   "color:#FF9B3D;font-size:11px;font-weight:700;border-radius:12px;padding:0 10px;}"
                   "QPushButton:hover{background:rgba(255,122,0,0.2);}"
                 : "QPushButton{background:transparent;border:1px solid rgba(255,170,90,0.08);"
-                  "color:#6B5B4E;font-size:11px;border-radius:12px;padding:0 10px;}"
+                  "color:#8B7355;font-size:11px;border-radius:12px;padding:0 10px;}"
                   "QPushButton:hover{color:#C7B6A2;border-color:rgba(255,170,90,0.18);}");
         };
         applyProtoStyle(i == 0);
@@ -332,7 +332,7 @@ QWidget* MainWindow::BuildVpnPage() {
                       "color:#FF9B3D;font-size:11px;font-weight:700;border-radius:12px;padding:0 10px;}"
                       "QPushButton:hover{background:rgba(255,122,0,0.2);}"
                     : "QPushButton{background:transparent;border:1px solid rgba(255,170,90,0.08);"
-                      "color:#6B5B4E;font-size:11px;border-radius:12px;padding:0 10px;}"
+                      "color:#8B7355;font-size:11px;border-radius:12px;padding:0 10px;}"
                       "QPushButton:hover{color:#C7B6A2;border-color:rgba(255,170,90,0.18);}");
             }
         });
@@ -353,10 +353,10 @@ QWidget* MainWindow::BuildVpnPage() {
     vpn_connect_btn_->setFixedSize(132, 48);
     vpn_connect_btn_->setCursor(Qt::PointingHandCursor);
     vpn_connect_btn_->setStyleSheet(
-        "QPushButton{background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #FF7A00,stop:1 #D95C00);"
+        "QPushButton{background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #FF7A00,stop:1 #FF7A00);"
         "color:white;border:none;border-radius:14px;font-size:14px;font-weight:700;}"
-        "QPushButton:hover{background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #FF8810,stop:1 #E96C10);}"
-        "QPushButton:pressed{background:#D95C00;}");
+        "QPushButton:hover{background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #FF7A00,stop:1 #FF7A00);}"
+        "QPushButton:pressed{background:#FF7A00;}");
     connect(vpn_connect_btn_, &QPushButton::clicked, this, &MainWindow::VpnToggleConnect);
     hero_h->addWidget(vpn_connect_btn_, 0, Qt::AlignVCenter);
 
@@ -430,7 +430,7 @@ QWidget* MainWindow::BuildVpnPage() {
                 ? "QPushButton{background:rgba(255,122,0,0.12);border:1px solid rgba(255,122,0,0.22);"
                   "color:#FF9B3D;font-size:11px;font-weight:700;border-radius:13px;padding:0 12px;}"
                 : "QPushButton{background:transparent;border:1px solid rgba(255,170,90,0.08);"
-                  "color:#6B5B4E;font-size:11px;border-radius:13px;padding:0 12px;}"
+                  "color:#8B7355;font-size:11px;border-radius:13px;padding:0 12px;}"
                   "QPushButton:hover{color:#C7B6A2;border-color:rgba(255,170,90,0.18);}");
             connect(fb, &QPushButton::clicked, this, [this, fi, browser] {
                 vpn_filter_mode_ = fi;
@@ -441,7 +441,7 @@ QWidget* MainWindow::BuildVpnPage() {
                         ? "QPushButton{background:rgba(255,122,0,0.12);border:1px solid rgba(255,122,0,0.22);"
                           "color:#FF9B3D;font-size:11px;font-weight:700;border-radius:13px;padding:0 12px;}"
                         : "QPushButton{background:transparent;border:1px solid rgba(255,170,90,0.08);"
-                          "color:#6B5B4E;font-size:11px;border-radius:13px;padding:0 12px;}"
+                          "color:#8B7355;font-size:11px;border-radius:13px;padding:0 12px;}"
                           "QPushButton:hover{color:#C7B6A2;border-color:rgba(255,170,90,0.18);}");
                 }
                 VpnRefreshServerList(vpn_search_edit_->text());
@@ -681,12 +681,12 @@ void MainWindow::VpnUpdateHero() {
         else
             vpn_connect_btn_->setStyleSheet(
                 "QPushButton{background:qlineargradient(x1:0,y1:0,x2:1,y2:1,"
-                "stop:0 #FF7A00,stop:1 #D95C00);"
+                "stop:0 #FF7A00,stop:1 #FF7A00);"
                 "color:white;border:none;border-radius:14px;"
                 "font-size:14px;font-weight:700;}"
                 "QPushButton:hover{background:qlineargradient(x1:0,y1:0,x2:1,y2:1,"
-                "stop:0 #FF8810,stop:1 #E96C10);}"
-                "QPushButton:pressed{background:#D95C00;}");
+                "stop:0 #FF7A00,stop:1 #FF7A00);}"
+                "QPushButton:pressed{background:#FF7A00;}");
     }
 
     // Reset stats when disconnecting
@@ -803,7 +803,7 @@ void MainWindow::VpnRefreshServerList(const QString& search) {
         fav_btn->setCursor(Qt::PointingHandCursor);
         fav_btn->setStyleSheet(is_fav
             ? "QPushButton{background:none;border:none;color:#FF9B3D;font-size:14px;}"
-            : "QPushButton{background:none;border:none;color:#4A3B30;font-size:14px;}"
+            : "QPushButton{background:none;border:none;color:#33261A;font-size:14px;}"
               "QPushButton:hover{color:#C7B6A2;}");
         const int si = i;
         connect(fav_btn, &QPushButton::clicked, this, [this, si]{

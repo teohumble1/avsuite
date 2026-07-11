@@ -409,7 +409,7 @@ static const char* kNetTabActive =
     " border-radius:8px; color:#FF7A00; font-size:8.5pt; font-weight:700; padding:4px 12px; }";
 static const char* kNetTabInactive =
     "QPushButton { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);"
-    " border-radius:8px; color:#8A7A6E; font-size:8.5pt; font-weight:600; padding:4px 12px; }"
+    " border-radius:8px; color:#8B7355; font-size:8.5pt; font-weight:600; padding:4px 12px; }"
     "QPushButton:hover { background:rgba(255,122,0,0.10); color:#C7B6A2; }";
 
 } // anonymous namespace
@@ -433,7 +433,7 @@ QWidget* MainWindow::BuildNetworkPage() {
     auto* title_col = new QVBoxLayout();
     title_col->setSpacing(1);
     auto* hdr_title = new QLabel("C2 Monitor", page);
-    hdr_title->setStyleSheet("font-size:15pt;font-weight:800;color:#FFFFFF;background:transparent;");
+    hdr_title->setStyleSheet("font-size:15pt;font-weight:800;color:#ECE4DA;background:transparent;");
     auto* hdr_sub = new QLabel("Zero-Trust Network Surveillance", page);
     hdr_sub->setStyleSheet("font-size:8pt;color:rgba(199,182,162,0.6);background:transparent;");
     title_col->addWidget(hdr_title);
@@ -626,7 +626,7 @@ QWidget* MainWindow::BuildNetworkPage() {
     hh->setSectionResizeMode(7, QHeaderView::Stretch);
     net_conn_table_->setStyleSheet(
         "QTableWidget{background:transparent;alternate-background-color:rgba(255,122,0,0.03);"
-        "color:#E8DACE;font-size:8.5pt;border:none;gridline-color:transparent;}"
+        "color:#ECE4DA;font-size:8.5pt;border:none;gridline-color:transparent;}"
         "QTableWidget::item{padding:3px 8px;}"
         "QTableWidget::item:selected{background:rgba(255,122,0,0.18);color:#fff;}"
         "QHeaderView::section{background:transparent;color:rgba(255,122,0,0.75);"
@@ -668,10 +668,10 @@ QWidget* MainWindow::BuildNetworkPage() {
     scan_btn->setFixedSize(64, 28);
     scan_btn->setStyleSheet(
         "QPushButton{background:qlineargradient(x1:0,y1:0,x2:1,y2:0,"
-        "stop:0 #C05500,stop:1 #FF7A00);color:#fff;font-weight:700;font-size:8.5pt;"
+        "stop:0 #FF7A00,stop:1 #FF7A00);color:#fff;font-weight:700;font-size:8.5pt;"
         "border-radius:6px;border:none;}"
         "QPushButton:hover{background:qlineargradient(x1:0,y1:0,x2:1,y2:0,"
-        "stop:0 #D06000,stop:1 #FF9030);}"
+        "stop:0 #FF7A00,stop:1 #FF9B3D);}"
         "QPushButton:disabled{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.2);}");
     scan_row->addWidget(scan_btn);
     scan_row->addStretch();
@@ -759,7 +759,7 @@ QWidget* MainWindow::BuildNetworkPage() {
     net_hunt_panel_->setFixedHeight(190);
     net_hunt_panel_->setVisible(false);
     net_hunt_panel_->setStyleSheet(
-        "QFrame{background:#150E08;border:1px solid rgba(255,122,0,0.35);"
+        "QFrame{background:#120B06;border:1px solid rgba(255,122,0,0.35);"
         "border-radius:10px;}");
 
     auto* hunt_vl = new QVBoxLayout(net_hunt_panel_);
@@ -779,7 +779,7 @@ QWidget* MainWindow::BuildNetworkPage() {
     hunt_hdr->addSpacing(6);
     net_hunt_title_lbl_ = new QLabel("—", net_hunt_panel_);
     net_hunt_title_lbl_->setStyleSheet(
-        "font-size:9pt;font-weight:700;color:#FFFFFF;background:transparent;");
+        "font-size:9pt;font-weight:700;color:#ECE4DA;background:transparent;");
     hunt_hdr->addWidget(net_hunt_title_lbl_);
     hunt_hdr->addStretch();
 
@@ -845,7 +845,7 @@ QWidget* MainWindow::BuildNetworkPage() {
     hh2->setSectionResizeMode(3, QHeaderView::Fixed); net_hunt_table_->setColumnWidth(3, 80);
     hh2->setSectionResizeMode(4, QHeaderView::Stretch);
     net_hunt_table_->setStyleSheet(
-        "QTableWidget{background:rgba(0,0,0,0.2);border:none;color:#E8DACE;font-size:8pt;}"
+        "QTableWidget{background:rgba(0,0,0,0.2);border:none;color:#ECE4DA;font-size:8pt;}"
         "QTableWidget::item{padding:2px 6px;}"
         "QHeaderView::section{background:transparent;color:rgba(255,122,0,0.6);"
         "font-size:7pt;font-weight:700;border:none;"

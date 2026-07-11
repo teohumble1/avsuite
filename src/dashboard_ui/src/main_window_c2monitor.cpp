@@ -165,13 +165,13 @@ QWidget* BuildC2MonitorPage(QWidget* parent) {
     layout->setSpacing(0);
 
     auto* header = new QFrame;
-    header->setStyleSheet("background-color:#1a1a1a; border-bottom:1px solid #333;");
+    header->setStyleSheet("background-color:#1C1108; border-bottom:1px solid #333;");
     header->setMaximumHeight(50);
     auto* h_layout = new QHBoxLayout(header);
     h_layout->setContentsMargins(16, 8, 16, 8);
 
     auto* title = new QLabel("C2 Monitor");
-    title->setStyleSheet("color:#FF6B6B; font-weight:bold; font-size:14px;");
+    title->setStyleSheet("color:#FF5A6A; font-weight:bold; font-size:14px;");
     h_layout->addWidget(title);
 
     auto* subtitle = new QLabel("Live outbound connections to non-private IPs. Reputation is checked on demand (right-click), never assumed.");
@@ -181,9 +181,9 @@ QWidget* BuildC2MonitorPage(QWidget* parent) {
     auto* export_btn = new QPushButton("Export");
     export_btn->setMaximumWidth(100);
     export_btn->setStyleSheet(
-        "QPushButton { background:#2d5a3d; color:#FFF; border:1px solid #4a7c5c; "
+        "QPushButton { background:#33261A; color:#FFF; border:1px solid #4ADE80; "
         "border-radius:4px; padding:6px 12px; }"
-        "QPushButton:hover { background:#3a6f47; }");
+        "QPushButton:hover { background:#4ADE80; }");
 
     auto* clear_btn = new QPushButton("Clear");
     clear_btn->setMaximumWidth(100);
@@ -233,8 +233,8 @@ QWidget* BuildC2MonitorPage(QWidget* parent) {
 
         QMenu menu;
         menu.setStyleSheet(
-            "QMenu { background:#1a1a1a; color:#FFF; border:1px solid #444; }"
-            "QMenu::item:selected { background:#FF6B6B; color:#000; }");
+            "QMenu { background:#1C1108; color:#FFF; border:1px solid #444; }"
+            "QMenu::item:selected { background:#FF5A6A; color:#000; }");
 
         const QString process = table->item(row, 1)->text();
         auto* hunt_action = menu.addAction("Ask AI about this connection");

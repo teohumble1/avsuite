@@ -393,16 +393,16 @@ struct NetGuardScanner {
 
 // ─── Page builder ─────────────────────────────────────────────────────────────
 QWidget* BuildNetGuardPage(QWidget* parent) {
-    static constexpr const char* kBg     = "#030712";
-    static constexpr const char* kCard   = "#0D1117";
-    static constexpr const char* kBorder = "#1A2332";
-    static constexpr const char* kText   = "#E2E8F0";
-    static constexpr const char* kMuted  = "#4B6280";
-    static constexpr const char* kRed    = "#FF4757";
-    static constexpr const char* kOrange = "#FFA502";
-    static constexpr const char* kGreen  = "#2ED573";
-    static constexpr const char* kBlue   = "#3742FA";
-    static constexpr const char* kCyan   = "#1E90FF";
+    static constexpr const char* kBg     = "#0E0804";
+    static constexpr const char* kCard   = "#120B06";
+    static constexpr const char* kBorder = "#33261A";
+    static constexpr const char* kText   = "#ECE4DA";
+    static constexpr const char* kMuted  = "#8B7355";
+    static constexpr const char* kRed    = "#FF5A6A";
+    static constexpr const char* kOrange = "#FBBF24";
+    static constexpr const char* kGreen  = "#4ADE80";
+    static constexpr const char* kBlue   = "#4DB8FF";
+    static constexpr const char* kCyan   = "#4DB8FF";
 
     auto* page = new QWidget(parent);
     page->setStyleSheet(QString("background:%1;").arg(kBg));
@@ -500,7 +500,7 @@ QWidget* BuildNetGuardPage(QWidget* parent) {
     httpTbl->setStyleSheet(QString(R"(
         QTableWidget { background:transparent; color:%1; border:none; font-size:12px; }
         QTableWidget::item { padding:6px 10px; border-bottom:1px solid %2; }
-        QTableWidget::item:selected { background:#0D2137; }
+        QTableWidget::item:selected { background:#33261A; }
         QHeaderView::section { background:%3; color:%4; border:none;
                                border-bottom:1px solid %2; padding:5px 10px; font-size:11px; }
         QScrollBar:vertical { background:%3; width:5px; border-radius:2px; }
@@ -514,7 +514,7 @@ QWidget* BuildNetGuardPage(QWidget* parent) {
     httpDetail->setReadOnly(true);
     httpDetail->setMaximumHeight(80);
     httpDetail->setStyleSheet(QString(R"(
-        QTextEdit { background:#050D18; color:%1; border:none; border-top:1px solid %2;
+        QTextEdit { background:#120B06; color:%1; border:none; border-top:1px solid %2;
                     font-family:Consolas,monospace; font-size:11px; padding:8px; }
     )").arg(kText).arg(kBorder));
     httpVL->addWidget(httpDetail);

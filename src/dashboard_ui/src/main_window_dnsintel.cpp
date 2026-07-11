@@ -78,9 +78,9 @@ QWidget* BuildDnsIntelPage(QWidget* parent) {
     auto* start_btn = new QPushButton(QString::fromUtf8("Start monitoring"), page);
     start_btn->setCursor(Qt::PointingHandCursor);
     start_btn->setStyleSheet(
-        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
+        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #FF7A00);"
         " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
-        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
+        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9B3D,stop:1 #FF7A00); }"
         "QPushButton:disabled { background:#33261A; color:#8B7355; }");
     ctl->addWidget(start_btn);
 
@@ -127,7 +127,7 @@ QWidget* BuildDnsIntelPage(QWidget* parent) {
     check_btn->setCursor(Qt::PointingHandCursor);
     check_btn->setStyleSheet(
         "QPushButton { background:#1C1108; border:1px solid rgba(255,122,0,40); border-radius:8px;"
-        " color:#FF9030; font-size:9.5pt; padding:8px 16px; }"
+        " color:#FF9B3D; font-size:9.5pt; padding:8px 16px; }"
         "QPushButton:hover { background:#33261A; }");
     check_row->addWidget(check_btn);
     root->addLayout(check_row);

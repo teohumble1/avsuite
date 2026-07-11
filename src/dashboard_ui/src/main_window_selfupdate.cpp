@@ -274,9 +274,9 @@ QWidget* BuildSelfUpdatePage(QWidget* parent) {
         auto* b = new QPushButton(text, card);
         b->setCursor(Qt::PointingHandCursor);
         b->setStyleSheet(
-            "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
+            "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #FF7A00);"
             " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 22px; }"
-            "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
+            "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9B3D,stop:1 #FF7A00); }"
             "QPushButton:disabled { background:#33261A; color:#8B7355; }");
         return b;
     };

@@ -275,9 +275,9 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
     auto* scan_btn = new QPushButton(QString::fromUtf8("Scan running processes"), page);
     scan_btn->setCursor(Qt::PointingHandCursor);
     scan_btn->setStyleSheet(
-        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
+        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #FF7A00);"
         " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
-        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
+        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9B3D,stop:1 #FF7A00); }"
         "QPushButton:disabled { background:#33261A; color:#8B7355; }");
     ctl->addWidget(scan_btn);
 
@@ -288,20 +288,20 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
     stop_btn->setCursor(Qt::PointingHandCursor);
     stop_btn->setEnabled(false);
     stop_btn->setStyleSheet(
-        "QPushButton { background:#241708; border:1px solid #E6C24A; border-radius:10px;"
-        " color:#E6C24A; font-size:10pt; font-weight:700; padding:10px 20px; }"
+        "QPushButton { background:#241708; border:1px solid #FBBF24; border-radius:10px;"
+        " color:#FBBF24; font-size:10pt; font-weight:700; padding:10px 20px; }"
         "QPushButton:hover { background:#33261A; }"
-        "QPushButton:disabled { background:#241708; color:#6B5444; border-color:#33261A; }");
+        "QPushButton:disabled { background:#241708; color:#8B7355; border-color:#33261A; }");
     ctl->addWidget(stop_btn);
 
     auto* kill_btn = new QPushButton(QString::fromUtf8("Kill selected process"), page);
     kill_btn->setCursor(Qt::PointingHandCursor);
     kill_btn->setEnabled(false);
     kill_btn->setStyleSheet(
-        "QPushButton { background:#3A1414; border:1px solid #FF5A6A; border-radius:10px;"
+        "QPushButton { background:#33261A; border:1px solid #FF5A6A; border-radius:10px;"
         " color:#FF5A6A; font-size:10pt; font-weight:700; padding:10px 20px; }"
-        "QPushButton:hover { background:#4A1818; }"
-        "QPushButton:disabled { background:#241708; color:#6B5444; border-color:#33261A; }");
+        "QPushButton:hover { background:#33261A; }"
+        "QPushButton:disabled { background:#241708; color:#8B7355; border-color:#33261A; }");
     ctl->addWidget(kill_btn);
 
     // Clean: clears the results table so the next scan starts fresh.
@@ -311,8 +311,8 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
     clean_btn->setStyleSheet(
         "QPushButton { background:#241708; border:1px solid rgba(255,170,90,60); border-radius:10px;"
         " color:#C7B6A2; font-size:10pt; font-weight:700; padding:10px 20px; }"
-        "QPushButton:hover { background:#2F2016; }"
-        "QPushButton:disabled { background:#241708; color:#6B5444; border-color:#33261A; }");
+        "QPushButton:hover { background:#33261A; }"
+        "QPushButton:disabled { background:#241708; color:#8B7355; border-color:#33261A; }");
     ctl->addWidget(clean_btn);
 
     // Export: writes the current findings to a CSV file for reporting.
@@ -320,10 +320,10 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
     export_btn->setCursor(Qt::PointingHandCursor);
     export_btn->setEnabled(false);
     export_btn->setStyleSheet(
-        "QPushButton { background:#152A1A; border:1px solid #4ADE80; border-radius:10px;"
+        "QPushButton { background:#241708; border:1px solid #4ADE80; border-radius:10px;"
         " color:#4ADE80; font-size:10pt; font-weight:700; padding:10px 20px; }"
-        "QPushButton:hover { background:#1A331F; }"
-        "QPushButton:disabled { background:#241708; color:#6B5444; border-color:#33261A; }");
+        "QPushButton:hover { background:#33261A; }"
+        "QPushButton:disabled { background:#241708; color:#8B7355; border-color:#33261A; }");
     ctl->addWidget(export_btn);
 
     auto* status = new QLabel(QString::fromUtf8("Idle."), page);
@@ -462,7 +462,7 @@ QWidget* BuildMemHuntPage(QWidget* parent) {
                 for (const auto& f : findings) {
                     const int row = table->rowCount();
                     table->insertRow(row);
-                    QString bg; if (f.risk >= 90) bg = "#3A1F1F"; else if (f.risk >= 70) bg = "#3A2F1F"; else if (f.risk >= 50) bg = "#2F3A1F"; else bg = "#1F2F1F";
+                    QString bg; if (f.risk >= 90) bg = "#33261A"; else if (f.risk >= 70) bg = "#33261A"; else if (f.risk >= 50) bg = "#33261A"; else bg = "#33261A";
                     auto* proc = new QTableWidgetItem(QString::fromStdString(f.proc_name)); proc->setBackground(QColor(bg)); table->setItem(row, 0, proc);
                     auto* pid = new QTableWidgetItem(QString::number(f.pid)); pid->setBackground(QColor(bg)); table->setItem(row, 1, pid);
                     std::ostringstream addr_hex; addr_hex << "0x" << std::hex << f.region_addr;

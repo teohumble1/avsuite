@@ -469,7 +469,7 @@ static QLabel* MakeBubble(const QString& text, Qt::Alignment align, QWidget* par
         lbl->setObjectName("msg_text");
         lbl->setWordWrap(true);
         lbl->setTextInteractionFlags(Qt::TextSelectableByMouse);
-        lbl->setStyleSheet("color: #ffffff; font-size: 10pt; background: transparent;");
+        lbl->setStyleSheet("color: #ECE4DA; font-size: 10pt; background: transparent;");
         lbl->setFont(QFont("Segoe UI", 10));
         blayout->addWidget(lbl);
 
@@ -527,7 +527,7 @@ static QLabel* MakeBubble(const QString& text, Qt::Alignment align, QWidget* par
             lbl->setObjectName("msg_text");
             lbl->setWordWrap(true);
             lbl->setTextInteractionFlags(Qt::TextSelectableByMouse);
-            lbl->setStyleSheet("color: #E8D8C8; font-size: 10pt; background: transparent;");
+            lbl->setStyleSheet("color: #ECE4DA; font-size: 10pt; background: transparent;");
             lbl->setFont(QFont("Segoe UI", 10));
             blayout->addWidget(lbl);
         }
@@ -601,7 +601,7 @@ QWidget* MainWindow::BuildAiPage() {
     logo_box->setFixedSize(34,34);
     logo_box->setStyleSheet(
         "QFrame { background: qlineargradient(x1:0,y1:0,x2:1,y2:1,"
-        " stop:0 #FF7A00, stop:1 #E55A00);"
+        " stop:0 #FF7A00, stop:1 #FF7A00);"
         " border-radius: 10px; border: none; }");
     auto* logo_box_l = new QVBoxLayout(logo_box);
     logo_box_l->setContentsMargins(8,8,8,8);
@@ -611,7 +611,7 @@ QWidget* MainWindow::BuildAiPage() {
     auto* logo_texts = new QVBoxLayout();
     logo_texts->setSpacing(1);
     auto* logo_name = new QLabel("TeoAVSuite", logo_area);
-    logo_name->setStyleSheet("color:#ffffff; font-size:13pt; font-weight:700; background:transparent;");
+    logo_name->setStyleSheet("color:#ECE4DA; font-size:13pt; font-weight:700; background:transparent;");
     auto* logo_sub = new QLabel("AI Security", logo_area);
     logo_sub->setStyleSheet("color:#FF9B3D; font-size:10pt; background:transparent;");
     logo_texts->addWidget(logo_name);
@@ -631,7 +631,7 @@ QWidget* MainWindow::BuildAiPage() {
     new_conv_btn->setStyleSheet(
         "QPushButton { background: rgba(255,122,0,25);"
         " border: 1px solid rgba(255,122,0,46);"
-        " border-radius: 10px; color:#ffffff;"
+        " border-radius: 10px; color:#ECE4DA;"
         " font-size:11.5pt; font-weight:500;"
         " text-align:left; padding-left:10px; }"
         "QPushButton:hover { background: rgba(255,122,0,46); }");
@@ -642,7 +642,7 @@ QWidget* MainWindow::BuildAiPage() {
         auto* plus_icon = new AiPageIcon(AiPageIcon::Plus, 15, QColor(0xFF,0x7A,0x00), new_conv_btn);
         plus_icon->setAttribute(Qt::WA_TransparentForMouseEvents, false);
         auto* btn_lbl = new QLabel(QString::fromUtf8("New Conversation"), new_conv_btn);
-        btn_lbl->setStyleSheet("color:#ffffff; font-size:11pt; font-weight:500; background:transparent;");
+        btn_lbl->setStyleSheet("color:#ECE4DA; font-size:11pt; font-weight:500; background:transparent;");
         btn_l->addWidget(plus_icon);
         btn_l->addWidget(btn_lbl);
         btn_l->addStretch();
@@ -748,7 +748,7 @@ QWidget* MainWindow::BuildAiPage() {
         auto* t = new QLabel(title, item);
         t->setStyleSheet("color:#C7B6A2; font-size:11pt; font-weight:500; background:transparent;");
         auto* pr = new QLabel(preview, item);
-        pr->setStyleSheet("color:#4A3B30; font-size:9.5pt; background:transparent;");
+        pr->setStyleSheet("color:#33261A; font-size:9.5pt; background:transparent;");
         text_col->addWidget(t);
         text_col->addWidget(pr);
         il->addLayout(text_col, 1);
@@ -798,7 +798,7 @@ QWidget* MainWindow::BuildAiPage() {
         bl->setSpacing(8);
         bl->addWidget(new AiPageIcon(ico, 13, QColor(0x4A,0x3B,0x30), btn));
         auto* tl = new QLabel(label, btn);
-        tl->setStyleSheet("color:#6B5B4E; font-size:11pt; background:transparent;");
+        tl->setStyleSheet("color:#8B7355; font-size:11pt; background:transparent;");
         bl->addWidget(tl);
         bl->addStretch();
         return btn;
@@ -825,7 +825,7 @@ QWidget* MainWindow::BuildAiPage() {
     sb_bot_l->setSpacing(8);
     sb_bot_l->addWidget(new AiPageIcon(AiPageIcon::Settings, 15, QColor(0x4A,0x3B,0x30), sb_bottom));
     auto* sb_settings_lbl = new QLabel("Settings", sb_bottom);
-    sb_settings_lbl->setStyleSheet("color:#6B5B4E; font-size:11pt; background:transparent;");
+    sb_settings_lbl->setStyleSheet("color:#8B7355; font-size:11pt; background:transparent;");
     sb_bot_l->addWidget(sb_settings_lbl);
     sb_bot_l->addStretch();
     // Green online dot
@@ -873,7 +873,7 @@ QWidget* MainWindow::BuildAiPage() {
     hdr_text_col->setSpacing(2);
     auto* hdr_title = new QLabel("TeoAV Assistant", ctr_hdr);
     hdr_title->setStyleSheet(
-        "color:#ffffff; font-size:13pt; font-weight:700; background:transparent;");
+        "color:#ECE4DA; font-size:13pt; font-weight:700; background:transparent;");
     auto* hdr_sub_row = new QHBoxLayout();
     hdr_sub_row->setSpacing(5);
     auto* hdr_green_dot = new QLabel(ctr_hdr);
@@ -881,7 +881,7 @@ QWidget* MainWindow::BuildAiPage() {
     hdr_green_dot->setStyleSheet(
         "QLabel { background:#4ADE80; border-radius:3px; border:none; }");
     auto* hdr_sub = new QLabel("AI Security Analyst " "\xc2\xb7" " Online", ctr_hdr);
-    hdr_sub->setStyleSheet("color:#6B5B4E; font-size:9.5pt; background:transparent;");
+    hdr_sub->setStyleSheet("color:#8B7355; font-size:9.5pt; background:transparent;");
     hdr_sub_row->addWidget(hdr_green_dot);
     hdr_sub_row->addWidget(hdr_sub);
     hdr_text_col->addWidget(hdr_title);
@@ -943,7 +943,7 @@ QWidget* MainWindow::BuildAiPage() {
     ai_input_edit_->setEnabled(false);
     ai_input_edit_->setMinimumHeight(30);
     ai_input_edit_->setStyleSheet(
-        "QLineEdit { background:transparent; border:none; color:#ffffff;"
+        "QLineEdit { background:transparent; border:none; color:#ECE4DA;"
         " font-size:10.5pt; padding:2px 4px; }"
         "QLineEdit:disabled { color:rgba(255,255,255,60); }");
     input_container_l->addWidget(ai_input_edit_);
@@ -979,7 +979,7 @@ QWidget* MainWindow::BuildAiPage() {
         "QPushButton { background:rgba(235,59,90,0); color:rgba(235,100,130,0.6);"
         " border:1px solid rgba(235,59,90,30); border-radius:8px;"
         " padding:2px 10px; font-size:9pt; }"
-        "QPushButton:hover { background:rgba(235,59,90,30); color:#ff6b8a; }");
+        "QPushButton:hover { background:rgba(235,59,90,30); color:#FF5A6A; }");
     {
         auto* il = new QHBoxLayout(clear_btn);
         il->setContentsMargins(6,0,6,0); il->setSpacing(5);
@@ -998,7 +998,7 @@ QWidget* MainWindow::BuildAiPage() {
     ai_stop_btn_->setFixedSize(30,26);
     ai_stop_btn_->setVisible(false);
     ai_stop_btn_->setStyleSheet(
-        "QPushButton { background:rgba(235,59,90,46); color:#ff5577;"
+        "QPushButton { background:rgba(235,59,90,46); color:#FF5A6A;"
         " border:1px solid rgba(235,59,90,90); border-radius:7px; font-size:10pt; }"
         "QPushButton:hover { background:rgba(235,59,90,90); }");
     ai_stop_btn_->setText("\xe2\x8f\xb9");
@@ -1012,7 +1012,7 @@ QWidget* MainWindow::BuildAiPage() {
         " border:1px solid rgba(255,122,0,60); border-radius:8px;"
         " font-size:9.5pt; font-weight:700; }"
         "QPushButton:enabled { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,"
-        " stop:0 #FF7A00, stop:1 #E55A00); color:#fff;"
+        " stop:0 #FF7A00, stop:1 #FF7A00); color:#fff;"
         " border-color:rgba(255,122,0,120); }"
         "QPushButton:enabled:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,"
         " stop:0 #FF9B3D, stop:1 #FF7A00); }");
@@ -1084,7 +1084,7 @@ QWidget* MainWindow::BuildAiPage() {
     model_hdr_row->addWidget(new AiPageIcon(AiPageIcon::Zap, 12, QColor(0xFF,0x9B,0x3D), model_card));
     auto* model_hdr_lbl = new QLabel("MODEL", model_card);
     model_hdr_lbl->setStyleSheet(
-        "color:#6B5B4E; font-size:8.5pt; font-weight:700;"
+        "color:#8B7355; font-size:8.5pt; font-weight:700;"
         " letter-spacing:1px; background:transparent;");
     model_hdr_row->addWidget(model_hdr_lbl);
     model_hdr_row->addStretch();
@@ -1130,7 +1130,7 @@ QWidget* MainWindow::BuildAiPage() {
     auto* load_btn = new QPushButton(QString::fromUtf8("Load Model"), model_card);
     load_btn->setStyleSheet(
         "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,"
-        " stop:0 #FF7A00, stop:1 #E55A00);"
+        " stop:0 #FF7A00, stop:1 #FF7A00);"
         " color:#fff; font-weight:700; font-size:9pt;"
         " border-radius:7px; padding:4px 10px;"
         " border:1px solid rgba(255,122,0,120); }"
@@ -1168,7 +1168,7 @@ QWidget* MainWindow::BuildAiPage() {
     sc_hdr->addWidget(sc_icon_box);
     auto* sc_title = new QLabel("SYSTEM STATUS", status_card);
     sc_title->setStyleSheet(
-        "color:#6B5B4E; font-size:8.5pt; font-weight:700;"
+        "color:#8B7355; font-size:8.5pt; font-weight:700;"
         " letter-spacing:1px; background:transparent;");
     sc_hdr->addWidget(sc_title);
     sc_hdr->addStretch();
@@ -1183,14 +1183,14 @@ QWidget* MainWindow::BuildAiPage() {
     sc_main_row->addWidget(sc_dot);
     auto* sc_status = new QLabel("Protected", status_card);
     sc_status->setStyleSheet(
-        "color:#ffffff; font-size:12pt; font-weight:700; background:transparent;");
+        "color:#ECE4DA; font-size:12pt; font-weight:700; background:transparent;");
     sc_main_row->addWidget(sc_status);
     sc_main_row->addStretch();
     status_card_l->addLayout(sc_main_row);
 
     auto* sc_sub = new QLabel("TeoAV Engine v4.2 " "\xc2\xb7" " Active", status_card);
     sc_sub->setStyleSheet(
-        "color:#6B5B4E; font-size:8.5pt; font-family:Consolas,monospace;"
+        "color:#8B7355; font-size:8.5pt; font-family:Consolas,monospace;"
         " background:transparent;");
     status_card_l->addWidget(sc_sub);
     rp_l->addWidget(status_card);
@@ -1206,7 +1206,7 @@ QWidget* MainWindow::BuildAiPage() {
     ctx_hdr->addWidget(new AiPageIcon(AiPageIcon::Activity, 12, QColor(0xFF,0x9B,0x3D), ctx_card));
     auto* ctx_title = new QLabel("REALTIME CONTEXT", ctx_card);
     ctx_title->setStyleSheet(
-        "color:#6B5B4E; font-size:8.5pt; font-weight:700;"
+        "color:#8B7355; font-size:8.5pt; font-weight:700;"
         " letter-spacing:1px; background:transparent;");
     ctx_hdr->addWidget(ctx_title);
     ctx_hdr->addStretch();
@@ -1217,7 +1217,7 @@ QWidget* MainWindow::BuildAiPage() {
         auto* row = new QHBoxLayout();
         row->setSpacing(4);
         auto* lbl = new QLabel(label + ":", ctx_card);
-        lbl->setStyleSheet("color:#6B5B4E; font-size:9pt; background:transparent;");
+        lbl->setStyleSheet("color:#8B7355; font-size:9pt; background:transparent;");
         auto* val = new QLabel(value, ctx_card);
         val->setStyleSheet(
             QString("color:%1; font-size:9pt; font-weight:600; background:transparent;")
@@ -1250,7 +1250,7 @@ QWidget* MainWindow::BuildAiPage() {
     qa_hdr->addWidget(new AiPageIcon(AiPageIcon::Sparkles, 12, QColor(0xFF,0x9B,0x3D), qa_card));
     auto* qa_title = new QLabel("QUICK ACTIONS", qa_card);
     qa_title->setStyleSheet(
-        "color:#6B5B4E; font-size:8.5pt; font-weight:700;"
+        "color:#8B7355; font-size:8.5pt; font-weight:700;"
         " letter-spacing:1px; background:transparent;");
     qa_hdr->addWidget(qa_title);
     qa_hdr->addStretch();
@@ -1319,7 +1319,7 @@ QWidget* MainWindow::BuildAiPage() {
     sug_hdr->addWidget(new AiPageIcon(AiPageIcon::Sparkles, 12, QColor(0xFF,0x9B,0x3D), sug_card));
     auto* sug_title = new QLabel("AI SUGGESTIONS", sug_card);
     sug_title->setStyleSheet(
-        "color:#6B5B4E; font-size:8.5pt; font-weight:700;"
+        "color:#8B7355; font-size:8.5pt; font-weight:700;"
         " letter-spacing:1px; background:transparent;");
     sug_hdr->addWidget(sug_title);
     sug_hdr->addStretch();
@@ -1351,7 +1351,7 @@ QWidget* MainWindow::BuildAiPage() {
         txt->setStyleSheet("color:#C7B6A2; font-size:9.5pt; background:transparent;");
         txt->setWordWrap(true);
         auto* meta_lbl = new QLabel(meta, item);
-        meta_lbl->setStyleSheet("color:#4A3B30; font-size:8.5pt; background:transparent;");
+        meta_lbl->setStyleSheet("color:#33261A; font-size:8.5pt; background:transparent;");
         meta_lbl->setWordWrap(true);
         tc->addWidget(txt);
         tc->addWidget(meta_lbl);
@@ -1457,7 +1457,7 @@ QWidget* MainWindow::BuildAiPage() {
             lbl->setObjectName("msg_text");
             lbl->setWordWrap(true);
             lbl->setTextInteractionFlags(Qt::TextSelectableByMouse);
-            lbl->setStyleSheet("color:#ffffff; font-size:10pt; background:transparent;");
+            lbl->setStyleSheet("color:#ECE4DA; font-size:10pt; background:transparent;");
             lbl->setFont(QFont("Segoe UI",10));
             bl->addWidget(lbl);
 
@@ -1502,7 +1502,7 @@ QWidget* MainWindow::BuildAiPage() {
                 lbl->setObjectName("msg_text");
                 lbl->setWordWrap(true);
                 lbl->setTextInteractionFlags(Qt::TextSelectableByMouse);
-                lbl->setStyleSheet("color:#E8D8C8; font-size:10pt; background:transparent;");
+                lbl->setStyleSheet("color:#ECE4DA; font-size:10pt; background:transparent;");
                 lbl->setFont(QFont("Segoe UI",10));
                 bl->addWidget(lbl);
             }

@@ -339,12 +339,12 @@ QWidget* BuildKernelBiosPage(QWidget* parent) {
     sb_val->setStyleSheet(QString(
         "font-size:9.5pt; font-weight:700; background:transparent; color:%1;")
         .arg(!bios.secure_boot_known ? "#8B7355"
-             : bios.secure_boot_enabled ? "#4ADE80" : "#FF3B50"));
+             : bios.secure_boot_enabled ? "#4ADE80" : "#FF5A6A"));
 
     if (!bios.ok) {
         auto* warn = new QLabel(QString::fromUtf8(
             "Could not read SMBIOS firmware table on this machine."), fw_card);
-        warn->setStyleSheet("color:#E6C24A; font-size:9pt; background:transparent;");
+        warn->setStyleSheet("color:#FBBF24; font-size:9pt; background:transparent;");
         fw_l->addWidget(warn, 3, 0, 1, 3);
     }
     root->addWidget(fw_card);
@@ -355,9 +355,9 @@ QWidget* BuildKernelBiosPage(QWidget* parent) {
     auto* refresh_btn = new QPushButton(QString::fromUtf8("Rescan drivers"), page);
     refresh_btn->setCursor(Qt::PointingHandCursor);
     refresh_btn->setStyleSheet(
-        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
+        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #FF7A00);"
         " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 24px; }"
-        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
+        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9B3D,stop:1 #FF7A00); }"
         "QPushButton:disabled { background:#33261A; color:#8B7355; }");
     ctl->addWidget(refresh_btn);
 
@@ -365,20 +365,20 @@ QWidget* BuildKernelBiosPage(QWidget* parent) {
     block_btn->setCursor(Qt::PointingHandCursor);
     block_btn->setEnabled(false);
     block_btn->setStyleSheet(
-        "QPushButton { background:#3A2A12; border:1px solid #E6C24A; border-radius:10px;"
-        " color:#E6C24A; font-size:10pt; font-weight:700; padding:10px 18px; }"
-        "QPushButton:hover { background:#4A3616; }"
-        "QPushButton:disabled { background:#241a10; color:#6B5A3C; border-color:#4A3A1C; }");
+        "QPushButton { background:#33261A; border:1px solid #FBBF24; border-radius:10px;"
+        " color:#FBBF24; font-size:10pt; font-weight:700; padding:10px 18px; }"
+        "QPushButton:hover { background:#33261A; }"
+        "QPushButton:disabled { background:#241708; color:#8B7355; border-color:#33261A; }");
     ctl->addWidget(block_btn);
 
     auto* delete_btn = new QPushButton(QString::fromUtf8("Delete driver"), page);
     delete_btn->setCursor(Qt::PointingHandCursor);
     delete_btn->setEnabled(false);
     delete_btn->setStyleSheet(
-        "QPushButton { background:#3A1414; border:1px solid #FF3B50; border-radius:10px;"
-        " color:#FF6B7A; font-size:10pt; font-weight:700; padding:10px 18px; }"
-        "QPushButton:hover { background:#4A1A1A; }"
-        "QPushButton:disabled { background:#241010; color:#6B3C3C; border-color:#4A1C1C; }");
+        "QPushButton { background:#33261A; border:1px solid #FF5A6A; border-radius:10px;"
+        " color:#FF5A6A; font-size:10pt; font-weight:700; padding:10px 18px; }"
+        "QPushButton:hover { background:#33261A; }"
+        "QPushButton:disabled { background:#241708; color:#8B7355; border-color:#33261A; }");
     ctl->addWidget(delete_btn);
 
     auto* status = new QLabel(QString::fromUtf8("Idle."), page);

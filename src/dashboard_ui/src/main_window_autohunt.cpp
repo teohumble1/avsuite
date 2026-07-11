@@ -66,15 +66,15 @@ void AutoHuntEnqueue(HuntTarget t) {
 // ─── UI helpers ──────────────────────────────────────────────────────────────
 namespace {
 
-static constexpr const char* kBg     = "#0A0E1A";
-static constexpr const char* kCard   = "#111827";
-static constexpr const char* kBorder = "#1E2A3A";
-static constexpr const char* kText   = "#E2E8F0";
-static constexpr const char* kMuted  = "#64748B";
-static constexpr const char* kAccent = "#6366F1";
-static constexpr const char* kRed    = "#EF4444";
-static constexpr const char* kOrange = "#F59E0B";
-static constexpr const char* kGreen  = "#22C55E";
+static constexpr const char* kBg     = "#120B06";
+static constexpr const char* kCard   = "#1C1108";
+static constexpr const char* kBorder = "#33261A";
+static constexpr const char* kText   = "#ECE4DA";
+static constexpr const char* kMuted  = "#8B7355";
+static constexpr const char* kAccent = "#4DB8FF";
+static constexpr const char* kRed    = "#FF5A6A";
+static constexpr const char* kOrange = "#FF7A00";
+static constexpr const char* kGreen  = "#4ADE80";
 
 QString riskColor(int score) {
     if (score >= 75) return kRed;
@@ -161,7 +161,7 @@ QWidget* BuildAutoHuntPage(QWidget* parent, avai::LlmAssistant* ai) {
         autoToggle->setStyleSheet(QString(R"(
             QCheckBox { color:%1; font-size:12px; spacing:6px; }
             QCheckBox::indicator { width:16px; height:16px; border-radius:4px;
-                                   border:1px solid %2; background:#1E2A3A; }
+                                   border:1px solid %2; background:#33261A; }
             QCheckBox::indicator:checked { background:%3; border-color:%3; }
         )").arg(kText).arg(kBorder).arg(kAccent));
         hdr->addWidget(autoToggle);
@@ -169,7 +169,7 @@ QWidget* BuildAutoHuntPage(QWidget* parent, avai::LlmAssistant* ai) {
         huntBtn->setStyleSheet(QString(R"(
             QPushButton { background:%1; color:white; border:none; border-radius:6px;
                           padding:6px 16px; font-size:12px; font-weight:600; }
-            QPushButton:hover { background:#7C3AED; }
+            QPushButton:hover { background:#4DB8FF; }
         )").arg(kAccent));
         huntBtn->setCursor(Qt::PointingHandCursor);
         hdr->addWidget(huntBtn);
@@ -215,7 +215,7 @@ QWidget* BuildAutoHuntPage(QWidget* parent, avai::LlmAssistant* ai) {
     clearBtn->setStyleSheet(QString(R"(
         QPushButton { background:transparent; color:%1; border:1px solid %2;
                       border-radius:5px; padding:3px 10px; font-size:11px; }
-        QPushButton:hover { background:#1E2A3A; }
+        QPushButton:hover { background:#33261A; }
     )").arg(kMuted).arg(kBorder));
     clearBtn->setCursor(Qt::PointingHandCursor);
     thl->addWidget(clearBtn);
@@ -237,7 +237,7 @@ QWidget* BuildAutoHuntPage(QWidget* parent, avai::LlmAssistant* ai) {
         QTableWidget { background:transparent; color:%1; gridline-color:%2;
                        border:none; font-size:12px; }
         QTableWidget::item { padding:8px 10px; border-bottom:1px solid %2; }
-        QTableWidget::item:selected { background:#1E3A5F; }
+        QTableWidget::item:selected { background:#33261A; }
         QHeaderView::section { background:%3; color:%4; border:none;
                                border-bottom:1px solid %2; padding:6px 10px;
                                font-size:11px; font-weight:600; letter-spacing:0.5px; }
@@ -275,7 +275,7 @@ QWidget* BuildAutoHuntPage(QWidget* parent, avai::LlmAssistant* ai) {
     auto* threatStrip = new QWidget;
     threatStrip->setVisible(false);
     threatStrip->setStyleSheet(
-        QString("background:#0F1A2E;border-bottom:1px solid %1;").arg(kBorder));
+        QString("background:#1C1108;border-bottom:1px solid %1;").arg(kBorder));
     auto* tsl = new QHBoxLayout(threatStrip);
     tsl->setContentsMargins(12,8,12,8);
     tsl->setSpacing(8);
@@ -325,15 +325,15 @@ QWidget* BuildAutoHuntPage(QWidget* parent, avai::LlmAssistant* ai) {
             QPushButton { background:%1; color:white; border:none; border-radius:5px;
                           padding:5px 12px; font-size:11px; font-weight:600; }
             QPushButton:hover:enabled { opacity:0.85; }
-            QPushButton:disabled { background:#1E2A3A; color:%2; }
+            QPushButton:disabled { background:#33261A; color:%2; }
         )").arg(bgColor).arg(kMuted));
         btn->setCursor(Qt::PointingHandCursor);
         return btn;
     };
     auto* analyzeBtn  = makeActBtn("🔍 Analyze", kAccent);
-    auto* killBtn     = makeActBtn("💀 Kill Process", "#DC2626");
-    auto* quarBtn     = makeActBtn("🔒 Quarantine", "#D97706");
-    auto* whiteBtn    = makeActBtn("✅ Whitelist", "#059669");
+    auto* killBtn     = makeActBtn("💀 Kill Process", "#FF5A6A");
+    auto* quarBtn     = makeActBtn("🔒 Quarantine", "#FF7A00");
+    auto* whiteBtn    = makeActBtn("✅ Whitelist", "#4ADE80");
     abl->addWidget(analyzeBtn);
     abl->addWidget(killBtn);
     abl->addWidget(quarBtn);
@@ -379,9 +379,9 @@ QWidget* BuildAutoHuntPage(QWidget* parent, avai::LlmAssistant* ai) {
 
             // Source badge color
             QColor srcColor(kMuted);
-            if (t.source == "DLL Intel") srcColor = QColor("#A78BFA");
+            if (t.source == "DLL Intel") srcColor = QColor("#4DB8FF");
             else if (t.source == "Sys Watch") srcColor = QColor(kOrange);
-            else if (t.source == "Network") srcColor = QColor("#38BDF8");
+            else if (t.source == "Network") srcColor = QColor("#4DB8FF");
 
             setCell(0, QString::fromStdString(t.source), srcColor);
             setCell(1, QString::fromStdString(t.name));

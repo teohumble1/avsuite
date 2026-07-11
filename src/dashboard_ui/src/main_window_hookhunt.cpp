@@ -329,10 +329,10 @@ QWidget* BuildHookHuntPage(QWidget* parent) {
 
                         // Color-code by risk
                         QString bg_color;
-                        if (f.risk >= 90) bg_color = "#3A1F1F"; // critical red
-                        else if (f.risk >= 70) bg_color = "#3A2F1F"; // high orange
-                        else if (f.risk >= 50) bg_color = "#2F3A1F"; // medium yellow
-                        else bg_color = "#1F2F1F"; // low green
+                        if (f.risk >= 90) bg_color = "#33261A"; // critical red
+                        else if (f.risk >= 70) bg_color = "#33261A"; // high orange
+                        else if (f.risk >= 50) bg_color = "#33261A"; // medium yellow
+                        else bg_color = "#33261A"; // low green
 
                         for (auto* item : {proc_item, pid_item, func_item, status_item, risk_item, note_item}) {
                             item->setBackground(QColor(bg_color));

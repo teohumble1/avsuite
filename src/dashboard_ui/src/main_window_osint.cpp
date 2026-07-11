@@ -173,9 +173,9 @@ QWidget* BuildOsintPage(QWidget* parent) {
     auto* lookup_btn = new QPushButton(QString::fromUtf8("Lookup"), page);
     lookup_btn->setCursor(Qt::PointingHandCursor);
     lookup_btn->setStyleSheet(
-        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
+        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #FF7A00);"
         " border:none; border-radius:8px; color:#fff; font-size:10.5pt; font-weight:700; padding:9px 26px; }"
-        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
+        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9B3D,stop:1 #FF7A00); }"
         "QPushButton:disabled { background:#33261A; color:#8B7355; }");
     ctl->addWidget(lookup_btn);
     root->addLayout(ctl);

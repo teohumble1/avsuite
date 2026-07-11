@@ -204,9 +204,9 @@ QWidget* BuildWafPage(QWidget* parent) {
     auto* eval_btn = new QPushButton(QString::fromUtf8("Evaluate request"), page);
     eval_btn->setCursor(Qt::PointingHandCursor);
     eval_btn->setStyleSheet(
-        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
+        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #FF7A00);"
         " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:9px 24px; }"
-        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }");
+        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9B3D,stop:1 #FF7A00); }");
     ctl->addWidget(eval_btn);
     auto* verdict = new QLabel(page);
     verdict->setAlignment(Qt::AlignCenter);
@@ -257,8 +257,8 @@ QWidget* BuildWafPage(QWidget* parent) {
         }
         score_lbl->setText(QString::fromUtf8("Anomaly score: %1  (block threshold 5)").arg(res.score));
 
-        QString bg = "#4ADE80", fg = "#0B2015", txt = "ALLOW";
-        if (res.verdict == "BLOCK")      { bg = "#FF3B50"; fg = "#fff"; txt = "BLOCK"; }
+        QString bg = "#4ADE80", fg = "#1C1108", txt = "ALLOW";
+        if (res.verdict == "BLOCK")      { bg = "#FF5A6A"; fg = "#fff"; txt = "BLOCK"; }
         else if (res.verdict == "SUSPICIOUS") { bg = "#FF7A00"; fg = "#fff"; txt = "SUSPICIOUS"; }
         verdict->setText(txt + QString::fromUtf8("  (%1 rules)").arg(static_cast<int>(res.matches.size())));
         verdict->setStyleSheet(QString(

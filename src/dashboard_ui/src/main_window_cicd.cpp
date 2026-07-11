@@ -296,16 +296,16 @@ static std::vector<PkgFinding> ScanBuildProcesses() {
 
 // ─── Page builder ─────────────────────────────────────────────────────────────
 QWidget* BuildCiCdPage(QWidget* parent) {
-    static constexpr const char* kBg     = "#060A14";
-    static constexpr const char* kCard   = "#0E1520";
-    static constexpr const char* kBorder = "#1A2540";
-    static constexpr const char* kText   = "#E2E8F0";
-    static constexpr const char* kMuted  = "#4A6080";
-    static constexpr const char* kRed    = "#FF3E3E";
-    static constexpr const char* kOrange = "#FF8C00";
-    static constexpr const char* kGreen  = "#00D26A";
-    static constexpr const char* kPurple = "#9D6AFF";
-    static constexpr const char* kYellow = "#FFD700";
+    static constexpr const char* kBg     = "#0E0804";
+    static constexpr const char* kCard   = "#1C1108";
+    static constexpr const char* kBorder = "#33261A";
+    static constexpr const char* kText   = "#ECE4DA";
+    static constexpr const char* kMuted  = "#8B7355";
+    static constexpr const char* kRed    = "#FF5A6A";
+    static constexpr const char* kOrange = "#FF7A00";
+    static constexpr const char* kGreen  = "#4ADE80";
+    static constexpr const char* kPurple = "#4DB8FF";
+    static constexpr const char* kYellow = "#FBBF24";
 
     auto* page = new QWidget(parent);
     page->setStyleSheet(QString("background:%1;").arg(kBg));
@@ -339,9 +339,9 @@ QWidget* BuildCiCdPage(QWidget* parent) {
             auto* v = new QLabel(val);
             v->setStyleSheet(QString("color:%1;font-size:20px;font-weight:700;").arg(col));
             auto* l = new QLabel(lbl);
-            l->setStyleSheet("color:#4A6080;font-size:10px;");
+            l->setStyleSheet("color:#8B7355;font-size:10px;");
             vl->addWidget(v); vl->addWidget(l);
-            w->setStyleSheet("background:#0E1520;border:1px solid #1A2540;border-radius:8px;");
+            w->setStyleSheet("background:#1C1108;border:1px solid #33261A;border-radius:8px;");
             if (out) *out = v;
             return w;
         };
@@ -380,8 +380,8 @@ QWidget* BuildCiCdPage(QWidget* parent) {
         scanBtn->setStyleSheet(QString(R"(
             QPushButton { background:%1; color:white; border:none;
                           border-radius:5px; padding:5px 16px; font-size:12px; font-weight:600; }
-            QPushButton:hover { background:#7B4FCC; }
-            QPushButton:disabled { background:#1A2540; color:%2; }
+            QPushButton:hover { background:#4DB8FF; }
+            QPushButton:disabled { background:#33261A; color:%2; }
         )").arg(kPurple).arg(kMuted));
         scanBtn->setCursor(Qt::PointingHandCursor);
         pathRow->addWidget(pathLabel);
@@ -417,7 +417,7 @@ QWidget* BuildCiCdPage(QWidget* parent) {
     tbl->setStyleSheet(QString(R"(
         QTableWidget { background:transparent; color:%1; border:none; font-size:12px; }
         QTableWidget::item { padding:7px 10px; border-bottom:1px solid %2; }
-        QTableWidget::item:selected { background:#1A1030; }
+        QTableWidget::item:selected { background:#33261A; }
         QHeaderView::section { background:%3; color:%4; border:none;
                                border-bottom:1px solid %2; padding:5px 10px; font-size:11px; }
         QScrollBar:vertical { background:%3; width:5px; border-radius:2px; }
@@ -431,7 +431,7 @@ QWidget* BuildCiCdPage(QWidget* parent) {
     detailText->setReadOnly(true);
     detailText->setMaximumHeight(90);
     detailText->setStyleSheet(QString(R"(
-        QTextEdit { background:#050810; color:%1; border:none; border-top:1px solid %2;
+        QTextEdit { background:#0E0804; color:%1; border:none; border-top:1px solid %2;
                     font-family:Consolas,monospace; font-size:11px; padding:8px; }
     )").arg(kText).arg(kBorder));
     tl->addWidget(detailText);

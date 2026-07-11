@@ -318,8 +318,8 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
     scan_btn->setFixedSize(100, 34);
     scan_btn->setStyleSheet(
         "QPushButton { background:#FF7A00; color:#000; border-radius:8px; font-weight:600; font-size:12px; }"
-        "QPushButton:hover { background:#FF9030; }"
-        "QPushButton:pressed { background:#E06800; }");
+        "QPushButton:hover { background:#FF9B3D; }"
+        "QPushButton:pressed { background:#FF7A00; }");
     hlay->addWidget(scan_btn);
 
     root->addWidget(hdr);
@@ -432,7 +432,7 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
     tbl->setStyleSheet(
         "QTableWidget { background:transparent; color:#ECE4DA; font-size:12px; "
         "               border:none; selection-background-color:#FF7A0025; }"
-        "QTableWidget::item { padding:6px 8px; border-bottom:1px solid #1E1208; }"
+        "QTableWidget::item { padding:6px 8px; border-bottom:1px solid #1C1108; }"
         "QHeaderView::section { background:#0E0804; color:#8B7355; font-size:11px; "
         "                       padding:6px; border:none; border-bottom:1px solid #33261A; }");
     tc->addWidget(tbl);
@@ -441,7 +441,7 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
     // ── Detail panel ──────────────────────────────────────────────────────────
     auto* detail_card = new QWidget;
     detail_card->setFixedHeight(0); // collapsed initially
-    detail_card->setStyleSheet("background:#1A1009; border:1px solid #FF7A0040; border-radius:10px;");
+    detail_card->setStyleSheet("background:#1C1108; border:1px solid #FF7A0040; border-radius:10px;");
     detail_card->setMaximumHeight(0);
 
     auto* detail_lay = new QVBoxLayout(detail_card);

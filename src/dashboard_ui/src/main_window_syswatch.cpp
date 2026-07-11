@@ -407,7 +407,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
     tbl->setStyleSheet(
         "QTableWidget { background:transparent; color:#ECE4DA; font-size:12px; "
         "               border:none; selection-background-color:#FF7A0025; }"
-        "QTableWidget::item { padding:5px 8px; border-bottom:1px solid #1E1208; }"
+        "QTableWidget::item { padding:5px 8px; border-bottom:1px solid #1C1108; }"
         "QHeaderView::section { background:#0E0804; color:#8B7355; font-size:11px; "
         "                       padding:5px; border:none; border-bottom:1px solid #33261A; }");
     tcl->addWidget(tbl);
@@ -429,7 +429,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
     // ── Detail + action panel ─────────────────────────────────────────────────
     auto* detail = new QWidget;
     detail->setMaximumHeight(0);
-    detail->setStyleSheet("background:#1A1009; border:1px solid #FF7A0040; border-radius:10px;");
+    detail->setStyleSheet("background:#1C1108; border:1px solid #FF7A0040; border-radius:10px;");
     auto* dl = new QVBoxLayout(detail);
     dl->setContentsMargins(14, 10, 14, 10);
     dl->setSpacing(8);
@@ -731,7 +731,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
         dot_visible = !dot_visible;
         live_dot->setStyleSheet(
             dot_visible ? "background:#4ADE80; border-radius:4px;"
-                        : "background:#1C3020; border-radius:4px;");
+                        : "background:#33261A; border-radius:4px;");
     });
     dot_timer->start(800);
 

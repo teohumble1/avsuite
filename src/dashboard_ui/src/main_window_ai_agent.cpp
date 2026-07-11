@@ -355,7 +355,7 @@ void MainWindow::HandleAiToolCall(const std::string& tool_name, const std::strin
     auto* card = new QFrame(row);
     card->setMaximumWidth(460);
     card->setStyleSheet(
-        "QFrame { background:#241512; border:1px solid rgba(255,90,90,90); border-radius:12px; }");
+        "QFrame { background:#241708; border:1px solid rgba(255,90,90,90); border-radius:12px; }");
     auto* card_l = new QVBoxLayout(card);
     card_l->setContentsMargins(14, 12, 14, 12);
     card_l->setSpacing(8);
@@ -369,8 +369,8 @@ void MainWindow::HandleAiToolCall(const std::string& tool_name, const std::strin
     confirm_btn->setCursor(Qt::PointingHandCursor);
     confirm_btn->setStyleSheet(
         "QPushButton { background:#FF5A6A; border:none; border-radius:8px; color:#fff;"
-        " font-weight:700; padding:7px 18px; } QPushButton:hover { background:#FF3A5A; }"
-        " QPushButton:disabled { background:#3A1F1F; color:#8B7355; }");
+        " font-weight:700; padding:7px 18px; } QPushButton:hover { background:#FF5A6A; }"
+        " QPushButton:disabled { background:#33261A; color:#8B7355; }");
     auto* cancel_btn = new QPushButton(QString::fromUtf8("H\xe1\xbb\xa7y"), card);
     cancel_btn->setCursor(Qt::PointingHandCursor);
     cancel_btn->setStyleSheet(

@@ -132,7 +132,7 @@ QWidget* BuildSuricataPage(QWidget* parent) {
     recheck_btn->setFixedHeight(28);
     recheck_btn->setStyleSheet(
         "QPushButton { background:#1C1108; border:1px solid #FF7A00; border-radius:6px; "
-        "              color:#FF9030; font-size:12px; padding:0 12px; }"
+        "              color:#FF9B3D; font-size:12px; padding:0 12px; }"
         "QPushButton:hover { background:#FF7A0030; }");
     status_row->addWidget(status_lbl, 1);
     status_row->addWidget(recheck_btn);

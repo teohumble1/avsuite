@@ -202,9 +202,9 @@ QWidget* BuildHiddenHuntPage(QWidget* parent) {
     auto* hunt_btn = new QPushButton(QString::fromUtf8("Choose folder & hunt"), page);
     hunt_btn->setCursor(Qt::PointingHandCursor);
     hunt_btn->setStyleSheet(
-        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #CC5500);"
+        "QPushButton { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF7A00,stop:1 #FF7A00);"
         " border:none; border-radius:10px; color:#fff; font-size:10.5pt; font-weight:700; padding:10px 26px; }"
-        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9030,stop:1 #DD6600); }"
+        "QPushButton:hover { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #FF9B3D,stop:1 #FF7A00); }"
         "QPushButton:disabled { background:#33261A; color:#8B7355; }");
     ctl->addWidget(hunt_btn);
 
@@ -213,10 +213,10 @@ QWidget* BuildHiddenHuntPage(QWidget* parent) {
     stop_btn->setCursor(Qt::PointingHandCursor);
     stop_btn->setEnabled(false);
     stop_btn->setStyleSheet(
-        "QPushButton { background:#241708; border:1px solid #E6C24A; border-radius:10px;"
-        " color:#E6C24A; font-size:10pt; font-weight:700; padding:10px 20px; }"
+        "QPushButton { background:#241708; border:1px solid #FBBF24; border-radius:10px;"
+        " color:#FBBF24; font-size:10pt; font-weight:700; padding:10px 20px; }"
         "QPushButton:hover { background:#33261A; }"
-        "QPushButton:disabled { background:#241708; color:#6B5444; border-color:#33261A; }");
+        "QPushButton:disabled { background:#241708; color:#8B7355; border-color:#33261A; }");
     ctl->addWidget(stop_btn);
 
     auto* status = new QLabel(QString::fromUtf8("Idle. Pick a folder to scan."), page);
@@ -266,7 +266,7 @@ QWidget* BuildHiddenHuntPage(QWidget* parent) {
     auto addRow = [table](const HiddenFinding& f) {
         const int row = table->rowCount();
         table->insertRow(row);
-        QString bg; if (f.risk >= 90) bg = "#3A1F1F"; else if (f.risk >= 70) bg = "#3A2F1F"; else if (f.risk >= 50) bg = "#2F3A1F"; else bg = "#1F2F1F";
+        QString bg; if (f.risk >= 90) bg = "#33261A"; else if (f.risk >= 70) bg = "#33261A"; else if (f.risk >= 50) bg = "#33261A"; else bg = "#33261A";
         auto* risk = new QTableWidgetItem(QString::number(f.risk));
         risk->setForeground(RiskColor(f.risk)); risk->setBackground(QColor(bg));
         table->setItem(row, 0, risk);

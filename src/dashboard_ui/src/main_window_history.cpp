@@ -483,7 +483,7 @@ static QWidget* MakeScanCard(const avcore::DetectionEvent& ev, QWidget* parent,
     card->setFrameShape(QFrame::NoFrame);
     card->setStyleSheet(
         "QFrame#scan_card {"
-        " background:#1E1308;"
+        " background:#1C1108;"
         " border:1px solid rgba(255,170,90,26);"
         " border-radius:12px;"
         "}");
@@ -529,7 +529,7 @@ static QWidget* MakeScanCard(const avcore::DetectionEvent& ev, QWidget* parent,
     name_lbl->setWordWrap(false);
     name_lbl->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     name_lbl->setStyleSheet(
-        "color:#ffffff; font-size:10pt; font-weight:600;"
+        "color:#ECE4DA; font-size:10pt; font-weight:600;"
         " font-family:Consolas,monospace;");
     auto* date_row = new QHBoxLayout();
     date_row->setSpacing(8);
@@ -633,7 +633,7 @@ static QWidget* MakeScanCard(const avcore::DetectionEvent& ev, QWidget* parent,
 
             auto* vt_hash_lbl = new QLabel(hash.left(16) + "...", detail);
             vt_hash_lbl->setStyleSheet(
-                "color:#6B5B4E; font-size:8.5pt; font-family:Consolas,monospace;"
+                "color:#8B7355; font-size:8.5pt; font-family:Consolas,monospace;"
                 " background:transparent;");
             vt_row_l->addWidget(vt_hash_lbl, 1);
 
@@ -672,9 +672,9 @@ static QWidget* MakeScanCard(const avcore::DetectionEvent& ev, QWidget* parent,
         const bool expanded = !body->isVisible();
         body->setVisible(expanded);
         card->setStyleSheet(expanded
-            ? "QFrame#scan_card { background:#2A1A0F;"
+            ? "QFrame#scan_card { background:#241708;"
               " border:1px solid rgba(255,122,0,64); border-radius:12px; }"
-            : "QFrame#scan_card { background:#1E1308;"
+            : "QFrame#scan_card { background:#1C1108;"
               " border:1px solid rgba(255,170,90,26); border-radius:12px; }");
         chevron->setColor(expanded ? QColor(0xFF,0x7A,0x00) : QColor(0xC7,0xB6,0xA2));
     });
@@ -806,9 +806,9 @@ QWidget* MainWindow::BuildHistoryPage() {
     search_field->setStyleSheet(
         "QLineEdit { background:#1C1108; border:1px solid rgba(255,170,90,46);"
         " border-radius:8px; padding:4px 12px 4px 32px;"
-        " color:#ffffff; font-size:9.5pt; }"
+        " color:#ECE4DA; font-size:9.5pt; }"
         "QLineEdit:focus { border-color:rgba(255,122,0,120); }"
-        "QLineEdit::placeholder { color:#4A3B30; }");
+        "QLineEdit::placeholder { color:#33261A; }");
     search_field->setVisible(false);
     auto* search_ico = new HistIcon(HistIcon::Search, 14, QColor(0x4A,0x3B,0x30), search_field);
     search_ico->move(9, 8);
@@ -1059,7 +1059,7 @@ QWidget* MainWindow::BuildHistoryPage() {
             es_l->addWidget(es_icon_box, 0, Qt::AlignCenter);
             auto* es_title = new QLabel("No scan history yet", es);
             es_title->setStyleSheet(
-                "color:#ffffff; font-size:13pt; font-weight:600; background:transparent;");
+                "color:#ECE4DA; font-size:13pt; font-weight:600; background:transparent;");
             es_title->setAlignment(Qt::AlignCenter);
             auto* es_sub = new QLabel("Run your first scan to start monitoring threats.", es);
             es_sub->setStyleSheet("color:#C7B6A2; font-size:10pt; background:transparent;");
@@ -1104,7 +1104,7 @@ QWidget* MainWindow::BuildHistoryPage() {
         "QTableWidget::item { padding:6px 8px; border-bottom:1px solid rgba(255,170,90,15); }"
         "QTableWidget::item:selected { background:rgba(255,122,0,30); color:#fff; }"
         "QHeaderView::section { background:rgba(26,18,12,255);"
-        " color:#6B5B4E; border:none; border-bottom:1px solid rgba(255,170,90,36);"
+        " color:#8B7355; border:none; border-bottom:1px solid rgba(255,170,90,36);"
         " padding:6px 8px; font-size:8.5pt; font-weight:700; letter-spacing:0.8px; }"
         "QScrollBar:vertical { background:transparent; width:4px; margin:0; }"
         "QScrollBar::handle:vertical { background:rgba(255,170,90,50); border-radius:2px; }"
@@ -1170,7 +1170,7 @@ QWidget* MainWindow::BuildHistoryPage() {
         hdr_row->addWidget(new HistIcon(ico, 12, ic_color, card));
         auto* lbl = new QLabel(header, card);
         lbl->setStyleSheet(
-            "color:#6B5B4E; font-size:8.5pt; font-weight:700;"
+            "color:#8B7355; font-size:8.5pt; font-weight:700;"
             " letter-spacing:1px; background:transparent;");
         hdr_row->addWidget(lbl);
         hdr_row->addStretch();
@@ -1243,10 +1243,10 @@ QWidget* MainWindow::BuildHistoryPage() {
             ll->setStyleSheet("color:#C7B6A2; font-size:8.5pt; background:transparent;");
             auto* vl = new QLabel(value, card);
             vl->setStyleSheet(
-                "color:#ffffff; font-size:14pt; font-weight:700;"
+                "color:#ECE4DA; font-size:14pt; font-weight:700;"
                 " font-family:Consolas,monospace; background:transparent;");
             auto* sl = new QLabel(sub, card);
-            sl->setStyleSheet("color:#6B5B4E; font-size:8pt; background:transparent;");
+            sl->setStyleSheet("color:#8B7355; font-size:8pt; background:transparent;");
             tc->addWidget(ll); tc->addWidget(vl); tc->addWidget(sl);
             l->addLayout(tc, 1);
             return card;
@@ -1302,13 +1302,13 @@ QWidget* MainWindow::BuildHistoryPage() {
                 .arg(sev_c.name()));
             txt_col->addWidget(nm); txt_col->addWidget(sv);
             auto* ts = new QLabel(FormatTs(ev.timestamp), item);
-            ts->setStyleSheet("color:#6B5B4E; font-size:8.5pt; background:transparent;");
+            ts->setStyleSheet("color:#8B7355; font-size:8.5pt; background:transparent;");
             il->addWidget(dot); il->addLayout(txt_col, 1); il->addWidget(ts);
             tl->addWidget(item);
         }
         if (shown == 0) {
             auto* lbl = new QLabel("No threats detected", threats_card);
-            lbl->setStyleSheet("color:#6B5B4E; font-size:9.5pt; background:transparent;");
+            lbl->setStyleSheet("color:#8B7355; font-size:9.5pt; background:transparent;");
             lbl->setAlignment(Qt::AlignCenter);
             tl->addWidget(lbl);
         }
@@ -1341,7 +1341,7 @@ QWidget* MainWindow::BuildHistoryPage() {
     feed_hdr->addWidget(new HistIcon(HistIcon::Activity, 13, QColor(0xFF,0x7A,0x00), feed));
     auto* feed_title = new QLabel("SECURITY ACTIVITY FEED", feed);
     feed_title->setStyleSheet(
-        "color:#6B5B4E; font-size:9pt; font-weight:700;"
+        "color:#8B7355; font-size:9pt; font-weight:700;"
         " letter-spacing:1px; background:transparent;");
     feed_hdr->addWidget(feed_title);
     auto* live_badge = new QLabel("LIVE", feed);
@@ -1409,11 +1409,11 @@ QWidget* MainWindow::BuildHistoryPage() {
         auto path_short = QString::fromUtf8(ev.target_path.c_str());
         if (path_short.length() > 40) path_short = "..." + path_short.right(37);
         auto* path_lbl = new QLabel(path_short, row);
-        path_lbl->setStyleSheet("color:#6B5B4E; font-size:8.5pt; background:transparent;");
+        path_lbl->setStyleSheet("color:#8B7355; font-size:8.5pt; background:transparent;");
         text_col->addWidget(rule_lbl);
         text_col->addWidget(path_lbl);
         auto* ts_lbl = new QLabel(FormatTs(ev.timestamp), row);
-        ts_lbl->setStyleSheet("color:#4A3B30; font-size:8pt; background:transparent;");
+        ts_lbl->setStyleSheet("color:#33261A; font-size:8pt; background:transparent;");
         ts_lbl->setAlignment(Qt::AlignTop | Qt::AlignRight);
         row_l->addLayout(text_col, 1);
         row_l->addWidget(ts_lbl, 0, Qt::AlignTop);

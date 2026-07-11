@@ -216,7 +216,7 @@ QWidget* BuildLanMonitorPage(QWidget* parent) {
                 for (const auto& d : devices) {
                     const int row = table->rowCount();
                     table->insertRow(row);
-                    QString bg; if (d.risk >= 90) bg = "#3A1F1F"; else if (d.risk >= 70) bg = "#3A2F1F"; else if (d.risk >= 50) bg = "#2F3A1F"; else bg = "#1F2F1F";
+                    QString bg; if (d.risk >= 90) bg = "#33261A"; else if (d.risk >= 70) bg = "#33261A"; else if (d.risk >= 50) bg = "#33261A"; else bg = "#33261A";
                     auto* ip = new QTableWidgetItem(d.ip); ip->setBackground(QColor(bg)); table->setItem(row, 0, ip);
                     auto* mac = new QTableWidgetItem(d.mac); mac->setBackground(QColor(bg)); table->setItem(row, 1, mac);
                     auto* host = new QTableWidgetItem(d.host.isEmpty() ? QString("-") : d.host); host->setBackground(QColor(bg)); table->setItem(row, 2, host);

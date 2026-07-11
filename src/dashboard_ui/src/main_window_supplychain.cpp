@@ -265,7 +265,7 @@ QWidget* BuildSupplyChainPage(QWidget* parent) {
     auto addRow = [table](const ScFinding& f) {
         const int row = table->rowCount();
         table->insertRow(row);
-        QString bg; if (f.risk >= 90) bg = "#3A1F1F"; else if (f.risk >= 70) bg = "#3A2F1F"; else if (f.risk >= 50) bg = "#2F3A1F"; else bg = "#1F2F1F";
+        QString bg; if (f.risk >= 90) bg = "#33261A"; else if (f.risk >= 70) bg = "#33261A"; else if (f.risk >= 50) bg = "#33261A"; else bg = "#33261A";
         auto* risk = new QTableWidgetItem(QString::number(f.risk));
         risk->setForeground(RiskColor(f.risk)); risk->setBackground(QColor(bg));
         table->setItem(row, 0, risk);

@@ -8,17 +8,20 @@
 *Bộ nghiên cứu bảo mật kernel Windows — phát hiện mối đe dọa chế độ kernel, YARA, phân tích hành vi, trợ lý AI cục bộ*
 
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20x64-0078D6?logo=windows&logoColor=white)
-![Release](https://img.shields.io/badge/release-v1.0.2-FF7A00)
+![Release](https://img.shields.io/badge/release-v1.0.4-FF7A00)
 ![UI](https://img.shields.io/badge/UI-Qt6%20·%20Figma%20design%20system-41CD52?logo=qt&logoColor=white)
 ![Engine](https://img.shields.io/badge/engine-YARA%20%2B%20ETW%20%2B%20minifilter-FF9B3D)
 ![AI](https://img.shields.io/badge/AI-Qwen2.5%20GGUF%20·%20llama.cpp%20runtime%20·%20100%25%20offline-8B5CF6)
+![Updated](https://img.shields.io/badge/updated-frequently%20·%20actively%20developed-22C55E)
 ![Status](https://img.shields.io/badge/status-research%20project-8B7355)
 
 <br/>
 
-[![Download TeoAvSuite](https://img.shields.io/badge/⬇%20%20DOWNLOAD%20TeoAvSuite--Setup--v1.0.2.exe%20%20(26.85%20MB)-FF7A00?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/teohumble1/avsuite/releases/download/v1.0.2/TeoAvSuite-Setup-v1.0.2.exe)
+[![Download TeoAvSuite](https://img.shields.io/badge/⬇%20%20DOWNLOAD%20TeoAvSuite--Setup--v1.0.4.exe%20%20(27.0%20MB)-FF7A00?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/teohumble1/avsuite/releases/download/v1.0.4/TeoAvSuite-Setup-v1.0.4.exe)
 
 **Tải trực tiếp 1 click — Windows 10/11 x64 · Direct download, no signup**
+
+*🔄 Cập nhật liên tục — mỗi bản phát hành mạnh & mượt hơn bản trước. Continuously improving — every release is faster and stronger than the last.*
 
 <br/>
 
@@ -35,6 +38,26 @@
 A portfolio security research project demonstrating Windows kernel-mode threat detection and behavior analysis. **Not for production use.**
 
 Dự án portfolio nghiên cứu bảo mật minh họa phát hiện mối đe dọa ở chế độ kernel Windows và phân tích hành vi. **Không dành cho sử dụng sản xuất.**
+
+## 🆕 What's New in v1.0.4 | Có Gì Mới ở v1.0.4
+
+**v1.0.4 — Performance optimization / Tối ưu hiệu năng** (2026-07-11)
+
+TeoAvSuite is **actively developed with frequent releases** — the project has moved from v1.0.0 to v1.0.4 in a matter of days, and **each version is faster, smoother and stronger than the one before**. This release makes the whole dashboard run well on **every Windows 10/11 machine**, from high-end desktops down to old, low-spec laptops.
+
+- ⚡ **DLL Intel page no longer lags** — lighter risk-column rendering, debounced search (no full-table rebuild per keystroke), batched repaints, and per-path caching of DLL signature checks (a big win on machines with many running processes).
+- 🖥️ **Low-end / GPU-aware mode** — the app auto-detects weak hardware (few CPU cores, low RAM, or an old/integrated GPU with little dedicated VRAM) and automatically drops the heaviest per-frame effects (neon glow/shadows, 60fps shimmer, page slide/fade) so it stays smooth — while capable machines keep the full visual experience.
+- 🎛️ **`AVSUITE_PERF_MODE=low|full`** environment override to force either path when auto-detection misjudges a machine.
+
+---
+
+**TeoAvSuite được phát triển tích cực, ra bản mới liên tục** — dự án đã đi từ v1.0.0 lên v1.0.4 chỉ trong vài ngày, và **mỗi bản đều nhanh hơn, mượt hơn và mạnh hơn bản trước**. Bản này giúp toàn bộ dashboard chạy tốt trên **mọi máy Windows 10/11**, từ desktop cấu hình cao đến laptop đời cũ yếu.
+
+- ⚡ **Trang DLL Intel hết lag** — vẽ cột rủi ro nhẹ hơn, ô tìm kiếm debounce (không dựng lại cả bảng mỗi lần gõ phím), gộp repaint, và cache kết quả kiểm tra chữ ký DLL theo đường dẫn (lợi lớn trên máy nhiều tiến trình).
+- 🖥️ **Chế độ nhận biết máy yếu / GPU cũ** — app tự phát hiện phần cứng yếu (ít nhân CPU, ít RAM, hoặc GPU cũ/tích hợp ít VRAM) và tự tắt các hiệu ứng nặng theo khung hình (glow/shadow, shimmer 60fps, hiệu ứng chuyển trang) để giữ mượt — máy khỏe vẫn giữ trọn hiệu ứng.
+- 🎛️ **`AVSUITE_PERF_MODE=low|full`** để ép chế độ khi nhận diện tự động bị sai.
+
+> 📦 Xem toàn bộ lịch sử phát hành tại **[Releases](https://github.com/teohumble1/avsuite/releases)** — bản mới ra thường xuyên. See all releases for the full, frequently-updated history.
 
 ## What This Is | Đây Là Cái Gì
 
@@ -107,12 +130,12 @@ This is an **educational/research project** that implements:
 
 **One-click professional installer - like any normal app**
 
-**Direct link | Link tải thẳng:** https://github.com/teohumble1/avsuite/releases/download/v1.0.2/TeoAvSuite-Setup-v1.0.2.exe
+**Direct link | Link tải thẳng:** https://github.com/teohumble1/avsuite/releases/download/v1.0.4/TeoAvSuite-Setup-v1.0.4.exe
 
 Download and run:
 ```bash
 # Visit: https://github.com/teohumble1/avsuite/releases
-# Download: TeoAvSuite-Setup-v1.0.2.exe
+# Download: TeoAvSuite-Setup-v1.0.4.exe
 # Double-click to run installer
 # Follow the setup wizard (Next → Next → Install)
 # Launch from Start Menu or Desktop shortcut
@@ -122,7 +145,7 @@ Download and run:
 
 ```bash
 # Truy cập: https://github.com/teohumble1/avsuite/releases
-# Tải: TeoAvSuite-Setup-v1.0.2.exe
+# Tải: TeoAvSuite-Setup-v1.0.4.exe
 # Double-click để chạy trình cài đặt
 # Làm theo hướng dẫn (Next → Next → Install)
 # Mở từ Start Menu hoặc Desktop shortcut
@@ -884,17 +907,37 @@ Nhiều dự án portfolio overclaim khả năng. Dự án này rõ ràng ghi ch
 
 ## Distribution & Releases | Phân Phối & Phát Hành
 
-**Current Version**: v1.0.2 (2026-07-11) — Figma UI redesign (sectioned sidebar, flat amber design system)
+**Current Version**: v1.0.4 (2026-07-11) — Performance optimization (low-end / GPU-aware mode, DLL Intel scan + UI lag fixes)
 - Available at: https://github.com/teohumble1/avsuite/releases
-- Format: TeoAvSuite-Setup-v1.0.2.exe (Windows 10/11 installer)
+- Format: TeoAvSuite-Setup-v1.0.4.exe (Windows 10/11 installer, ~27 MB)
 - Installation: Admin + isolated VM recommended
 - Uninstall: Windows Control Panel → Programs and Features
 
-**Phiên bản hiện tại**: v1.0.2 (2026-07-11) — Redesign UI theo Figma (sidebar chia nhóm, hệ nút phẳng amber)
+> **Release cadence:** actively developed — new versions ship frequently, each one faster and stronger than the last. Check the [Releases page](https://github.com/teohumble1/avsuite/releases) for the latest.
+
+**Release history:**
+- **v1.0.4** — Performance optimization: low-end / GPU-aware mode, DLL Intel lag fixes, `AVSUITE_PERF_MODE` override
+- **v1.0.3** — Non-interactive driver signing, release-prep hardening
+- **v1.0.2** — Figma UI redesign (sectioned sidebar, flat amber design system)
+- **v1.0.1** — Auto-quarantine at Suspicious level, context-aware false-positive reduction
+- **v1.0.0** — Initial release: Select All + batch quarantine, professional installer
+
+---
+
+**Phiên bản hiện tại**: v1.0.4 (2026-07-11) — Tối ưu hiệu năng (chế độ nhận biết máy yếu/GPU, sửa lag scan + UI trang DLL Intel)
 - Có sẵn tại: https://github.com/teohumble1/avsuite/releases
-- Định dạng: TeoAvSuite-Setup-v1.0.2.exe (trình cài đặt Windows 10/11)
+- Định dạng: TeoAvSuite-Setup-v1.0.4.exe (trình cài đặt Windows 10/11, ~27 MB)
 - Cài đặt: Quản trị viên + VM cách ly được khuyến nghị
 - Gỡ cài đặt: Windows Control Panel → Programs and Features
+
+> **Nhịp phát hành:** phát triển tích cực — bản mới ra thường xuyên, mỗi bản nhanh & mạnh hơn bản trước. Xem [trang Releases](https://github.com/teohumble1/avsuite/releases) để lấy bản mới nhất.
+
+**Lịch sử phát hành:**
+- **v1.0.4** — Tối ưu hiệu năng: chế độ máy yếu/GPU-aware, sửa lag DLL Intel, override `AVSUITE_PERF_MODE`
+- **v1.0.3** — Ký driver không tương tác, gia cố chuẩn bị phát hành
+- **v1.0.2** — Redesign UI theo Figma (sidebar chia nhóm, hệ nút phẳng amber)
+- **v1.0.1** — Auto-quarantine ở mức Suspicious, giảm dương tính giả theo ngữ cảnh
+- **v1.0.0** — Bản đầu: Select All + quarantine hàng loạt, trình cài đặt chuyên nghiệp
 
 ## Hard Questions (You Should Expect These) | Câu Hỏi Khó (Bạn Nên Dự Kiến)
 

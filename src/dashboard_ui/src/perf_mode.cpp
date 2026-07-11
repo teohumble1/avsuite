@@ -1,6 +1,7 @@
 #include "perf_mode.hpp"
 
 #include <thread>
+#include <cstring>
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -13,6 +14,15 @@ namespace avdashboard {
 namespace {
 
 bool DetectLowEnd() {
+    // Manual override, for machines the heuristic misjudges or for QA testing the
+    // low-end path on capable hardware: AVSUITE_PERF_MODE=low forces low-end,
+    // =full forces the full-effect path. Anything else falls through to detection.
+    char buf[16] = {};
+    if (GetEnvironmentVariableA("AVSUITE_PERF_MODE", buf, sizeof(buf)) > 0) {
+        if (_stricmp(buf, "low") == 0)  return true;
+        if (_stricmp(buf, "full") == 0) return false;
+    }
+
     // 1) CPU: <= 4 logical cores is a low-end / older laptop.
     const unsigned cores = std::thread::hardware_concurrency();
     if (cores != 0 && cores <= 4) return true;

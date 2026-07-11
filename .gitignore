@@ -44,3 +44,10 @@ Thumbs.db
 *.zip
 
 vm_test_package/
+
+# Portable build output folders
+setup/TeoAvSuite-*-Portable/
+
+# Local helper/setup scripts (not project content; github-cleanup.bat deletes the repo)
+GITHUB_SETUP.txt
+github-cleanup.bat

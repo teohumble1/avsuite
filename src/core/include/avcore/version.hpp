@@ -6,6 +6,6 @@ namespace avcore {
 // avupdateserver's manifest.json "app_latest_version" field by the
 // Self-Update page. Bump this alongside installer.iss's AppVersion when
 // cutting a release.
-inline constexpr const char* kAppVersion = "1.0.3";
+inline constexpr const char* kAppVersion = "1.0.4";
 
 } // namespace avcore

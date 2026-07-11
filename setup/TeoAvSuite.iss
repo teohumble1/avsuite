@@ -7,7 +7,7 @@
 
 [Setup]
 AppName=TeoAvSuite
-AppVersion=1.0.3
+AppVersion=1.0.4
 AppPublisher=TeoHumble Security
 AppPublisherURL=https://github.com/teohumble1/avsuite
 AppSupportURL=https://github.com/teohumble1/avsuite/issues
@@ -16,7 +16,7 @@ DefaultDirName={autopf}\TeoAvSuite
 DefaultGroupName=TeoAvSuite
 AllowNoIcons=yes
 OutputDir=.\Output
-OutputBaseFilename=TeoAvSuite-Setup-v1.0.3
+OutputBaseFilename=TeoAvSuite-Setup-v1.0.4
 Compression=lzma2
 SolidCompression=yes
 PrivilegesRequired=admin
@@ -95,7 +95,7 @@ Type: filesandordirs; Name: "{app}\platforms"
 
 [Registry]
 Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "InstallPath"; ValueData: "{app}"; Flags: createvalueifdoesntexist
-Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "Version"; ValueData: "1.0.3"; Flags: createvalueifdoesntexist
+Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "Version"; ValueData: "1.0.4"; Flags: createvalueifdoesntexist
 
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);

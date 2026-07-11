@@ -253,9 +253,9 @@ QWidget* MainWindow::BuildSettingsPage() {
     auto* hdr_texts = new QVBoxLayout();
     hdr_texts->setSpacing(0);
     auto* hdr_title = new QLabel(QString::fromUtf8("C\xc3\xa0i \xc4\x91\xe1\xba\xb7t"), hdr);
-    hdr_title->setStyleSheet("color:#FFFFFF; font-size:14pt; font-weight:700; background:transparent;");
+    hdr_title->setStyleSheet("color:#ECE4DA; font-size:28px; font-weight:700; background:transparent;");
     auto* hdr_sub = new QLabel(QString::fromUtf8("C\xe1\xba\xa5u h\xc3\xacnh h\xe1\xbb\x87 th\xe1\xbb\x91ng v\xc3\xa0 b\xe1\xba\xa3o m\xe1\xba\xadt"), hdr);
-    hdr_sub->setStyleSheet("color:#6B5B4E; font-size:8.5pt; background:transparent;");
+    hdr_sub->setStyleSheet("color:#8B7355; font-size:13px; background:transparent;");
     hdr_texts->addWidget(hdr_title);
     hdr_texts->addWidget(hdr_sub);
     hdr_l->addLayout(hdr_texts);

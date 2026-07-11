@@ -740,7 +740,7 @@ QWidget* MainWindow::BuildHistoryPage() {
     auto* title_lbl = new QLabel(QString::fromUtf8("L\xe1\xbb\x8b"
                                                     "ch s\xe1\xbb\xad qu\xc3\xa9t"), hdr);
     title_lbl->setStyleSheet(
-        "color:#ECE4DA; font-size:19pt; font-weight:800; letter-spacing:0.3px; background:transparent;");
+        "color:#ECE4DA; font-size:28px; font-weight:700; background:transparent;");
     auto* sub_lbl = new QLabel("Review detections, scans and security events", hdr);
     sub_lbl->setStyleSheet("color:#C7B6A2; font-size:9.5pt; background:transparent;");
     sub_lbl->setMinimumWidth(360);

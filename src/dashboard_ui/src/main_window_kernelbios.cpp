@@ -289,7 +289,7 @@ QWidget* BuildKernelBiosPage(QWidget* parent) {
     root->setSpacing(14);
 
     auto* title = new QLabel(QString::fromUtf8("Kernel / BIOS Scan"), page);
-    title->setStyleSheet("color:#ECE4DA; font-size:16pt; font-weight:700; background:transparent;");
+    title->setStyleSheet("color:#ECE4DA; font-size:28px; font-weight:700; background:transparent;");
     root->addWidget(title);
     auto* sub = new QLabel(QString::fromUtf8(
         "Loaded kernel drivers checked against Authenticode signatures (unsigned = possible "

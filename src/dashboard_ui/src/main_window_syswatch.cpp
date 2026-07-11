@@ -286,7 +286,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
     hlay->setContentsMargins(0, 0, 0, 0);
 
     auto* title = new QLabel(QString::fromUtf8("System32 / Explorer Auto-Hunt"));
-    title->setStyleSheet("color:#FF7A00; font-size:20px; font-weight:700;");
+    title->setStyleSheet("color:#ECE4DA; font-size:28px; font-weight:700;");
     hlay->addWidget(title);
     hlay->addStretch();
 

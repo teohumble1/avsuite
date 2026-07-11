@@ -108,7 +108,7 @@ QWidget* BuildSuricataPage(QWidget* parent) {
     root->setSpacing(12);
 
     auto* title = new QLabel(QString::fromUtf8("Suricata IDS/IPS"), page);
-    title->setStyleSheet("color:#ECE4DA; font-size:18px; font-weight:700; background:transparent;");
+    title->setStyleSheet("color:#ECE4DA; font-size:28px; font-weight:700; background:transparent;");
     root->addWidget(title);
 
     auto* subtitle = new QLabel(QString::fromUtf8(

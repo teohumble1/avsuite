@@ -10,6 +10,18 @@
 // prompt describing which kind of data leaked, so the assistant can advise
 // on remediation. ASCII labels (MSVC builds without /utf-8).
 
+// NOTE: std headers (esp. <filesystem>) deliberately come FIRST — with the
+// project's MSVC 14.44 the previous Qt/windows-then-std order ICE'd (C1001 in
+// xutility while instantiating std::filesystem::path::generic_u16string).
+#include <atomic>
+#include <cctype>
+#include <filesystem>
+#include <fstream>
+#include <memory>
+#include <string>
+#include <thread>
+#include <vector>
+
 #include "main_window.hpp"
 #include "av_quit_guard.hpp"
 #include "av_animations.hpp"
@@ -33,15 +45,6 @@
 #include <windows.h>
 #include <ShlObj.h>
 #pragma comment(lib, "shell32.lib")
-
-#include <atomic>
-#include <cctype>
-#include <filesystem>
-#include <fstream>
-#include <memory>
-#include <string>
-#include <thread>
-#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -277,7 +280,7 @@ QWidget* BuildDlpPage(QWidget* parent) {
     root->setSpacing(12);
 
     auto* title = new QLabel(QString::fromUtf8("Data Loss Prevention"), page);
-    title->setStyleSheet("color:#ECE4DA; font-size:16pt; font-weight:700; background:transparent;");
+    title->setStyleSheet("color:#ECE4DA; font-size:28px; font-weight:700; background:transparent;");
     root->addWidget(title);
     auto* sub = new QLabel(QString::fromUtf8(
         "Scans a folder for plaintext sensitive data at rest: credit card numbers "

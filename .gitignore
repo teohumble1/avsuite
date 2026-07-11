@@ -42,3 +42,5 @@ Thumbs.db
 # Backups
 *.bak
 *.zip
+
+vm_test_package/

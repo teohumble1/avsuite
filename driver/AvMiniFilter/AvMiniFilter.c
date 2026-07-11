@@ -273,10 +273,16 @@ AvmfPreCreate(
         return FLT_PREOP_SUCCESS_NO_CALLBACK;
     }
 
-    // Get name info outside the lock -- FltGetFileNameInformation is safe here.
+    // Get name info outside the lock. In a PRE-create callback the target
+    // file is not open yet, so requesting the NORMALIZED name is unsafe:
+    // Filter Manager may have to issue I/O to resolve it and can re-enter the
+    // create path (network redirectors, reparse points), deadlocking. Use the
+    // OPENED name, which is resolved from the create parameters already in
+    // Data and never triggers that recursion. The WDK "scanner" sample defers
+    // NORMALIZED to post-create for the same reason. We fail open on error.
     status = FltGetFileNameInformation(
         Data,
-        FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT,
+        FLT_FILE_NAME_OPENED | FLT_FILE_NAME_QUERY_DEFAULT,
         &nameInfo);
     if (!NT_SUCCESS(status)) {
         return FLT_PREOP_SUCCESS_NO_CALLBACK;

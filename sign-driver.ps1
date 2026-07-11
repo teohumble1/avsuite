@@ -35,7 +35,7 @@ $plainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringUni($bstr)
 [System.Runtime.InteropServices.Marshal]::ZeroFreeCoTaskMemUnicode($bstr)
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "✓ Driver signed successfully"
+    Write-Host "[OK] Driver signed successfully"
     exit 0
 } else {
     Write-Error "Failed to sign driver"

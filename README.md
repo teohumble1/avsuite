@@ -11,7 +11,7 @@
 ![Release](https://img.shields.io/badge/release-v1.0.2-FF7A00)
 ![UI](https://img.shields.io/badge/UI-Qt6%20·%20Figma%20design%20system-41CD52?logo=qt&logoColor=white)
 ![Engine](https://img.shields.io/badge/engine-YARA%20%2B%20ETW%20%2B%20minifilter-FF9B3D)
-![AI](https://img.shields.io/badge/AI-llama.cpp%20·%20100%25%20offline-8B5CF6)
+![AI](https://img.shields.io/badge/AI-Qwen2.5%20GGUF%20·%20llama.cpp%20runtime%20·%20100%25%20offline-8B5CF6)
 ![Status](https://img.shields.io/badge/status-research%20project-8B7355)
 
 [**⬇ Download**](https://github.com/teohumble1/avsuite/releases) ·

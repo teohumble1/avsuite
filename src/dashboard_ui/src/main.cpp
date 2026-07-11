@@ -1,6 +1,7 @@
 #include <filesystem>
 
 #include <QApplication>
+#include <QIcon>
 #include <QMessageBox>
 #include <QTimer>
 
@@ -391,6 +392,9 @@ int main(int argc, char** argv) {
     app.setStyleSheet(QString::fromUtf8(kStyleSheet) + theme::ComponentQss());
 
     const auto exe_dir = ExecutableDirectory();
+    // Window/taskbar icon (the exe file icon comes from app.rc).
+    app.setWindowIcon(QIcon(QString::fromStdString((exe_dir / "app_icon.png").string())));
+
     avcore::Config config = avcore::Config::LoadFromFile((exe_dir / "avsuite.json").string());
     config.database_path = ResolveNextToExe(exe_dir, config.database_path);
     config.log_path = ResolveNextToExe(exe_dir, config.log_path);

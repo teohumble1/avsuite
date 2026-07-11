@@ -1759,9 +1759,30 @@ QWidget* MainWindow::BuildSidebar() {
         nav_l->addWidget(body);
 
         connect(head, &QPushButton::clicked, body, [body, chev] {
-            const bool show = !body->isVisible();
-            body->setVisible(show);
+            // Animated expand/collapse: slide the section body open/closed by
+            // animating maximumHeight (240ms OutCubic), Figma-style.
+            const bool show = !body->isVisible() || body->maximumHeight() == 0;
             chev->setText(show ? QString::fromUtf8("▾") : QString::fromUtf8("▸"));
+            auto* anim = new QPropertyAnimation(body, "maximumHeight", body);
+            anim->setDuration(240);
+            anim->setEasingCurve(QEasingCurve::OutCubic);
+            if (show) {
+                body->setMaximumHeight(0);
+                body->setVisible(true);
+                anim->setStartValue(0);
+                anim->setEndValue(body->sizeHint().height());
+                QObject::connect(anim, &QPropertyAnimation::finished, body, [body] {
+                    body->setMaximumHeight(QWIDGETSIZE_MAX);
+                });
+            } else {
+                anim->setStartValue(body->height());
+                anim->setEndValue(0);
+                QObject::connect(anim, &QPropertyAnimation::finished, body, [body] {
+                    body->setVisible(false);
+                    body->setMaximumHeight(QWIDGETSIZE_MAX);
+                });
+            }
+            anim->start(QAbstractAnimation::DeleteWhenStopped);
         });
     }
 
@@ -2313,9 +2334,21 @@ QWidget* MainWindow::BuildHashListPage() {
 }
 
 void MainWindow::GoToPage(int index) {
+    const int previous = pages_->currentIndex();
     pages_->setCurrentIndex(index);
-    // Fade-in incoming page (250ms OutCubic)
-    if (QWidget* incoming = pages_->currentWidget()) {
+    // Figma-style page transition: slide in from the right (24px) + fade.
+    // A pure opacity fade on a full page is nearly invisible; the horizontal
+    // motion is what makes the switch feel alive.
+    if (QWidget* incoming = pages_->currentWidget(); incoming && previous != index) {
+        const QPoint home = incoming->pos();
+        incoming->move(home + QPoint(24, 0));
+        auto* slide = new QPropertyAnimation(incoming, "pos", incoming);
+        slide->setDuration(280);
+        slide->setStartValue(home + QPoint(24, 0));
+        slide->setEndValue(home);
+        slide->setEasingCurve(QEasingCurve::OutCubic);
+        slide->start(QAbstractAnimation::DeleteWhenStopped);
+
         auto* eff = new QGraphicsOpacityEffect(incoming);
         eff->setOpacity(0.0);
         incoming->setGraphicsEffect(eff);

@@ -23,6 +23,11 @@ ShowLanguageDialog=auto
 WizardStyle=modern
 LicenseFile=..\LICENSE
 MinVersion=10.0
+; Branding: amber shield icon on the setup exe + dark wizard art
+SetupIconFile=..\src\dashboard_ui\resources\app.ico
+WizardImageFile=wizard-large.bmp
+WizardSmallImageFile=wizard-small.bmp
+UninstallDisplayIcon={app}\avdashboard.exe
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -40,6 +45,9 @@ Source: "{#RelDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Qt platform plugins
 Source: "{#RelDir}\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+; Runtime window/taskbar icon (loaded by main.cpp next to the exe)
+Source: "{#RelDir}\app_icon.png"; DestDir: "{app}"; Flags: ignoreversion
 
 ; YARA rules
 Source: "{#RelDir}\yara_rules\*"; DestDir: "{app}\yara_rules"; Flags: ignoreversion recursesubdirs createallsubdirs

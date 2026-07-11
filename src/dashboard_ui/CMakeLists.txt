@@ -45,6 +45,7 @@ add_executable(avdashboard WIN32
     src/main.cpp
     ${AVDASHBOARD_PAGE_SOURCES}
     src/main_window.hpp
+    app.rc
 )
 
 target_link_libraries(avdashboard PRIVATE avengine avai avlogging avcore Qt6::Widgets Qt6::EntryPointPrivate)
@@ -59,6 +60,14 @@ if(MSVC)
     set_source_files_properties(${AVDASHBOARD_PAGE_SOURCES}
         PROPERTIES COMPILE_FLAGS "/Od /bigobj /Zm300 /std:c++17")
 endif()
+
+# Runtime window/taskbar icon (main.cpp loads it via setWindowIcon; the .rc
+# above only covers the exe file icon in Explorer).
+add_custom_command(TARGET avdashboard POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/app_icon.png
+        $<TARGET_FILE_DIR:avdashboard>/app_icon.png
+)
 
 # Ship the starter .yar rules next to this executable, same as host_console.
 add_custom_command(TARGET avdashboard POST_BUILD

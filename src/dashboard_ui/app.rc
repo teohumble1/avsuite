@@ -1,0 +1,3 @@
+// Application icon resource — first ICON entry becomes the .exe file icon
+// shown by Explorer, the taskbar, Start Menu and Alt-Tab.
+IDI_ICON1 ICON "resources/app.ico"

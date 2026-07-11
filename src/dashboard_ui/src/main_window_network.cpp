@@ -925,7 +925,7 @@ QWidget* MainWindow::BuildNetworkPage() {
         hunt_safe_btn->setText(QString("\xe2\x9c\x93 Safe (%1)").arg(marked));
         if (net_hunt_risk_lbl_)
             net_hunt_risk_lbl_->setText(
-                "<span style='color:#07C97A;'>User Verified \xe2\x80\x94 Whitelisted</span>");
+                "<span style='color:#4ADE80;'>User Verified \xe2\x80\x94 Whitelisted</span>");
         QTimer::singleShot(500, this, &MainWindow::RefreshNetworkConnections);
     });
 
@@ -1410,8 +1410,8 @@ void MainWindow::HuntProcess(uint32_t pid) {
 
             // Risk summary
             if (max_risk > 0) {
-                const char* risk_color = max_risk >= 70 ? "#FF3A3A"
-                                       : max_risk >= 35 ? "#FFA500" : "#4ADE80";
+                const char* risk_color = max_risk >= 70 ? "#FF5A6A"
+                                       : max_risk >= 35 ? "#FBBF24" : "#4ADE80";
                 net_hunt_risk_lbl_->setText(
                     QString("<span style='color:%1;'>Risk %2</span>%3")
                         .arg(risk_color).arg(max_risk)

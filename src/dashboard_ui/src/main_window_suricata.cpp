@@ -176,7 +176,7 @@ QWidget* BuildSuricataPage(QWidget* parent) {
     auto* start_btn = new QPushButton(QString::fromUtf8("Bat dau giam sat"), status_card);
     start_btn->setFixedHeight(30);
     start_btn->setStyleSheet(
-        "QPushButton { background:#1C2226; border:1px solid #4ADE80; border-radius:6px; "
+        "QPushButton { background:#241708; border:1px solid #4ADE80; border-radius:6px; "
         "              color:#4ADE80; font-size:12px; padding:0 14px; }"
         "QPushButton:hover { background:#4ADE8030; }"
         "QPushButton:disabled { background:#1C1108; border-color:#333; color:#555; }");
@@ -184,7 +184,7 @@ QWidget* BuildSuricataPage(QWidget* parent) {
     stop_btn->setFixedHeight(30);
     stop_btn->setEnabled(false);
     stop_btn->setStyleSheet(
-        "QPushButton { background:#1C2226; border:1px solid #FF5A6A; border-radius:6px; "
+        "QPushButton { background:#241708; border:1px solid #FF5A6A; border-radius:6px; "
         "              color:#FF5A6A; font-size:12px; padding:0 14px; }"
         "QPushButton:hover { background:#FF5A6A30; }"
         "QPushButton:disabled { background:#1C1108; border-color:#333; color:#555; }");

@@ -14,6 +14,7 @@
 #include <filesystem>
 #include <atomic>
 #include <thread>
+#include <vector>
 
 #include <QAbstractItemView>
 #include <QAction>
@@ -1466,7 +1467,7 @@ MainWindow::MainWindow(avcore::Config config, QWidget* parent)
         auto finalizeLabel = [](QLabel* lbl, const QString& name) {
             if (lbl && lbl->property("statusSet").toBool() == false) {
                 lbl->setText(QString::fromUtf8("● %1  Hoạt động").arg(name));
-                lbl->setStyleSheet("color: #2ecc71; font-weight: 600;");
+                lbl->setStyleSheet("color: #4ADE80; font-weight: 600;");
             }
         };
         finalizeLabel(folder_watch_status_, QString::fromUtf8("Folder Watch"));
@@ -1582,39 +1583,55 @@ void MainWindow::ShowThreatNotification(const avcore::DetectionEvent& event) {
 }
 
 QWidget* MainWindow::BuildSidebar() {
+    // Figma sidebar: 220px rail, logo header ("AvSuite" + PRO badge), three
+    // collapsible labeled sections (Protection / Monitoring / Advanced), and
+    // Settings pinned at the bottom under a hairline.
     auto* sidebar = new QWidget();
     sidebar->setObjectName("Sidebar");
-    sidebar->setFixedWidth(64);
+    sidebar->setFixedWidth(220);
 
     auto* layout = new QVBoxLayout(sidebar);
-    layout->setContentsMargins(0, 16, 0, 16);
-    layout->setSpacing(2);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
 
-    // Logo: ShieldCheck in orange gradient rounded square
+    // ── Logo header ──
     {
-        auto* logo_w = new QWidget(sidebar);
-        logo_w->setFixedSize(40, 40);
+        auto* logo_bar = new QFrame(sidebar);
+        logo_bar->setObjectName("SidebarLogoBar");
+        logo_bar->setStyleSheet(
+            "QFrame#SidebarLogoBar { background: transparent;"
+            " border: none; border-bottom: 1px solid #33261A; }");
+        auto* lb = new QHBoxLayout(logo_bar);
+        lb->setContentsMargins(16, 16, 16, 12);
+        lb->setSpacing(10);
+
+        auto* logo_w = new QWidget(logo_bar);
+        logo_w->setFixedSize(28, 28);
         logo_w->setStyleSheet(
-            "QWidget { background: qlineargradient(x1:0,y1:0,x2:1,y2:1,"
-            "  stop:0 #FF7A00, stop:1 #FF5500); border-radius: 10px; }");
-        // Use layout to perfectly center icon inside the square
+            "QWidget { background: #FF7A00; border: none; border-radius: 8px; }");
         {
             auto* cl = new QVBoxLayout(logo_w);
-            cl->setContentsMargins(0,0,0,0); cl->setSpacing(0);
-            auto* rl = new QHBoxLayout();
-            rl->setContentsMargins(0,0,0,0); rl->setSpacing(0);
-            rl->addStretch();
-            rl->addWidget(new IconWidget(IconWidget::ShieldCheck, 22, Qt::white, logo_w));
-            rl->addStretch();
-            cl->addStretch(); cl->addLayout(rl); cl->addStretch();
+            cl->setContentsMargins(0, 0, 0, 0);
+            cl->addWidget(new IconWidget(IconWidget::ShieldCheck, 16,
+                                         QColor(0x12, 0x0B, 0x06), logo_w),
+                          0, Qt::AlignCenter);
         }
+        lb->addWidget(logo_w);
 
-        auto* logo_row = new QHBoxLayout();
-        logo_row->setContentsMargins(0, 0, 0, 14);
-        logo_row->addStretch();
-        logo_row->addWidget(logo_w);
-        logo_row->addStretch();
-        layout->addLayout(logo_row);
+        auto* name = new QLabel("AvSuite", logo_bar);
+        name->setStyleSheet(
+            "font-size: 15px; font-weight: 700; color: #ECE4DA;"
+            " background: transparent; border: none;");
+        lb->addWidget(name);
+        lb->addStretch();
+
+        auto* pro = new QLabel("PRO", logo_bar);
+        pro->setStyleSheet(
+            "QLabel { background: #241708; color: #FF7A00; border: none;"
+            " border-radius: 4px; padding: 1px 6px; font-size: 10px;"
+            " font-weight: 700; font-family: 'Cascadia Code', Consolas, monospace; }");
+        lb->addWidget(pro);
+        layout->addWidget(logo_bar);
     }
 
     nav_group_ = new QButtonGroup(sidebar);
@@ -1622,40 +1639,80 @@ QWidget* MainWindow::BuildSidebar() {
     struct NavEntry {
         IconWidget::Type icon;
         int page_index;
-        QString tooltip;
-    };
-    const NavEntry entries[] = {
-        {IconWidget::Home,          0, QString::fromUtf8("Trang chủ")},
-        {IconWidget::Search,        1, QString::fromUtf8("Lịch sử quét")},
-        {IconWidget::Archive,       2, "Quarantine"},
-        {IconWidget::Settings,      3, QString::fromUtf8("Cài đặt")},
-        {IconWidget::Lock,          4, "Hash List"},
-        {IconWidget::Activity,      5, "ETW Monitor"},
-        {IconWidget::Ai,            6, QString::fromUtf8("Trợ lý AI")},
-        {IconWidget::Wifi,          7, "Network Monitor"},
-        {IconWidget::Globe,         8, "VPN"},
-        {IconWidget::Eye,           9,  "DLL Intel"},
-        {IconWidget::Shield,       10,  "Sys Watch"},
-        {IconWidget::Zap,          11,  "Hidden Hunt"},
-        {IconWidget::Layers,       12,  "WAF"},
-        {IconWidget::Link,         13,  "Supply-chain"},
-        {IconWidget::Wifi,         14,  "LAN Monitor"},
-        {IconWidget::ShieldCheck,  15,  "Firewall Pro"},
-        {IconWidget::Database,     16,  "DLP"},
-        {IconWidget::TrendingUp,   17,  "Threat Intel"},
-        {IconWidget::UserCheck,    18,  "OSINT Hub"},
-        {IconWidget::BarChart2,    19,  "WiFi CSI"},
-        {IconWidget::Bell,         20,  "Suricata IDS"},
-        {IconWidget::Cpu,          21,  "Kernel/BIOS"},
-        {IconWidget::RefreshCw,    22,  "Self-Update"},
-        {IconWidget::AlertTriangle, 23,  "Memory Hunt"},
-        {IconWidget::File,          24,  "Hook Hunt"},
-        {IconWidget::Bell,          25,  "Threat Alerts"},
-        {IconWidget::TrendingUp,    26,  "Timeline"},
+        QString label;
     };
 
-    // Nav icons live in a scroll area so they stay reachable even when there
-    // are more entries than fit the sidebar height.
+    // Creates one nav row: icon at the left, label text via QSS padding.
+    auto makeNavButton = [this](const NavEntry& entry, QWidget* parent) -> QPushButton* {
+        QPushButton* button;
+        if (entry.page_index == 1) {
+            auto* bb = new BadgeButton(entry.label, parent);
+            nav_history_btn_ = bb;
+            button = bb;
+        } else {
+            auto* rb = new RippleButton(entry.label, parent);
+            rb->setRippleColor(QColor(255, 122, 0, 70));
+            button = rb;
+        }
+        button->setObjectName("NavButton");
+        button->setCheckable(true);
+        button->setFixedHeight(32);
+        button->setCursor(Qt::PointingHandCursor);
+
+        auto* ico = new IconWidget(entry.icon, 14, QColor(0xC7, 0xB6, 0xA2), button);
+        ico->setAttribute(Qt::WA_TransparentForMouseEvents);
+        ico->move(16, (32 - ico->height()) / 2);
+        connect(button, &QPushButton::toggled, button, [ico](bool checked) {
+            ico->setColor(checked ? QColor(0xFF, 0x7A, 0x00) : QColor(0xC7, 0xB6, 0xA2));
+        });
+
+        nav_group_->addButton(button, entry.page_index);
+        connect(button, &QPushButton::clicked, this,
+                [this, index = entry.page_index] { GoToPage(index); });
+        return button;
+    };
+
+    struct NavSection {
+        QString label;
+        bool collapsed;
+        std::vector<NavEntry> items;
+    };
+    const NavSection sections[] = {
+        {"PROTECTION", false, {
+            {IconWidget::Home,          0,  "Home"},
+            {IconWidget::Bell,          25, "Threat Alerts"},
+            {IconWidget::Activity,      26, "Timeline"},
+            {IconWidget::Archive,       2,  "Quarantine"},
+            {IconWidget::Search,        1,  "History"},
+            {IconWidget::Ai,            6,  "AI Assistant"},
+        }},
+        {"MONITORING", false, {
+            {IconWidget::Wifi,          7,  "Network Monitor"},
+            {IconWidget::Eye,           10, "Sys Watch"},
+            {IconWidget::Layers,        9,  "DLL Intel"},
+            {IconWidget::Database,      16, "DLP"},
+            {IconWidget::TrendingUp,    17, "Threat Intel"},
+            {IconWidget::Globe,         8,  "VPN"},
+            {IconWidget::Lock,          4,  "Hash List"},
+            {IconWidget::BarChart2,     5,  "ETW Monitor"},
+        }},
+        {"ADVANCED", true, {
+            {IconWidget::ShieldCheck,   15, "Firewall Pro"},
+            {IconWidget::AlertTriangle, 20, "Suricata IDS"},
+            {IconWidget::Link,          13, "Supply-chain"},
+            {IconWidget::UserCheck,     18, "OSINT Hub"},
+            {IconWidget::Wifi,          14, "LAN Monitor"},
+            {IconWidget::Shield,        12, "WAF"},
+            {IconWidget::Zap,           11, "Hidden Hunt"},
+            {IconWidget::Cpu,           23, "Memory Hunt"},
+            {IconWidget::File,          24, "Hook Hunt"},
+            {IconWidget::HardDrive,     21, "Kernel/BIOS"},
+            {IconWidget::RefreshCw,     22, "Self-Update"},
+            {IconWidget::Globe,         19, "WiFi CSI"},
+        }},
+    };
+
+    // Nav lives in a scroll area so every entry stays reachable on short windows.
     auto* nav_scroll = new QScrollArea(sidebar);
     nav_scroll->setWidgetResizable(true);
     nav_scroll->setFrameShape(QFrame::NoFrame);
@@ -1668,86 +1725,65 @@ QWidget* MainWindow::BuildSidebar() {
     auto* nav_inner = new QWidget();
     nav_inner->setStyleSheet("background:transparent;");
     auto* nav_l = new QVBoxLayout(nav_inner);
-    nav_l->setContentsMargins(0, 0, 0, 0);
-    nav_l->setSpacing(2);
+    nav_l->setContentsMargins(0, 8, 0, 8);
+    nav_l->setSpacing(1);
 
-    for (const auto& entry : entries) {
-        // Wrapper button (empty text, icon drawn as child)
-        QPushButton* button;
-        if (entry.page_index == 1) {
-            auto* bb = new BadgeButton("", sidebar);
-            nav_history_btn_ = bb;
-            button = bb;
-        } else {
-            auto* rb = new RippleButton("", sidebar);
-            rb->setRippleColor(QColor(255, 122, 0, 70));
-            button = rb;
-        }
-        button->setObjectName("NavButton");
-        button->setCheckable(true);
-        button->setFixedSize(64, 46);
-        button->setCursor(Qt::PointingHandCursor);
-        button->setToolTip(entry.tooltip);
+    for (const auto& section : sections) {
+        // Section header — uppercase label + chevron, click to collapse.
+        auto* head = new QPushButton(nav_inner);
+        head->setObjectName("NavSection");
+        head->setCursor(Qt::PointingHandCursor);
+        head->setFixedHeight(26);
+        auto* hl = new QHBoxLayout(head);
+        hl->setContentsMargins(12, 0, 12, 0);
+        auto* hlbl = new QLabel(section.label, head);
+        hlbl->setObjectName("NavSectionLabel");
+        hlbl->setAttribute(Qt::WA_TransparentForMouseEvents);
+        auto* chev = new QLabel(section.collapsed ? QString::fromUtf8("▸")
+                                                  : QString::fromUtf8("▾"), head);
+        chev->setObjectName("NavSectionLabel");
+        chev->setAttribute(Qt::WA_TransparentForMouseEvents);
+        hl->addWidget(hlbl);
+        hl->addStretch();
+        hl->addWidget(chev);
+        nav_l->addWidget(head);
 
-        const bool is_first = (entry.page_index == 0);
-        const QColor ico_start = is_first ? QColor(0xFF,0x7A,0x00) : QColor(0x6B,0x54,0x44);
-        auto* ico = new IconWidget(entry.icon, 17, ico_start, button);
-        ico->setAttribute(Qt::WA_TransparentForMouseEvents);
-        ico->move((64 - ico->width()) / 2, (46 - ico->height()) / 2);
+        auto* body = new QWidget(nav_inner);
+        body->setStyleSheet("background: transparent;");
+        auto* bl = new QVBoxLayout(body);
+        bl->setContentsMargins(0, 0, 0, 4);
+        bl->setSpacing(1);
+        for (const auto& entry : section.items)
+            bl->addWidget(makeNavButton(entry, body));
+        body->setVisible(!section.collapsed);
+        nav_l->addWidget(body);
 
-        connect(button, &QPushButton::toggled, button,
-                [ico](bool checked) {
-                    ico->setColor(checked ? QColor(0xFF,0x7A,0x00) : QColor(0x6B,0x54,0x44));
-                });
-
-        nav_group_->addButton(button, entry.page_index);
-        nav_l->addWidget(button, 0, Qt::AlignHCenter);
-        connect(button, &QPushButton::clicked, this,
-                [this, index = entry.page_index] { GoToPage(index); });
+        connect(head, &QPushButton::clicked, body, [body, chev] {
+            const bool show = !body->isVisible();
+            body->setVisible(show);
+            chev->setText(show ? QString::fromUtf8("▾") : QString::fromUtf8("▸"));
+        });
     }
-    nav_group_->button(0)->setChecked(true);
 
     nav_l->addStretch();
     nav_scroll->setWidget(nav_inner);
     layout->addWidget(nav_scroll, 1);
 
-    // Bottom: Bell + Settings + Avatar
+    // ── Bottom: Settings pinned under a hairline (Figma) ──
     {
-        auto* bell_btn = new QPushButton("", sidebar);
-        bell_btn->setFixedSize(40, 40);
-        bell_btn->setCursor(Qt::PointingHandCursor);
-        bell_btn->setStyleSheet(
-            "QPushButton { background: transparent; border: none; border-radius: 10px; }"
-            "QPushButton:hover { background: rgba(255,122,0,0.08); }");
-        auto* bell_ico = new IconWidget(IconWidget::Bell, 16, QColor(0x6B,0x54,0x44), bell_btn);
-        bell_ico->setAttribute(Qt::WA_TransparentForMouseEvents);
-        bell_ico->move((40-bell_ico->width())/2, (40-bell_ico->height())/2);
-
-        // NOTE: no bottom Settings button here — the sidebar nav above already
-        // has a Settings entry (page 3). A second identical gear icon showed
-        // "two Settings" in the sidebar, so it was removed.
-
-        // Avatar circle
-        auto* avatar = new QLabel("T", sidebar);
-        avatar->setFixedSize(28, 28);
-        avatar->setAlignment(Qt::AlignCenter);
-        avatar->setStyleSheet(
-            "QLabel { background: #FF7A00; color: white; border-radius: 14px; "
-            "font-size: 9pt; font-weight: 700; }");
-
-        auto addCentered = [&](QWidget* w) {
-            auto* row = new QHBoxLayout();
-            row->setContentsMargins(0, 0, 0, 0);
-            row->addStretch(); row->addWidget(w); row->addStretch();
-            layout->addLayout(row);
-        };
-        addCentered(bell_btn);
-
-        auto* av_row = new QHBoxLayout();
-        av_row->setContentsMargins(0, 4, 0, 0);
-        av_row->addStretch(); av_row->addWidget(avatar); av_row->addStretch();
-        layout->addLayout(av_row);
+        auto* bottom = new QFrame(sidebar);
+        bottom->setObjectName("SidebarBottom");
+        bottom->setStyleSheet(
+            "QFrame#SidebarBottom { background: transparent;"
+            " border: none; border-top: 1px solid #33261A; }");
+        auto* bl = new QVBoxLayout(bottom);
+        bl->setContentsMargins(0, 8, 0, 8);
+        bl->setSpacing(0);
+        bl->addWidget(makeNavButton({IconWidget::Settings, 3, "Settings"}, bottom));
+        layout->addWidget(bottom);
     }
+
+    nav_group_->button(0)->setChecked(true);
 
     return sidebar;
 }
@@ -2160,9 +2196,18 @@ QWidget* MainWindow::BuildQuarantinePage() {
     layout->setContentsMargins(28, 28, 28, 28);
     layout->setSpacing(12);
 
-    auto* heading = new QLabel(QString::fromUtf8("Quarantine"), page);
-    heading->setStyleSheet("font-size: 16pt; font-weight: 700; color: #ffffff; background: transparent;");
-    layout->addWidget(heading);
+    {
+        auto* htc = new QVBoxLayout();
+        htc->setSpacing(2);
+        auto* heading = new QLabel(QString::fromUtf8("Quarantine"), page);
+        heading->setStyleSheet("font-size: 22pt; font-weight: 800; color: #ECE4DA; background: transparent;");
+        htc->addWidget(heading);
+        auto* hsub = new QLabel(
+            QString::fromUtf8("Các tệp bị cách ly — khôi phục hoặc xóa vĩnh viễn"), page);
+        hsub->setStyleSheet("font-size: 9.5pt; color: #C7B6A2; background: transparent;");
+        htc->addWidget(hsub);
+        layout->addLayout(htc);
+    }
 
     auto* button_row = new QHBoxLayout();
     button_row->setSpacing(8);
@@ -2477,7 +2522,7 @@ void MainWindow::RefreshHomeDetections() {
             case avcore::Severity::Malicious:
                 bs = {"rgba(255,90,106,0.15)", "#FF5A6A", "Critical"}; break;
             case avcore::Severity::Suspicious:
-                bs = {"rgba(255,176,32,0.15)", "#FFB020", "Medium"}; break;
+                bs = {"rgba(251,191,36,0.15)", "#FBBF24", "Medium"}; break;
             default:
                 bs = {"rgba(74,222,128,0.12)", "#4ADE80", "Low"}; break;
         }

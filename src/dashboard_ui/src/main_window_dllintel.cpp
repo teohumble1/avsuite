@@ -354,8 +354,8 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
 
     makeCard("Total Threats", "#FF5A6A", &s_total);
     makeCard("DLL Hijacks",   "#FF7A00", &s_hijack);
-    makeCard("Unsigned DLLs", "#FACC15", &s_unsigned);
-    makeCard("Suspicious Path","#A78BFA", &s_susp);
+    makeCard("Unsigned DLLs", "#FBBF24", &s_unsigned);
+    makeCard("Suspicious Path","#4DB8FF", &s_susp);
     root->addLayout(card_row);
 
     // ── Filter bar ───────────────────────────────────────────────────────────
@@ -455,7 +455,7 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
     detail_text->setReadOnly(true);
     detail_text->setMaximumHeight(100);
     detail_text->setStyleSheet(
-        "QTextEdit { background:transparent; color:#D0D0D0; font-size:12px; border:none; }");
+        "QTextEdit { background:transparent; color:#C7B6A2; font-size:12px; border:none; }");
     detail_lay->addWidget(detail_text);
 
     auto* det_btn_row = new QHBoxLayout;

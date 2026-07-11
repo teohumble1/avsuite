@@ -50,22 +50,38 @@ QWidget#Sidebar {
 
 QPushButton#NavButton {
     background: transparent;
-    color: rgba(199,182,162,0.45);
-    text-align: center;
+    color: #C7B6A2;
+    text-align: left;
     border: none;
     border-radius: 0px;
-    border-right: 3px solid transparent;
-    padding: 12px 4px;
-    font-size: 18pt;
+    border-left: 2px solid transparent;
+    padding: 0px 12px 0px 41px;
+    font-size: 13px;
+    font-weight: 400;
 }
 QPushButton#NavButton:hover {
-    background: rgba(255,122,0,0.12);
-    color: #FF9B3D;
+    background: #241708;
+    color: #ECE4DA;
 }
 QPushButton#NavButton:checked {
-    background: rgba(255,122,0,0.16);
+    background: rgba(255,122,0,0.12);
     color: #FF7A00;
-    border-right: 3px solid #FF7A00;
+    border-left: 2px solid #FF7A00;
+    font-weight: 500;
+}
+
+QPushButton#NavSection {
+    background: transparent;
+    border: none;
+    border-radius: 0px;
+    padding: 0px;
+}
+QLabel#NavSectionLabel {
+    background: transparent;
+    color: #8B7355;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
 }
 
 /* ── BENTO CARDS ── */
@@ -139,30 +155,21 @@ QPushButton#QuickTile {
 }
 
 /* ── GENERAL BUTTONS ── */
+/* Figma buttons are flat: amber primary with dark text, 8px radius. */
 QPushButton {
-    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
-        stop:0 #FF8C20, stop:0.44 #F07200, stop:0.5 #E06800, stop:1 #C04800);
-    color: #ffffff;
-    border-top:    1px solid rgba(255,200,100,0.22);
-    border-left:   1px solid rgba(255,180,80,0.12);
-    border-right:  1px solid rgba(0,0,0,0.30);
-    border-bottom: 3px solid rgba(60,20,0,0.85);
-    border-radius: 7px;
-    padding: 7px 16px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
+    background: #FF7A00;
+    color: #120B06;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
 }
 QPushButton:hover {
-    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
-        stop:0 #FFA040, stop:0.44 #FF8020, stop:0.5 #F07000, stop:1 #D05800);
+    background: #FF9B3D;
 }
 QPushButton:pressed {
-    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
-        stop:0 #C04800, stop:1 #A03800);
-    border-top:    2px solid rgba(0,0,0,0.35);
-    border-bottom: 1px solid rgba(60,20,0,0.40);
-    padding-top: 9px;
-    padding-bottom: 5px;
+    background: #E06800;
 }
 QPushButton:disabled {
     background: rgba(255,255,255,0.06);
@@ -171,42 +178,30 @@ QPushButton:disabled {
 }
 
 QPushButton#DangerButton {
-    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
-        stop:0 #FF6070, stop:0.44 #E83B50, stop:0.5 #D03050, stop:1 #A01838);
-    border-top:    1px solid rgba(255,120,140,0.35);
-    border-left:   1px solid rgba(255,100,120,0.20);
-    border-right:  1px solid rgba(0,0,0,0.30);
-    border-bottom: 3px solid rgba(80,0,20,0.80);
+    background: #FF5A6A;
+    color: #ffffff;
 }
 QPushButton#DangerButton:hover {
-    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
-        stop:0 #FF7080, stop:0.44 #F04A60, stop:0.5 #E03858, stop:1 #B02040);
+    background: #FF3A5A;
 }
 
 QPushButton#SuccessButton {
-    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
-        stop:0 #45E888, stop:0.44 #2ECC71, stop:0.5 #28B864, stop:1 #1A8848);
-    color: #05160D;
-    border-top:    1px solid rgba(120,255,180,0.32);
-    border-bottom: 3px solid rgba(0,50,20,0.80);
+    background: #4ADE80;
+    color: #120B06;
 }
 QPushButton#SuccessButton:hover {
-    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
-        stop:0 #55F099, stop:0.44 #38D878, stop:0.5 #30C86A, stop:1 #229855);
+    background: #6AE89A;
 }
 
+/* Ghost buttons (Figma "ghost" variant): transparent + hairline border. */
 QPushButton#SelectButton {
-    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
-        stop:0 #4DB8FF, stop:0.44 #2A9FE8, stop:0.5 #1E8FD8, stop:1 #1470B0);
-    color: #ffffff;
-    border-top:    1px solid rgba(100,200,255,0.35);
-    border-left:   1px solid rgba(80,180,255,0.22);
-    border-right:  1px solid rgba(0,0,0,0.30);
-    border-bottom: 3px solid rgba(10,40,80,0.80);
+    background: transparent;
+    color: #C7B6A2;
+    border: 1px solid #33261A;
 }
 QPushButton#SelectButton:hover {
-    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
-        stop:0 #5DC7FF, stop:0.44 #3AAEE8, stop:0.5 #2D9FD8, stop:1 #227FBF);
+    background: #241708;
+    color: #ECE4DA;
 }
 
 /* ── LABELS ── */

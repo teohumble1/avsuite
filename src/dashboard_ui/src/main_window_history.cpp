@@ -715,7 +715,7 @@ QWidget* MainWindow::BuildHistoryPage() {
     // HEADER BAR
     // ═══════════════════════════════════════════════════════════════════════════
     auto* hdr = new QWidget(page);
-    hdr->setFixedHeight(64);
+    hdr->setFixedHeight(78);
     hdr->setStyleSheet(
         "QWidget { background:rgba(18,11,6,234);"
         " border-bottom:1px solid rgba(255,170,90,25); }");
@@ -728,7 +728,7 @@ QWidget* MainWindow::BuildHistoryPage() {
     logo_box->setFixedSize(32,32);
     logo_box->setStyleSheet(
         "QFrame { background:qlineargradient(x1:0,y1:0,x2:1,y2:1,"
-        " stop:0 #FF7A00, stop:1 #CC4400);"
+        " stop:0 #FF7A00, stop:1 #FF7A00);"
         " border-radius:8px; border:none; }");
     auto* logo_box_l = new QVBoxLayout(logo_box);
     logo_box_l->setContentsMargins(7,7,7,7);
@@ -740,9 +740,10 @@ QWidget* MainWindow::BuildHistoryPage() {
     auto* title_lbl = new QLabel(QString::fromUtf8("L\xe1\xbb\x8b"
                                                     "ch s\xe1\xbb\xad qu\xc3\xa9t"), hdr);
     title_lbl->setStyleSheet(
-        "color:#ffffff; font-size:13.5pt; font-weight:700; background:transparent;");
+        "color:#ECE4DA; font-size:19pt; font-weight:800; letter-spacing:0.3px; background:transparent;");
     auto* sub_lbl = new QLabel("Review detections, scans and security events", hdr);
-    sub_lbl->setStyleSheet("color:#C7B6A2; font-size:9pt; background:transparent;");
+    sub_lbl->setStyleSheet("color:#C7B6A2; font-size:9.5pt; background:transparent;");
+    sub_lbl->setMinimumWidth(360);
     title_col->addWidget(title_lbl);
     title_col->addWidget(sub_lbl);
     hdr_l->addLayout(title_col);

@@ -342,7 +342,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
     for (const auto& t : kTargets) {
         auto* cb = new QCheckBox(QString::fromUtf8(t.label));
         cb->setChecked(t.enabled);
-        cb->setStyleSheet("color:#D0D0D0; font-size:11px;");
+        cb->setStyleSheet("color:#C7B6A2; font-size:11px;");
         targets_row->addWidget(cb);
         target_checks.push_back(cb);
     }
@@ -437,7 +437,7 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
     auto* detail_text = new QTextEdit;
     detail_text->setReadOnly(true);
     detail_text->setMaximumHeight(90);
-    detail_text->setStyleSheet("QTextEdit { background:transparent; color:#D0D0D0; font-size:12px; border:none; }");
+    detail_text->setStyleSheet("QTextEdit { background:transparent; color:#C7B6A2; font-size:12px; border:none; }");
     dl->addWidget(detail_text);
 
     auto* act_row = new QHBoxLayout;
@@ -456,8 +456,8 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
         return b;
     };
     auto* quarantine_btn = makeDBtn("Quarantine File", "#FF7A00");
-    auto* reveal_btn     = makeDBtn("Reveal in Explorer", "#A78BFA");
-    auto* vt_btn         = makeDBtn("VirusTotal Lookup", "#38BDF8");
+    auto* reveal_btn     = makeDBtn("Reveal in Explorer", "#4DB8FF");
+    auto* vt_btn         = makeDBtn("VirusTotal Lookup", "#4DB8FF");
     act_row->addStretch();
     dl->addLayout(act_row);
     root->addWidget(detail);

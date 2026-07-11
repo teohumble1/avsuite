@@ -260,7 +260,7 @@ void MainWindow::RunAiGenerationTurn() {
                         if (ai_thinking_timer_) ai_thinking_timer_->stop();
                         ai_typing_label_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
                         ai_typing_label_->setStyleSheet(
-                            "color:#E8D8C8; font-size:10pt; background:transparent;");
+                            "color:#ECE4DA; font-size:10pt; background:transparent;");
                     }
                     ai_typing_text_ += QString::fromUtf8(token.c_str());
                     ai_typing_label_->setTextFormat(Qt::PlainText);
@@ -278,14 +278,14 @@ void MainWindow::RunAiGenerationTurn() {
                     if (ai_typing_text_.isEmpty()) {
                         ai_typing_label_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
                         ai_typing_label_->setStyleSheet(
-                            "color:#E8D8C8; font-size:10pt; background:transparent;");
+                            "color:#ECE4DA; font-size:10pt; background:transparent;");
                         ai_typing_label_->setText(
                             QString::fromUtf8("(Kh\xc3\xb4ng c\xc3\xb3 ph\xe1\xba\xa3n h\xe1\xbb\x93i)"));
                     } else if (toolcall) {
                         // Don't show the raw TOOL_CALL JSON to the user.
                         ai_typing_label_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
                         ai_typing_label_->setStyleSheet(
-                            "color:#9FB0C0; font-size:9.5pt; font-style:italic; background:transparent;");
+                            "color:#8B7355; font-size:9.5pt; font-style:italic; background:transparent;");
                         ai_typing_label_->setText(
                             QString::fromUtf8("\xf0\x9f\x94\xa7 \xc4\x90" "ang g\xe1\xbb\x8di c\xc3\xb4ng c\xe1\xbb\xa5: ") +
                             QString::fromStdString(toolcall->name));
@@ -361,22 +361,22 @@ void MainWindow::HandleAiToolCall(const std::string& tool_name, const std::strin
     card_l->setSpacing(8);
     auto* lbl = new QLabel(QString::fromUtf8("\xe2\x9a\xa0\xef\xb8\x8f ") + DescribeDestructiveCall(tc), card);
     lbl->setWordWrap(true);
-    lbl->setStyleSheet("color:#FFD8D8; font-size:9.5pt; background:transparent;");
+    lbl->setStyleSheet("color:#ECE4DA; font-size:9.5pt; background:transparent;");
     card_l->addWidget(lbl);
     auto* btn_row = new QHBoxLayout();
     btn_row->setSpacing(8);
     auto* confirm_btn = new QPushButton(QString::fromUtf8("X\xc3\xa1" "c nh\xe1\xba\xadn"), card);
     confirm_btn->setCursor(Qt::PointingHandCursor);
     confirm_btn->setStyleSheet(
-        "QPushButton { background:#C0304A; border:none; border-radius:8px; color:#fff;"
-        " font-weight:700; padding:7px 18px; } QPushButton:hover { background:#D8405C; }"
-        " QPushButton:disabled { background:#4A2A30; color:#886A6A; }");
+        "QPushButton { background:#FF5A6A; border:none; border-radius:8px; color:#fff;"
+        " font-weight:700; padding:7px 18px; } QPushButton:hover { background:#FF3A5A; }"
+        " QPushButton:disabled { background:#3A1F1F; color:#8B7355; }");
     auto* cancel_btn = new QPushButton(QString::fromUtf8("H\xe1\xbb\xa7y"), card);
     cancel_btn->setCursor(Qt::PointingHandCursor);
     cancel_btn->setStyleSheet(
-        "QPushButton { background:#2A2A2A; border:none; border-radius:8px; color:#ccc;"
-        " padding:7px 18px; } QPushButton:hover { background:#3A3A3A; }"
-        " QPushButton:disabled { background:#222; color:#666; }");
+        "QPushButton { background:#241708; border:1px solid #33261A; border-radius:8px; color:#C7B6A2;"
+        " padding:7px 18px; } QPushButton:hover { background:#33261A; }"
+        " QPushButton:disabled { background:#1C1108; color:#8B7355; }");
     btn_row->addWidget(confirm_btn);
     btn_row->addWidget(cancel_btn);
     btn_row->addStretch();

@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ TeoAvSuite
+<img src="docs/images/banner.png" alt="TeoAvSuite — Windows kernel security research suite" width="1000"/>
 
 ### Windows Kernel Security Research Suite
 **Kernel-mode threat detection · YARA engine · Behavior analysis · Local AI analyst**
@@ -27,8 +27,6 @@
 [**🖼 Screenshots**](#screenshots--ảnh-chụp-màn-hình) ·
 [**📦 All releases**](https://github.com/teohumble1/avsuite/releases) ·
 [**⚠ Limitations**](#important-limitations--những-hạn-chế-quan-trọng)
-
-<img src="docs/images/dashboard-home.png" alt="TeoAvSuite dashboard — amber dark theme" width="860"/>
 
 </div>
 

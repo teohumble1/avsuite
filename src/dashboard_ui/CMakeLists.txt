@@ -43,8 +43,10 @@ set(AVDASHBOARD_PAGE_SOURCES
 
 add_executable(avdashboard WIN32
     src/main.cpp
+    src/perf_mode.cpp
     ${AVDASHBOARD_PAGE_SOURCES}
     src/main_window.hpp
+    src/perf_mode.hpp
     app.rc
 )
 

@@ -1,4 +1,5 @@
 #include "main_window.hpp"
+#include "perf_mode.hpp"
 
 // Windows headers must come before Qt on Windows to avoid type conflicts.
 #define NOMINMAX
@@ -459,47 +460,62 @@ public:
     explicit CyberTile(const QString& text, QWidget* parent = nullptr)
         : QPushButton(text, parent)
     {
-        shadow_ = new QGraphicsDropShadowEffect(this);
-        shadow_->setColor(QColor(255, 122, 0, 0));
-        shadow_->setBlurRadius(0);
-        shadow_->setOffset(0, 4);
-        setGraphicsEffect(shadow_);
+        const bool low = IsLowEndSystem();
 
-        // Shimmer sweep (runs only while hovered)
+        // The neon glow drop-shadow is a CPU-rasterised QGraphicsEffect whose
+        // blur is re-rendered every animation frame — the single most expensive
+        // per-tile effect. Skip it entirely on low-end/old hardware.
+        if (!low) {
+            shadow_ = new QGraphicsDropShadowEffect(this);
+            shadow_->setColor(QColor(255, 122, 0, 0));
+            shadow_->setBlurRadius(0);
+            shadow_->setOffset(0, 4);
+            setGraphicsEffect(shadow_);
+        }
+
+        // Shimmer sweep (runs only while hovered). 60fps on capable machines,
+        // a lighter ~25fps on low-end so it never pegs a weak CPU/iGPU.
         shimmer_timer_ = new QTimer(this);
-        shimmer_timer_->setInterval(16);
+        shimmer_timer_->setInterval(low ? 40 : 16);
         connect(shimmer_timer_, &QTimer::timeout, this, [this] {
             shimmer_x_ += 3.5;
             if (shimmer_x_ > width() + 70.0) shimmer_x_ = -70.0;
             update();
         });
 
-        // Smooth glow in/out
-        glow_anim_ = new QVariantAnimation(this);
-        glow_anim_->setDuration(180);
-        glow_anim_->setEasingCurve(QEasingCurve::InOutQuad);
-        glow_anim_->setStartValue(0.0);
-        glow_anim_->setEndValue(1.0);
-        connect(glow_anim_, &QVariantAnimation::valueChanged, this, [this](const QVariant& v) {
-            glow_t_ = v.toDouble();
-            shadow_->setBlurRadius(glow_t_ * 28.0);
-            shadow_->setColor(QColor(255, 122, 0, static_cast<int>(glow_t_ * 160)));
-            update();
-        });
+        // Smooth glow in/out — it only drives the drop shadow, so it's pointless
+        // (and its valueChanged would deref a null shadow_) on low-end. Skip it.
+        if (!low) {
+            glow_anim_ = new QVariantAnimation(this);
+            glow_anim_->setDuration(180);
+            glow_anim_->setEasingCurve(QEasingCurve::InOutQuad);
+            glow_anim_->setStartValue(0.0);
+            glow_anim_->setEndValue(1.0);
+            connect(glow_anim_, &QVariantAnimation::valueChanged, this, [this](const QVariant& v) {
+                glow_t_ = v.toDouble();
+                shadow_->setBlurRadius(glow_t_ * 28.0);
+                shadow_->setColor(QColor(255, 122, 0, static_cast<int>(glow_t_ * 160)));
+                update();
+            });
+        }
     }
 
 protected:
     void enterEvent(QEnterEvent* e) override {
         QPushButton::enterEvent(e);
-        glow_anim_->setDirection(QAbstractAnimation::Forward);
-        glow_anim_->start();
+        if (glow_anim_) {
+            glow_anim_->setDirection(QAbstractAnimation::Forward);
+            glow_anim_->start();
+        }
         shimmer_x_ = -70.0;
         shimmer_timer_->start();
     }
     void leaveEvent(QEvent* e) override {
         QPushButton::leaveEvent(e);
-        glow_anim_->setDirection(QAbstractAnimation::Backward);
-        glow_anim_->start();
+        if (glow_anim_) {
+            glow_anim_->setDirection(QAbstractAnimation::Backward);
+            glow_anim_->start();
+        }
         shimmer_timer_->stop();
         shimmer_x_ = -200.0;
         update();
@@ -1764,7 +1780,9 @@ QWidget* MainWindow::BuildSidebar() {
             const bool show = !body->isVisible() || body->maximumHeight() == 0;
             chev->setText(show ? QString::fromUtf8("▾") : QString::fromUtf8("▸"));
             auto* anim = new QPropertyAnimation(body, "maximumHeight", body);
-            anim->setDuration(240);
+            // AnimMs() collapses this to 0 (instant, no per-frame relayout) on
+            // low-end/old hardware; full 240ms OutCubic slide on capable machines.
+            anim->setDuration(avdashboard::AnimMs(240));
             anim->setEasingCurve(QEasingCurve::OutCubic);
             if (show) {
                 body->setMaximumHeight(0);
@@ -2339,7 +2357,11 @@ void MainWindow::GoToPage(int index) {
     // Figma-style page transition: slide in from the right (24px) + fade.
     // A pure opacity fade on a full page is nearly invisible; the horizontal
     // motion is what makes the switch feel alive.
-    if (QWidget* incoming = pages_->currentWidget(); incoming && previous != index) {
+    // On low-end/old hardware skip the slide+fade entirely: the page is already
+    // shown (setCurrentIndex above), and the per-frame QGraphicsOpacityEffect on
+    // a full page is exactly the kind of raster effect that janks weak machines.
+    if (QWidget* incoming = pages_->currentWidget();
+        incoming && previous != index && !IsLowEndSystem()) {
         const QPoint home = incoming->pos();
         incoming->move(home + QPoint(24, 0));
         auto* slide = new QPropertyAnimation(incoming, "pos", incoming);
@@ -2364,20 +2386,22 @@ void MainWindow::GoToPage(int index) {
     }
     if (auto* button = nav_group_->button(index)) {
         button->setChecked(true);
-        // Brief opacity pulse on nav selection
-        auto* eff = new QGraphicsOpacityEffect(button);
-        eff->setOpacity(1.0);
-        button->setGraphicsEffect(eff);
-        auto* pa = new QPropertyAnimation(eff, "opacity", button);
-        pa->setDuration(350);
-        pa->setKeyValueAt(0.0, 1.0);
-        pa->setKeyValueAt(0.25, 0.55);
-        pa->setKeyValueAt(1.0, 1.0);
-        pa->setEasingCurve(QEasingCurve::InOutCubic);
-        connect(pa, &QPropertyAnimation::finished, button, [button] {
-            button->setGraphicsEffect(nullptr);
-        });
-        pa->start(QAbstractAnimation::DeleteWhenStopped);
+        // Brief opacity pulse on nav selection — decorative only; skip on low-end.
+        if (!IsLowEndSystem()) {
+            auto* eff = new QGraphicsOpacityEffect(button);
+            eff->setOpacity(1.0);
+            button->setGraphicsEffect(eff);
+            auto* pa = new QPropertyAnimation(eff, "opacity", button);
+            pa->setDuration(350);
+            pa->setKeyValueAt(0.0, 1.0);
+            pa->setKeyValueAt(0.25, 0.55);
+            pa->setKeyValueAt(1.0, 1.0);
+            pa->setEasingCurve(QEasingCurve::InOutCubic);
+            connect(pa, &QPropertyAnimation::finished, button, [button] {
+                button->setGraphicsEffect(nullptr);
+            });
+            pa->start(QAbstractAnimation::DeleteWhenStopped);
+        }
     }
     if (index == 1 && nav_history_btn_) {
         detection_unread_ = 0;

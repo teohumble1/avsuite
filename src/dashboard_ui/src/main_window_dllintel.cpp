@@ -128,13 +128,23 @@ static bool IsDllSignedByCatalog(const std::wstring& path) {
 }
 
 static bool IsDllSigned(const std::wstring& path) {
-    // Check embedded Authenticode first
-    if (IsDllSignedEmbedded(path)) return true;
+    // WinVerifyTrust costs tens of ms per call; the same DLL path recurs across
+    // many processes and across repeated scans, so cache the verdict by path.
+    // This is the single biggest scan-time win on machines with many processes.
+    static std::mutex cache_mtx;
+    static std::unordered_map<std::wstring, bool> cache;
+    {
+        std::lock_guard<std::mutex> lk(cache_mtx);
+        auto it = cache.find(path);
+        if (it != cache.end()) return it->second;
+    }
 
-    // Then check if it's signed via Windows catalog (system files)
-    if (IsDllSignedByCatalog(path)) return true;
+    // Check embedded Authenticode first, then Windows catalog (system files).
+    const bool signed_ok = IsDllSignedEmbedded(path) || IsDllSignedByCatalog(path);
 
-    return false;
+    std::lock_guard<std::mutex> lk(cache_mtx);
+    cache.emplace(path, signed_ok);
+    return signed_ok;
 }
 
 // ─── DLL search-order hijack candidates ──────────────────────────────────────
@@ -495,6 +505,8 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
     auto refreshTable = [=] {
         std::lock_guard<std::mutex> lk(state->mtx);
         tbl->setRowCount(0);
+        // Suppress per-item repaints while we bulk-fill; one repaint at the end.
+        tbl->setUpdatesEnabled(false);
 
         int total = 0, n_hijack = 0, n_unsigned = 0, n_susp = 0;
 
@@ -517,14 +529,13 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
             const QColor risk_color = (t.risk_score >= 80) ? QColor(0xFF,0x5A,0x6A)
                                     : (t.risk_score >= 55) ? QColor(0xFF,0x7A,0x00)
                                                            : QColor(0xFA,0xCC,0x15);
-            auto* dot_w = new QWidget;
-            auto* dot_l = new QHBoxLayout(dot_w);
-            dot_l->setContentsMargins(8, 0, 0, 0);
-            auto* dot = new QLabel;
-            dot->setFixedSize(10, 10);
-            dot->setStyleSheet(QString("background:%1; border-radius:5px;").arg(risk_color.name()));
-            dot_l->addWidget(dot);
-            tbl->setCellWidget(row, 0, dot_w);
+            // Colored "●" as a plain item instead of a per-row QWidget+layout+QLabel
+            // cell widget. Cell widgets dominate the UI-thread cost when filling a
+            // table with many rows; a styled item renders far cheaper.
+            auto* dot_item = new QTableWidgetItem(QString(QChar(0x25CF)));
+            dot_item->setForeground(risk_color);
+            dot_item->setTextAlignment(Qt::AlignCenter);
+            tbl->setItem(row, 0, dot_item);
 
             auto make_item = [](const std::string& s, QColor c = QColor(0xE8,0xE8,0xE8)) {
                 auto* item = new QTableWidgetItem(QString::fromStdString(s));
@@ -548,6 +559,8 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
             else if (t.threat_type == "Unsigned DLL") n_unsigned++;
             else n_susp++;
         }
+
+        tbl->setUpdatesEnabled(true);
 
         if (s_total)    s_total->setText(QString::number(total));
         if (s_hijack)   s_hijack->setText(QString::number(n_hijack));
@@ -608,9 +621,15 @@ QWidget* BuildDllIntelPage(QWidget* parent) {
     QObject::connect(fb_unsigned, &QPushButton::clicked, fb_unsigned, [=] { setFilter(2, fb_unsigned); });
     QObject::connect(fb_susp,     &QPushButton::clicked, fb_susp,     [=] { setFilter(3, fb_susp); });
 
+    // Debounce typing: rebuilding the whole table on every keystroke is the main
+    // source of input lag. Coalesce bursts of keystrokes into a single rebuild.
+    auto* search_debounce = new QTimer(page);
+    search_debounce->setSingleShot(true);
+    search_debounce->setInterval(200);
+    QObject::connect(search_debounce, &QTimer::timeout, page, [=] { refreshTable(); });
     QObject::connect(search_edit, &QLineEdit::textChanged, search_edit, [=](const QString& t) {
         state->search_text = t;
-        refreshTable();
+        search_debounce->start();
     });
 
     // ── Row selection → detail panel ──────────────────────────────────────────

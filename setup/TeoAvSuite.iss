@@ -3,6 +3,7 @@
 ; Command: "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" TeoAvSuite.iss
 
 #define RelDir "..\build\release\src\dashboard_ui\Release"
+#define AmsiDir "..\build\release\src\amsi_provider\Release"
 
 [Setup]
 AppName=TeoAvSuite
@@ -52,6 +53,14 @@ Source: "{#RelDir}\app_icon.png"; DestDir: "{app}"; Flags: ignoreversion
 ; YARA rules
 Source: "{#RelDir}\yara_rules\*"; DestDir: "{app}\yara_rules"; Flags: ignoreversion recursesubdirs createallsubdirs
 
+; AMSI provider (script-scanning) DLL + its own YARA rules. Registered in [Run]
+; below via regsvr32 (DllRegisterServer records this installed {app} path in the
+; AMSI provider registry, so registration always points at the shipped RELEASE
+; DLL -- never a dev build\ or Debug path). Its rules live in {app}\rules, which
+; is where DllRegisterServer looks (ThisDllDir\rules).
+Source: "{#AmsiDir}\avamsi.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#AmsiDir}\rules\*"; DestDir: "{app}\rules"; Flags: ignoreversion recursesubdirs createallsubdirs
+
 ; Config file -- ship a sanitized default (empty API keys, portable paths), NOT
 ; the developer's build-tree avsuite.json which contains a real VirusTotal key
 ; and absolute D:\Dev paths. onlyifdoesntexist preserves a user's own settings
@@ -69,10 +78,19 @@ Name: "{commondesktop}\TeoAvSuite"; Filename: "{app}\avdashboard.exe"; Tasks: de
 Name: "{commonstartup}\TeoAvSuite"; Filename: "{app}\avdashboard.exe"; Tasks: startupicon
 
 [Run]
+; Register the AMSI provider (elevated -- installer is admin). Runs during install,
+; before the optional app launch, so script-scanning is live immediately.
+Filename: "regsvr32.exe"; Parameters: "/s ""{app}\avamsi.dll"""; StatusMsg: "Registering AMSI script-scanning provider..."; Flags: runhidden
 Filename: "{app}\avdashboard.exe"; Description: "{cm:LaunchProgram,TeoAvSuite}"; Flags: nowait postinstall skipifsilent
+
+[UninstallRun]
+; Unregister the AMSI provider before files are removed, so no stale/dangling
+; provider is left loading into every AMSI host after uninstall.
+Filename: "regsvr32.exe"; Parameters: "/s /u ""{app}\avamsi.dll"""; Flags: runhidden; RunOnceId: "UnregAvSuiteAmsi"
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\yara_rules"
+Type: filesandordirs; Name: "{app}\rules"
 Type: filesandordirs; Name: "{app}\platforms"
 
 [Registry]

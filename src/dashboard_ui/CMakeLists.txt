@@ -80,6 +80,16 @@ add_custom_command(TARGET avdashboard POST_BUILD
         $<TARGET_FILE_DIR:avdashboard>/yara_rules
 )
 
+# Ship the privacy hardening scripts next to the exe. The Telemetry Guard and
+# Fingerprint Guard tabs' Apply buttons run these elevated from the exe's own
+# directory (ScriptPath()), so they must sit beside avdashboard.exe.
+add_custom_command(TARGET avdashboard POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/scripts/Harden-Telemetry.ps1
+        ${CMAKE_SOURCE_DIR}/scripts/Harden-Fingerprint.ps1
+        $<TARGET_FILE_DIR:avdashboard>
+)
+
 # Qt's platform plugin (qwindows.dll) is loaded dynamically at runtime, so
 # vcpkg's automatic dependency-copying (which only follows direct link
 # dependencies) won't bring it along -- copy it explicitly. vcpkg mirrors the

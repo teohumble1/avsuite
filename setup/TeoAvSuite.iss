@@ -7,7 +7,7 @@
 
 [Setup]
 AppName=TeoAvSuite
-AppVersion=1.0.4
+AppVersion=1.0.5
 AppPublisher=TeoHumble Security
 AppPublisherURL=https://github.com/teohumble1/avsuite
 AppSupportURL=https://github.com/teohumble1/avsuite/issues
@@ -16,7 +16,7 @@ DefaultDirName={autopf}\TeoAvSuite
 DefaultGroupName=TeoAvSuite
 AllowNoIcons=yes
 OutputDir=.\Output
-OutputBaseFilename=TeoAvSuite-Setup-v1.0.4
+OutputBaseFilename=TeoAvSuite-Setup-v1.0.5
 Compression=lzma2
 SolidCompression=yes
 PrivilegesRequired=admin
@@ -52,6 +52,10 @@ Source: "{#RelDir}\app_icon.png"; DestDir: "{app}"; Flags: ignoreversion
 
 ; YARA rules
 Source: "{#RelDir}\yara_rules\*"; DestDir: "{app}\yara_rules"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+; Privacy hardening scripts run (elevated) by the Telemetry Guard / Fingerprint
+; Guard tabs' Apply buttons. The app resolves them next to avdashboard.exe.
+Source: "..\scripts\*.ps1"; DestDir: "{app}"; Flags: ignoreversion
 
 ; AMSI provider (script-scanning) DLL + its own YARA rules. Registered in [Run]
 ; below via regsvr32 (DllRegisterServer records this installed {app} path in the
@@ -95,7 +99,7 @@ Type: filesandordirs; Name: "{app}\platforms"
 
 [Registry]
 Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "InstallPath"; ValueData: "{app}"; Flags: createvalueifdoesntexist
-Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "Version"; ValueData: "1.0.4"; Flags: createvalueifdoesntexist
+Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "Version"; ValueData: "1.0.5"; Flags: createvalueifdoesntexist
 
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);

@@ -115,6 +115,13 @@ This is an **educational/research project** that implements:
 
 ## Screenshots | Ảnh Chụp Màn Hình
 
+<div align="center">
+<img src="docs/images/history.png" width="900" alt="Scan History — detections, activity chart, stats and live security feed"/>
+<br/><em>Scan History — detections, activity chart, live security feed | Lịch sử quét — phát hiện, biểu đồ hoạt động, feed sự kiện trực tiếp</em>
+</div>
+
+<br/>
+
 | Dashboard (Home) | ETW Process Monitor (live) |
 |---|---|
 | <img src="docs/images/dashboard-home.png" width="440"/> | <img src="docs/images/etw-monitor.png" width="440"/> |

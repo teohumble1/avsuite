@@ -29,6 +29,7 @@
 
 #include <QAbstractItemView>
 #include <QComboBox>
+#include <QFont>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -36,6 +37,7 @@
 #include <QLineEdit>
 #include <QMenu>
 #include <QPushButton>
+#include <QStyle>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QTime>
@@ -377,7 +379,9 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     revertBtn->setStyleSheet(QString(
         "QPushButton{background:transparent;color:%1;border:1px solid %2;border-radius:%3px;padding:0 14px;}"
         "QPushButton:hover{color:%4;}").arg(theme::Dim).arg(theme::Border).arg(theme::RadiusMd).arg(theme::Text));
-    auto* refreshBtn = new QPushButton(QString::fromUtf8("\xE2\x86\xBB"));
+    auto* refreshBtn = new QPushButton();
+    // Qt standard reload pixmap always renders (no font-glyph dependency).
+    refreshBtn->setIcon(refreshBtn->style()->standardIcon(QStyle::SP_BrowserReload));
     refreshBtn->setFixedSize(34, 34);
     refreshBtn->setStyleSheet(QString(
         "QPushButton{background:transparent;color:%1;border:1px solid %2;border-radius:%3px;}"
@@ -617,6 +621,15 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
             cnt->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             tbl->setItem(row, 6, cnt);
             ++shown;
+        }
+        if (shown == 0) {
+            tbl->insertRow(0);
+            tbl->setSpan(0, 0, 1, tbl->columnCount());
+            auto* msg = new QTableWidgetItem(
+                QString::fromUtf8("No telemetry captured yet \xE2\x80\x94 monitoring\xE2\x80\xA6"));
+            msg->setForeground(QColor(theme::Dim));
+            msg->setTextAlignment(Qt::AlignCenter);
+            tbl->setItem(0, 0, msg);
         }
         tbl->setUpdatesEnabled(true);
         countLbl->setText(QString("%1 events").arg(shown));

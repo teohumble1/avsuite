@@ -21,6 +21,7 @@
 #include "av_quit_guard.hpp"
 
 #include <QAbstractItemView>
+#include <QFont>
 #include <QFrame>
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -30,6 +31,7 @@
 #include <QMenu>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QStyle>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QTime>
@@ -321,7 +323,8 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
     auto* revertBtn = new QPushButton("Revert"); revertBtn->setFixedHeight(34);
     revertBtn->setStyleSheet(QString("QPushButton{background:transparent;color:%1;border:1px solid %2;border-radius:%3px;padding:0 14px;}"
         "QPushButton:hover{color:%4;}").arg(theme::Dim).arg(theme::Border).arg(theme::RadiusMd).arg(theme::Text));
-    auto* refreshBtn = new QPushButton(QString::fromUtf8("\xE2\x86\xBB")); refreshBtn->setFixedSize(34,34);
+    auto* refreshBtn = new QPushButton(); refreshBtn->setFixedSize(34,34);
+    refreshBtn->setIcon(refreshBtn->style()->standardIcon(QStyle::SP_BrowserReload));
     refreshBtn->setStyleSheet(QString("QPushButton{background:transparent;color:%1;border:1px solid %2;border-radius:%3px;}"
         "QPushButton:hover{color:%4;}").arg(theme::Dim).arg(theme::Border).arg(theme::RadiusMd).arg(theme::Text));
     al->addWidget(applyBtn); al->addWidget(revertBtn); al->addWidget(refreshBtn);
@@ -514,6 +517,15 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
             auto* cn = item(QString::number(r.count), QColor(theme::Dim));
             cn->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter); tbl->setItem(row, 6, cn);
             ++shown;
+        }
+        if (shown == 0) {
+            tbl->insertRow(0);
+            tbl->setSpan(0, 0, 1, tbl->columnCount());
+            auto* msg = new QTableWidgetItem(
+                QString::fromUtf8("No trackers seen yet \xE2\x80\x94 monitoring\xE2\x80\xA6"));
+            msg->setForeground(QColor(theme::Dim));
+            msg->setTextAlignment(Qt::AlignCenter);
+            tbl->setItem(0, 0, msg);
         }
         tbl->setUpdatesEnabled(true);
         cntLbl->setText(QString("%1 events").arg(shown));

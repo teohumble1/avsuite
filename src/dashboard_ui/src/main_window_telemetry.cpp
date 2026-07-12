@@ -264,11 +264,28 @@ void CaptureRows(State* st) {
 }
 
 // ─── Small UI builders ───────────────────────────────────────────────────────
-QFrame* Card() {
-    auto* c = new QFrame;
-    c->setStyleSheet(QString("QFrame{background:%1;border:1px solid %2;border-radius:%3px;}")
+QWidget* Card() {
+    auto* c = new QWidget;
+    // Scope the border to THIS widget via an id selector. A selector-less inline
+    // stylesheet ("border:1px...") cascades the border onto every child QLabel
+    // (which boxes/clips their text); an id selector matches only the card.
+    c->setObjectName("GuardCard");
+    c->setStyleSheet(QString("QWidget#GuardCard{background:%1;border:1px solid %2;border-radius:%3px;}")
                          .arg(theme::Surface).arg(theme::Border).arg(theme::RadiusLg));
     return c;
+}
+
+// Section heading with a small amber accent bar on the left.
+QWidget* SectionTitle(const QString& text) {
+    auto* w = new QWidget;
+    auto* h = new QHBoxLayout(w);
+    h->setContentsMargins(0, 0, 0, 0); h->setSpacing(8);
+    auto* bar = new QLabel; bar->setFixedSize(3, 14);
+    bar->setStyleSheet(QString("background:%1;border-radius:1px;").arg(theme::Accent));
+    auto* lbl = new QLabel(text);
+    lbl->setStyleSheet(QString("color:%1;font-size:13px;font-weight:600;").arg(theme::Text));
+    h->addWidget(bar); h->addWidget(lbl); h->addStretch();
+    return w;
 }
 
 // A checkable pill toggle (flat, on-theme).
@@ -285,6 +302,14 @@ QPushButton* Toggle(bool checked) {
     return t;
 }
 
+// Absolute path to a hardening script shipped next to the executable (installer
+// drops them in {app}; the CMake post-build copies them beside the dev exe).
+std::wstring ScriptPath(const wchar_t* name) {
+    wchar_t buf[MAX_PATH]; GetModuleFileNameW(nullptr, buf, MAX_PATH);
+    std::wstring p(buf); auto s = p.find_last_of(L"\\/");
+    return (s == std::wstring::npos ? std::wstring() : p.substr(0, s + 1)) + name;
+}
+
 } // namespace
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -292,6 +317,9 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     auto* page = new QWidget(parent);
     page->setObjectName("TelemetryPage");
     ArmQuitGuard(page);
+    // QLabel is-a QFrame, so an ancestor "QFrame{border}" stylesheet would box
+    // every text label. Reset borders for all labels on this page.
+    page->setStyleSheet("QLabel{border:none;}");
 
     auto* st = new State();
     st->layers = {
@@ -315,10 +343,11 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     al->setSpacing(theme::Space2);
 
     auto* seg = new QWidget;
+    seg->setObjectName("GuardBox");
     auto* segl = new QHBoxLayout(seg);
     segl->setContentsMargins(2, 2, 2, 2);
     segl->setSpacing(2);
-    seg->setStyleSheet(QString("background:%1;border:1px solid %2;border-radius:%3px;")
+    seg->setStyleSheet(QString("QWidget#GuardBox{background:%1;border:1px solid %2;border-radius:%3px;}")
                            .arg(theme::Surface).arg(theme::Border).arg(theme::RadiusMd));
     auto makeSeg = [&](const QString& text) {
         auto* b = new QPushButton(text);
@@ -368,7 +397,7 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     struct CardRefs { QLabel* value; QLabel* sub; QLabel* dot; };
     auto makeCard = [&](const QString& label, const QString& color) -> CardRefs {
         auto* c = Card();
-        c->setFixedHeight(84);
+        c->setFixedHeight(96);
         auto* cl = new QVBoxLayout(c);
         cl->setContentsMargins(14, 12, 14, 12);
         cl->setSpacing(4);
@@ -400,9 +429,7 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     auto* ll = new QVBoxLayout(layerCard);
     ll->setContentsMargins(14, 12, 14, 12);
     ll->setSpacing(theme::Space3);
-    auto* layerHead = new QLabel(QString::fromUtf8("Layer Control"));
-    layerHead->setStyleSheet(QString("color:%1;font-size:13px;font-weight:600;").arg(theme::Text));
-    ll->addWidget(layerHead);
+    ll->addWidget(SectionTitle(QString::fromUtf8("Layer Control")));
     auto* tilesRow = new QHBoxLayout;
     tilesRow->setSpacing(theme::Space2);
 
@@ -410,8 +437,9 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     std::vector<QPushButton*> tileToggle(st->layers.size());
     for (size_t i = 0; i < st->layers.size(); ++i) {
         const auto& L = st->layers[i];
-        auto* tile = new QFrame;
-        tile->setStyleSheet(QString("QFrame{background:%1;border:1px solid %2;border-radius:%3px;}")
+        auto* tile = new QWidget;
+        tile->setObjectName("GuardBox");
+        tile->setStyleSheet(QString("QWidget#GuardBox{background:%1;border:1px solid %2;border-radius:%3px;}")
                                 .arg("rgba(255,122,0,0.06)").arg("rgba(255,122,0,0.20)").arg(theme::RadiusMd));
         auto* tl = new QVBoxLayout(tile);
         tl->setContentsMargins(10, 10, 10, 10);
@@ -465,9 +493,7 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     auto* tb = new QHBoxLayout(toolbar);
     tb->setContentsMargins(14, 10, 14, 10);
     tb->setSpacing(theme::Space2);
-    auto* monTitle = new QLabel(QString::fromUtf8("Realtime Telemetry Monitor"));
-    monTitle->setStyleSheet(QString("color:%1;font-size:13px;font-weight:600;").arg(theme::Text));
-    tb->addWidget(monTitle);
+    tb->addWidget(SectionTitle(QString::fromUtf8("Realtime Telemetry Monitor")));
     auto* liveLbl = new QLabel(QString::fromUtf8("\xE2\x97\x8F LIVE"));
     liveLbl->setStyleSheet(QString("color:%1;font-size:10px;font-family:%2;").arg(theme::Danger).arg(theme::MonoFamily));
     tb->addWidget(liveLbl);
@@ -521,9 +547,10 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     body->addWidget(tblCard, 1);
 
     // detail panel (hidden until a row is selected)
-    auto* detail = new QFrame;
+    auto* detail = new QWidget;
+    detail->setObjectName("GuardBox");
     detail->setFixedWidth(0);
-    detail->setStyleSheet(QString("QFrame{background:%1;border:1px solid %2;border-radius:%3px;}")
+    detail->setStyleSheet(QString("QWidget#GuardBox{background:%1;border:1px solid %2;border-radius:%3px;}")
                               .arg(theme::Sidebar).arg(theme::Border).arg(theme::RadiusLg));
     auto* dl = new QVBoxLayout(detail);
     dl->setContentsMargins(14, 12, 14, 12);
@@ -707,8 +734,8 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     QObject::connect(applyBtn, &QPushButton::clicked, page, [=](){
         QString mode; { std::lock_guard<std::mutex> lk(st->mtx); st->mode = st->pendingMode; mode = st->mode; }
         const QString flag = mode == "BLOCKING" ? "-Apply" : "-Revert";
-        std::wstring params = L"-NoProfile -ExecutionPolicy Bypass -File \"C:\\Dev\\TelemetryBlock\\Harden-Telemetry.ps1\" "
-                            + flag.toStdWString();
+        std::wstring params = L"-NoProfile -ExecutionPolicy Bypass -File \""
+                            + ScriptPath(L"Harden-Telemetry.ps1") + L"\" " + flag.toStdWString();
         // runas => UAC prompt; script does the real service/registry/hosts/DoH work.
         ShellExecuteW(nullptr, L"runas", L"powershell.exe", params.c_str(), nullptr, SW_SHOWNORMAL);
         refreshStatus(); refreshTable();

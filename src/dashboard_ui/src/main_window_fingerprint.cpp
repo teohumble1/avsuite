@@ -240,18 +240,41 @@ void CaptureRows(State* st) {
     st->rows = std::move(rows); st->seen = st->rows.size();
 }
 
-QFrame* Card() {
-    auto* c = new QFrame;
-    c->setStyleSheet(QString("QFrame{background:%1;border:1px solid %2;border-radius:%3px;}")
+QWidget* Card() {
+    auto* c = new QWidget;
+    // Id-scoped so the border applies to the card only, not its child QLabels
+    // (a selector-less inline border cascades to children and boxes their text).
+    c->setObjectName("GuardBox");
+    c->setStyleSheet(QString("QWidget#GuardBox{background:%1;border:1px solid %2;border-radius:%3px;}")
                          .arg(theme::Surface).arg(theme::Border).arg(theme::RadiusLg));
     return c;
 }
+// Section heading with a small amber accent bar on the left.
+QWidget* SectionTitle(const QString& text) {
+    auto* w = new QWidget;
+    auto* h = new QHBoxLayout(w);
+    h->setContentsMargins(0, 0, 0, 0); h->setSpacing(8);
+    auto* bar = new QLabel; bar->setFixedSize(3, 14);
+    bar->setStyleSheet(QString("background:%1;border-radius:1px;").arg(theme::Accent));
+    auto* lbl = new QLabel(text);
+    lbl->setStyleSheet(QString("color:%1;font-size:13px;font-weight:600;").arg(theme::Text));
+    h->addWidget(bar); h->addWidget(lbl); h->addStretch();
+    return w;
+}
+
 QPushButton* Toggle(bool on) {
     auto* t = new QPushButton; t->setCheckable(true); t->setChecked(on);
     t->setFixedSize(38, 20); t->setCursor(Qt::PointingHandCursor);
     t->setStyleSheet(QString("QPushButton{border-radius:10px;background:#3A3A3E;border:1px solid #4A4A4E;}"
         "QPushButton:checked{background:%1;border:1px solid %1;}").arg(theme::Accent));
     return t;
+}
+
+// Absolute path to a hardening script shipped next to the executable.
+std::wstring ScriptPath(const wchar_t* name) {
+    wchar_t buf[MAX_PATH]; GetModuleFileNameW(nullptr, buf, MAX_PATH);
+    std::wstring p(buf); auto s = p.find_last_of(L"\\/");
+    return (s == std::wstring::npos ? std::wstring() : p.substr(0, s + 1)) + name;
 }
 
 } // namespace
@@ -261,6 +284,9 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
     auto* page = new QWidget(parent);
     page->setObjectName("FingerprintPage");
     ArmQuitGuard(page);
+    // QLabel is-a QFrame, so an ancestor "QFrame{border}" stylesheet would box
+    // every text label. Reset borders for all labels on this page.
+    page->setStyleSheet("QLabel{border:none;}");
 
     auto* st = new State();
     st->layers = {
@@ -277,8 +303,8 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
     // Header actions
     auto* actions = new QWidget;
     auto* al = new QHBoxLayout(actions); al->setContentsMargins(0,0,0,0); al->setSpacing(theme::Space2);
-    auto* seg = new QWidget; auto* sl = new QHBoxLayout(seg); sl->setContentsMargins(2,2,2,2); sl->setSpacing(2);
-    seg->setStyleSheet(QString("background:%1;border:1px solid %2;border-radius:%3px;")
+    auto* seg = new QWidget; seg->setObjectName("GuardBox"); auto* sl = new QHBoxLayout(seg); sl->setContentsMargins(2,2,2,2); sl->setSpacing(2);
+    seg->setStyleSheet(QString("QWidget#GuardBox{background:%1;border:1px solid %2;border-radius:%3px;}")
                            .arg(theme::Surface).arg(theme::Border).arg(theme::RadiusMd));
     auto mkSeg = [&](const QString& t){
         auto* b = new QPushButton(t); b->setCheckable(true); b->setFixedHeight(30); b->setCursor(Qt::PointingHandCursor);
@@ -306,7 +332,7 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
     auto* cardRow = new QHBoxLayout; cardRow->setSpacing(theme::Space3);
     struct CR { QLabel* v; QLabel* s; };
     auto mkCard = [&](const QString& label, const QString& color)->CR {
-        auto* c = Card(); c->setFixedHeight(84);
+        auto* c = Card(); c->setFixedHeight(96);
         auto* cl = new QVBoxLayout(c); cl->setContentsMargins(14,12,14,12); cl->setSpacing(4);
         auto* lbl = new QLabel(label.toUpper());
         lbl->setStyleSheet(QString("color:%1;font-size:10px;font-weight:600;letter-spacing:1px;").arg(theme::Dim));
@@ -329,18 +355,14 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
 
     auto* surfCard = Card();
     auto* surfL = new QVBoxLayout(surfCard); surfL->setContentsMargins(14,12,14,12); surfL->setSpacing(8);
-    auto* surfHead = new QLabel(QString::fromUtf8("Fingerprint Surface"));
-    surfHead->setStyleSheet(QString("color:%1;font-size:13px;font-weight:600;").arg(theme::Text));
-    surfL->addWidget(surfHead);
+    surfL->addWidget(SectionTitle(QString::fromUtf8("Fingerprint Surface")));
     auto* surfGrid = new QGridLayout; surfGrid->setHorizontalSpacing(16); surfGrid->setVerticalSpacing(6);
     surfL->addLayout(surfGrid); surfL->addStretch();
     midRow->addWidget(surfCard, 3);
 
     auto* layerCard = Card();
     auto* ll = new QVBoxLayout(layerCard); ll->setContentsMargins(14,12,14,12); ll->setSpacing(10);
-    auto* lh = new QLabel(QString::fromUtf8("Hardening"));
-    lh->setStyleSheet(QString("color:%1;font-size:13px;font-weight:600;").arg(theme::Text));
-    ll->addWidget(lh);
+    ll->addWidget(SectionTitle(QString::fromUtf8("Hardening")));
     std::vector<QLabel*> tileStatus(st->layers.size());
     for (size_t i = 0; i < st->layers.size(); ++i) {
         const auto& L = st->layers[i];
@@ -368,9 +390,7 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
     auto* tblCard = Card();
     auto* tc = new QVBoxLayout(tblCard); tc->setContentsMargins(0,0,0,0); tc->setSpacing(0);
     auto* toolbar = new QWidget; auto* tb = new QHBoxLayout(toolbar); tb->setContentsMargins(14,10,14,10); tb->setSpacing(theme::Space2);
-    auto* mt = new QLabel(QString::fromUtf8("Tracker & Fingerprint Monitor"));
-    mt->setStyleSheet(QString("color:%1;font-size:13px;font-weight:600;").arg(theme::Text));
-    tb->addWidget(mt);
+    tb->addWidget(SectionTitle(QString::fromUtf8("Tracker & Fingerprint Monitor")));
     auto* cntLbl = new QLabel("0 events"); cntLbl->setStyleSheet(QString("color:%1;font-size:11px;").arg(theme::Dim));
     tb->addWidget(cntLbl); tb->addStretch();
     QStringList chips = {"All","Fingerprint","Analytics","Ads"};
@@ -402,8 +422,8 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
     tc->addWidget(tbl, 1);
     body->addWidget(tblCard, 1);
 
-    auto* detail = new QFrame; detail->setFixedWidth(0);
-    detail->setStyleSheet(QString("QFrame{background:%1;border:1px solid %2;border-radius:%3px;}")
+    auto* detail = new QWidget; detail->setObjectName("GuardBox"); detail->setFixedWidth(0);
+    detail->setStyleSheet(QString("QWidget#GuardBox{background:%1;border:1px solid %2;border-radius:%3px;}")
                               .arg(theme::Sidebar).arg(theme::Border).arg(theme::RadiusLg));
     auto* dl = new QVBoxLayout(detail); dl->setContentsMargins(14,12,14,12); dl->setSpacing(8);
     auto* dTitle = new QLabel(QString::fromUtf8("Tracker Detail"));
@@ -428,7 +448,10 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
             auto* v = new QLabel(a.value);
             v->setStyleSheet(QString("color:%1;font-size:12px;font-family:%2;").arg(theme::Text).arg(theme::MonoFamily));
             auto* pill = new QLabel(a.exposed ? "exposed" : "protected");
-            pill->setStyleSheet(QString("color:%1;font-size:10px;font-weight:600;").arg(a.exposed ? theme::Danger : theme::Safe));
+            pill->setStyleSheet(QString("color:%1;background:%2;border-radius:8px;padding:1px 8px;"
+                                        "font-size:10px;font-weight:600;")
+                .arg(a.exposed ? "#E57373" : "#81C784")
+                .arg(a.exposed ? "rgba(229,57,53,0.14)" : "rgba(76,175,80,0.14)"));
             surfGrid->addWidget(k, r, 0);
             surfGrid->addWidget(v, r, 1);
             surfGrid->addWidget(pill, r, 2, Qt::AlignRight);
@@ -547,8 +570,8 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
     QObject::connect(applyBtn, &QPushButton::clicked, page, [=](){
         QString mode; { std::lock_guard<std::mutex> lk(st->mtx); st->mode = st->pendingMode; mode = st->mode; }
         const QString flag = mode == "HARDENED" ? "-Apply" : "-Revert";
-        std::wstring params = L"-NoProfile -ExecutionPolicy Bypass -File \"C:\\Dev\\TelemetryBlock\\Harden-Fingerprint.ps1\" "
-                            + flag.toStdWString();
+        std::wstring params = L"-NoProfile -ExecutionPolicy Bypass -File \""
+                            + ScriptPath(L"Harden-Fingerprint.ps1") + L"\" " + flag.toStdWString();
         ShellExecuteW(nullptr, L"runas", L"powershell.exe", params.c_str(), nullptr, SW_SHOWNORMAL);
         std::thread([st]{ ReadFingerprint(st); }).detach();
     });

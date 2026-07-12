@@ -873,38 +873,6 @@ Nhiều dự án portfolio overclaim khả năng. Dự án này rõ ràng ghi ch
 - `TEST-RESULTS.md` - Real testing data | Dữ liệu kiểm tra thực tế
 - `generate-cert.ps1` - Create self-signed certificate | Tạo chứng chỉ tự-ký
 
-## Interview Talking Points | Những Điểm Nói Chuyện Phỏng Vấn
-
-**"What's your false positive rate?"**
-> *Honest answer:* Unknown, likely high. This is research-stage code with limited benign testing (50 files vs 1M+ needed). I haven't done the 6-12 month tuning cycle that production AV requires. Without that, pattern detection will flag legitimate files. This is exactly why false positive minimization is listed as NOT implemented - it's the hardest part.
-
-**"Tỷ lệ dương tính giả của bạn là bao nhiêu?"**
-> *Câu trả lời trung thực:* Không biết, khả năng cao. Đây là mã ở giai đoạn nghiên cứu với kiểm tra lành mạnh hạn chế (50 tệp so với 1M+ cần). Tôi chưa thực hiện chu kỳ điều chỉnh 6-12 tháng mà AV sản xuất yêu cầu. Nếu không, phát hiện mô hình sẽ gắn cờ tệp hợp lệ. Đây chính xác là lý do tại sao giảm thiểu dương tính giả được liệt kê là KHÔNG được triển khai - đó là phần khó nhất.
-
----
-
-**"Is this production-ready?"**
-> No - it's a research project demonstrating kernel architecture. It detects *some* threats but has high false positives. Production AV needs extensive benign corpus testing and tuning.
-
-**"Điều này có sẵn sàng sản xuất không?"**
-> Không - đây là dự án nghiên cứu minh họa kiến trúc kernel. Nó phát hiện *một số* mối đe dọa nhưng có dương tính giả cao. AV sản xuất cần kiểm tra tập hợp lành mạnh rộng rãi và điều chỉnh.
-
----
-
-**"Why self-signed certificate?"**
-> For portfolio purposes. Production would use EV certificate from trusted CA. The important part is showing I understand code-signing practices.
-
-**"Tại sao chứng chỉ tự-ký?"**
-> Cho mục đích portfolio. Sản xuất sẽ sử dụng chứng chỉ EV từ CA đáng tin cậy. Phần quan trọng là cho thấy tôi hiểu các thực hành ký mã.
-
----
-
-**"How would you make it production?"**
-> The bottleneck is false positive tuning: real malware corpus (10k+ samples), benign corpus (1M+ files), iterative tuning to minimize FP without missing TP. That's 6-12 months of focused work. Detection logic is the easy part; tuning is the hard part.
-
-**"Bạn sẽ làm nó sản xuất như thế nào?"**
-> Tắc nghẽn là điều chỉnh dương tính giả: tập hợp malware thực (10k+ mẫu), tập hợp lành mạnh (1M+ tệp), điều chỉnh lặp lại để giảm thiểu FP mà không bỏ lỡ TP. Đó là 6-12 tháng công việc tập trung. Logic phát hiện là phần dễ; điều chỉnh là phần khó.
-
 ## Distribution & Releases | Phân Phối & Phát Hành
 
 **Current Version**: v1.0.4 (2026-07-11) — Performance optimization (low-end / GPU-aware mode, DLL Intel scan + UI lag fixes)

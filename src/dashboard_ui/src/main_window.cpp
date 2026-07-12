@@ -78,6 +78,8 @@
 
 namespace avdashboard {
     QWidget* BuildDllIntelPage(QWidget* parent);
+    QWidget* BuildTelemetryGuardPage(QWidget* parent);
+    QWidget* BuildFingerprintGuardPage(QWidget* parent);
     QWidget* BuildSysWatchPage(QWidget* parent);
     QWidget* BuildAutoHuntPage(QWidget* parent, avai::LlmAssistant* ai);
     QWidget* BuildNetGuardPage(QWidget* parent);
@@ -1409,6 +1411,8 @@ MainWindow::MainWindow(avcore::Config config, QWidget* parent)
     pages_->addWidget(BuildHookHuntPage(this)); CtorDbg("hookhunt"); // 24
     pages_->addWidget(BuildAlertsPage(this)); CtorDbg("alerts"); // 25
     pages_->addWidget(BuildTimelinePage(this)); CtorDbg("timeline"); // 26
+    pages_->addWidget(BuildTelemetryGuardPage(this)); CtorDbg("telemetry"); // 27
+    pages_->addWidget(BuildFingerprintGuardPage(this)); CtorDbg("fingerprint"); // 28
     // pages_->addWidget(BuildAutoHuntPage(this, ai_assistant_.get()));  // 11
     // pages_->addWidget(BuildNetGuardPage(this));                        // 12
     // pages_->addWidget(BuildCiCdPage(this));                            // 13
@@ -1713,6 +1717,8 @@ QWidget* MainWindow::BuildSidebar() {
             {IconWidget::BarChart2,     5,  "ETW Monitor"},
         }},
         {"ADVANCED", true, {
+            {IconWidget::Activity,      27, "Telemetry Guard"},
+            {IconWidget::Eye,           28, "Fingerprint Guard"},
             {IconWidget::ShieldCheck,   15, "Firewall Pro"},
             {IconWidget::AlertTriangle, 20, "Suricata IDS"},
             {IconWidget::Link,          13, "Supply-chain"},

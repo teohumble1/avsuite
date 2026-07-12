@@ -19,6 +19,7 @@ set(AVDASHBOARD_PAGE_SOURCES
     src/main_window_cicd.cpp
     src/main_window_dllintel.cpp
     src/main_window_dlp.cpp
+    src/main_window_fingerprint.cpp
     src/main_window_firewall.cpp
     src/main_window_hiddenhunt.cpp
     src/main_window_history.cpp
@@ -34,6 +35,7 @@ set(AVDASHBOARD_PAGE_SOURCES
     src/main_window_supplychain.cpp
     src/main_window_suricata.cpp
     src/main_window_syswatch.cpp
+    src/main_window_telemetry.cpp
     src/main_window_threatintel.cpp
     src/main_window_timeline.cpp
     src/main_window_vpn.cpp

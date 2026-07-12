@@ -822,48 +822,6 @@ Cho thấy tôi hiểu ràng buộc THẬT trong thiết kế AV không phải t
 
 ---
 
-## For Portfolio Review | Để Xem Xét Portfolio
-
-### What This Demonstrates | Những Gì Được Minh Họa
-✅ Windows kernel programming
-✅ Driver development knowledge
-✅ Security architecture design
-✅ Code-signing practices
-✅ **Honest problem scoping** (understanding the hard part)
-✅ Professional documentation
-✅ Realistic limitations (not overclaiming)
-
----
-
-✅ Lập trình kernel Windows
-✅ Kiến thức phát triển driver
-✅ Thiết kế kiến trúc bảo mật
-✅ Thực hành ký mã
-✅ **Phạm vi vấn đề trung thực** (hiểu phần khó)
-✅ Tài liệu chuyên nghiệp
-✅ Giới hạn thực tế (không overclaim)
-
-### What This Does NOT Claim | Những Gì Điều Này KHÔNG Tuyên Bố
-❌ Production-ready antivirus
-❌ Enterprise-grade reliability  
-❌ Comprehensive malware coverage
-❌ Low false positive rate
-❌ Performance-optimized for production
-
-**Why NOT claiming these things is itself valuable:**
-Many portfolio projects overclaim capabilities. This one explicitly documents what's missing and WHY it's missing (not laziness—tuning requires 6-12 months of focused work).
-
----
-
-❌ Antivirus sẵn sàng sản xuất
-❌ Độ tin cậy cấp doanh nghiệp
-❌ Phạm vi malware toàn diện
-❌ Tỷ lệ dương tính giả thấp
-❌ Tối ưu hóa hiệu suất sản xuất
-
-**Tại sao KHÔNG tuyên bố những thứ này lại có giá trị:**
-Nhiều dự án portfolio overclaim khả năng. Dự án này rõ ràng ghi chép những gì thiếu và TẠI SAO nó thiếu (không phải lười biếng—điều chỉnh yêu cầu 6-12 tháng công việc tập trung).
-
 ## Files | Các Tệp
 
 - `driver/AvMiniFilter/` - Kernel driver source + binary | Kernel driver nguồn + nhị phân
@@ -906,34 +864,6 @@ Nhiều dự án portfolio overclaim khả năng. Dự án này rõ ràng ghi ch
 - **v1.0.2** — Redesign UI theo Figma (sidebar chia nhóm, hệ nút phẳng amber)
 - **v1.0.1** — Auto-quarantine ở mức Suspicious, giảm dương tính giả theo ngữ cảnh
 - **v1.0.0** — Bản đầu: Select All + quarantine hàng loạt, trình cài đặt chuyên nghiệp
-
-## Hard Questions (You Should Expect These) | Câu Hỏi Khó (Bạn Nên Dự Kiến)
-
-**Q: "If we deployed this to 1M users, what would happen?"**
-> False positives would spike. Without tuning, legitimate apps would be blocked. Users would disable it. This is why tuning is harder than detection logic.
-
-**Q: "Why not just add more rules?"**
-> More rules = more false positives. The problem isn't finding malware patterns—it's distinguishing malware from legitimate code that looks similar. That's what requires the benign corpus.
-
-**Q: "So this would actually harm users more than help them?"**
-> Exactly. In its current state, yes. That's why it's labeled research/portfolio, not production. This demonstrates understanding of AV design constraints that many engineers miss.
-
-**Q: "How would you prioritize: detection or false positive tuning?"**
-> False positive tuning first. Missing malware is bad, but users who disable protection because of false alerts is worse. This is why real AV teams spend more time on FP tuning than detection logic.
-
----
-
-**Q: "Nếu chúng tôi triển khai điều này cho 1M người dùng, điều gì sẽ xảy ra?"**
-> Dương tính giả sẽ tăng đột biến. Nếu không điều chỉnh, các ứng dụng hợp lệ sẽ bị chặn. Người dùng sẽ tắt nó. Đây là lý do tại sao điều chỉnh khó hơn logic phát hiện.
-
-**Q: "Tại sao không chỉ thêm nhiều quy tắc hơn?"**
-> Nhiều quy tắc = nhiều dương tính giả hơn. Vấn đề không phải tìm mô hình malware—đó là phân biệt malware từ mã hợp lệ trông giống nhau. Đó là những gì yêu cầu tập hợp lành mạnh.
-
-**Q: "Vậy điều này sẽ thực sự gây hại cho người dùng hơn là giúp họ?"**
-> Chính xác. Ở trạng thái hiện tại, có. Đó là lý do tại sao nó được dán nhãn nghiên cứu/portfolio, không phải sản xuất. Điều này thể hiện hiểu biết về các ràng buộc thiết kế AV mà nhiều kỹ sư bỏ lỡ.
-
-**Q: "Bạn sẽ ưu tiên: phát hiện hay điều chỉnh dương tính giả?"**
-> Điều chỉnh dương tính giả trước tiên. Bỏ lỡ malware là tệ, nhưng người dùng tắt bảo vệ vì cảnh báo giả là tệ hơn. Đây là lý do tại sao các đội AV thực tế dành nhiều thời gian hơn cho điều chỉnh FP hơn là logic phát hiện.
 
 ## Learning Resources | Các Tài Nguyên Học Tập
 

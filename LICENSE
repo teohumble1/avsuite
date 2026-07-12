@@ -19,17 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-PORTFOLIO PROJECT DISCLAIMER:
-
-This is a portfolio/research project demonstrating Windows kernel security concepts.
-It is NOT suitable for production use and has NOT been tested against real malware.
-Use only in isolated testing environments.
-
-For production antivirus/EDR deployments, use commercially-supported solutions with:
-- Real malware corpus testing
-- False positive minimization
-- Performance optimization
-- Enterprise support and updates

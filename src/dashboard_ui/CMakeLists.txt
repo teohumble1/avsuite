@@ -11,6 +11,7 @@ set(CMAKE_AUTOMOC ON)
 # tree, which retriggers CMake's ZERO_CHECK) regenerates .vcxproj from THIS
 # file and silently dropped every hand-added page. Keep this list authoritative.
 set(AVDASHBOARD_PAGE_SOURCES
+    src/elevated_script.cpp
     src/main_window.cpp
     src/main_window_ai.cpp
     src/main_window_ai_agent.cpp

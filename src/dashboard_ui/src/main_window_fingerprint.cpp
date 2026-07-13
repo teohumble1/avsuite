@@ -18,6 +18,7 @@
 
 #include "main_window.hpp"
 #include "theme.hpp"
+#include "elevated_script.hpp"
 #include "av_quit_guard.hpp"
 
 #include <QAbstractItemView>
@@ -592,9 +593,8 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
     QObject::connect(applyBtn, &QPushButton::clicked, page, [=](){
         QString mode; { std::lock_guard<std::mutex> lk(st->mtx); st->mode = st->pendingMode; mode = st->mode; }
         const QString flag = mode == "HARDENED" ? "-Apply" : "-Revert";
-        std::wstring params = L"-NoProfile -ExecutionPolicy Bypass -File \""
-                            + ScriptPath(L"Harden-Fingerprint.ps1") + L"\" " + flag.toStdWString();
-        ShellExecuteW(nullptr, L"runas", L"powershell.exe", params.c_str(), nullptr, SW_SHOWNORMAL);
+        // Elevated run gated on script dir being admin-write-only (anti-LPE, review #1).
+        avsec::RunElevatedHardeningScript(ScriptPath(L"Harden-Fingerprint.ps1"), flag.toStdWString());
         std::thread([st]{ ReadFingerprint(st); }).detach();
     });
     QObject::connect(revertBtn, &QPushButton::clicked, page, [=](){

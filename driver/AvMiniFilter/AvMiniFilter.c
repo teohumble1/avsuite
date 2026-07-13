@@ -69,9 +69,22 @@ static BOOLEAN IsWhitelisted(_In_ PCUNICODE_STRING FileName)
     for (ULONG i = 0; i < ARRAYSIZE(kWhitelistedExes); i++) {
         SIZE_T nameLen = wcslen(kWhitelistedExes[i]);
         if (FileName->Length >= nameLen * sizeof(WCHAR)) {
-            WCHAR* pStart = (WCHAR*)((UCHAR*)FileName->Buffer + FileName->Length - nameLen * sizeof(WCHAR));
+            SIZE_T offsetBytes = FileName->Length - nameLen * sizeof(WCHAR);
+            WCHAR* pStart = (WCHAR*)((UCHAR*)FileName->Buffer + offsetBytes);
             if (RtlEqualMemory(pStart, kWhitelistedExes[i], nameLen * sizeof(WCHAR))) {
-                return TRUE;
+                // The match must be a WHOLE path component, not merely a suffix:
+                // either it is the entire string, or the character just before it
+                // is a path separator. Without this, "xavdashboard.exe" ends with
+                // "avdashboard.exe" and would be whitelisted -> real-time scan
+                // bypass by rename (review #2). NOTE: still name-based; a stronger
+                // fix keys off the verified client image/PID.
+                if (offsetBytes == 0) {
+                    return TRUE;
+                }
+                WCHAR prev = *(WCHAR*)((UCHAR*)FileName->Buffer + offsetBytes - sizeof(WCHAR));
+                if (prev == L'\\' || prev == L'/') {
+                    return TRUE;
+                }
             }
         }
     }

@@ -47,6 +47,7 @@
 
 #include <openssl/evp.h>
 
+#include <algorithm>
 #include <atomic>
 #include <fstream>
 #include <memory>
@@ -71,6 +72,34 @@ namespace {
 // defeat the point of a fixed trust anchor).
 constexpr const char* kUpdatePublicKeyHex =
     "029233fa2760266622c05d33ce5014cb95907c2cf5c30f97e04f520ad1aa8a5e";
+
+// Parses a dotted version ("1.2.10") into numeric components. Stops at the first
+// character that is neither a digit nor '.', so pre-release suffixes are ignored.
+std::vector<int> ParseVersion(const std::string& v) {
+    std::vector<int> out;
+    int cur = 0;
+    for (char c : v) {
+        if (c >= '0' && c <= '9') cur = cur * 10 + (c - '0');
+        else if (c == '.') { out.push_back(cur); cur = 0; }
+        else break;
+    }
+    out.push_back(cur);
+    return out;
+}
+
+// True iff version `a` is strictly newer than `b`. Used to REFUSE downgrades:
+// the self-update must only ever move forward, even if an attacker replays an
+// older but validly-signed manifest over the plain-HTTP transport (review #3).
+bool VersionGreater(const std::string& a, const std::string& b) {
+    const std::vector<int> va = ParseVersion(a), vb = ParseVersion(b);
+    const size_t n = std::max(va.size(), vb.size());
+    for (size_t i = 0; i < n; ++i) {
+        const int ai = i < va.size() ? va[i] : 0;
+        const int bi = i < vb.size() ? vb[i] : 0;
+        if (ai != bi) return ai > bi;
+    }
+    return false;
+}
 
 bool HexToBytes(const std::string& hex, std::vector<uint8_t>& out) {
     if (hex.empty() || hex.size() % 2 != 0) return false;
@@ -320,6 +349,12 @@ QWidget* BuildSelfUpdatePage(QWidget* parent) {
                 text = QString::fromUtf8("Server reached, but no app update is configured there.");
             } else if (m.latest_version == avcore::kAppVersion) {
                 text = QString::fromUtf8("Up to date (version %1).").arg(QString::fromLatin1(avcore::kAppVersion));
+            } else if (!VersionGreater(m.latest_version, avcore::kAppVersion)) {
+                // Offered version is OLDER than what we run -> refuse. Blocks a
+                // rollback/downgrade attack where a network attacker replays an
+                // older but validly-signed manifest (review #3).
+                text = QString::fromUtf8("Refusing downgrade: server offers %1 but you already run %2.")
+                           .arg(QString::fromStdString(m.latest_version), QString::fromLatin1(avcore::kAppVersion));
             } else {
                 text = QString::fromUtf8("Update available: %1 -> %2")
                            .arg(QString::fromLatin1(avcore::kAppVersion), QString::fromStdString(m.latest_version));

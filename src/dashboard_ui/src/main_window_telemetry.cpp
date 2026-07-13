@@ -25,6 +25,7 @@
 
 #include "main_window.hpp"
 #include "theme.hpp"
+#include "elevated_script.hpp"
 #include "av_quit_guard.hpp"
 
 #include <QAbstractItemView>
@@ -767,10 +768,8 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     QObject::connect(applyBtn, &QPushButton::clicked, page, [=](){
         QString mode; { std::lock_guard<std::mutex> lk(st->mtx); st->mode = st->pendingMode; mode = st->mode; }
         const QString flag = mode == "BLOCKING" ? "-Apply" : "-Revert";
-        std::wstring params = L"-NoProfile -ExecutionPolicy Bypass -File \""
-                            + ScriptPath(L"Harden-Telemetry.ps1") + L"\" " + flag.toStdWString();
-        // runas => UAC prompt; script does the real service/registry/hosts/DoH work.
-        ShellExecuteW(nullptr, L"runas", L"powershell.exe", params.c_str(), nullptr, SW_SHOWNORMAL);
+        // runas => UAC prompt; helper refuses if the script dir is user-writable (anti-LPE, review #1).
+        avsec::RunElevatedHardeningScript(ScriptPath(L"Harden-Telemetry.ps1"), flag.toStdWString());
         refreshStatus(); refreshTable();
     });
     QObject::connect(revertBtn, &QPushButton::clicked, page, [=](){

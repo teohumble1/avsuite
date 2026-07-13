@@ -80,6 +80,7 @@ namespace avdashboard {
     QWidget* BuildDllIntelPage(QWidget* parent);
     QWidget* BuildTelemetryGuardPage(QWidget* parent);
     QWidget* BuildFingerprintGuardPage(QWidget* parent);
+    QWidget* BuildWebGuardPage(QWidget* parent);
     QWidget* BuildSysWatchPage(QWidget* parent);
     QWidget* BuildAutoHuntPage(QWidget* parent, avai::LlmAssistant* ai);
     QWidget* BuildNetGuardPage(QWidget* parent);
@@ -1413,6 +1414,7 @@ MainWindow::MainWindow(avcore::Config config, QWidget* parent)
     pages_->addWidget(BuildTimelinePage(this)); CtorDbg("timeline"); // 26
     pages_->addWidget(BuildTelemetryGuardPage(this)); CtorDbg("telemetry"); // 27
     pages_->addWidget(BuildFingerprintGuardPage(this)); CtorDbg("fingerprint"); // 28
+    pages_->addWidget(BuildWebGuardPage(this)); CtorDbg("webguard"); // 29
     // pages_->addWidget(BuildAutoHuntPage(this, ai_assistant_.get()));  // 11
     // pages_->addWidget(BuildNetGuardPage(this));                        // 12
     // pages_->addWidget(BuildCiCdPage(this));                            // 13
@@ -1620,7 +1622,7 @@ QWidget* MainWindow::BuildSidebar() {
         logo_bar->setObjectName("SidebarLogoBar");
         logo_bar->setStyleSheet(
             "QFrame#SidebarLogoBar { background: transparent;"
-            " border: none; border-bottom: 1px solid #33261A; }");
+            " border: none; border-bottom: 1px solid #493826; }");
         auto* lb = new QHBoxLayout(logo_bar);
         lb->setContentsMargins(16, 16, 16, 12);
         lb->setSpacing(10);
@@ -1647,7 +1649,7 @@ QWidget* MainWindow::BuildSidebar() {
 
         auto* pro = new QLabel("PRO", logo_bar);
         pro->setStyleSheet(
-            "QLabel { background: #241708; color: #FF7A00; border: none;"
+            "QLabel { background: #2E1D10; color: #FF7A00; border: none;"
             " border-radius: 4px; padding: 1px 6px; font-size: 10px;"
             " font-weight: 700; font-family: 'Cascadia Code', Consolas, monospace; }");
         lb->addWidget(pro);
@@ -1679,11 +1681,25 @@ QWidget* MainWindow::BuildSidebar() {
         button->setFixedHeight(32);
         button->setCursor(Qt::PointingHandCursor);
 
-        auto* ico = new IconWidget(entry.icon, 14, QColor(0xC7, 0xB6, 0xA2), button);
+        // Icon sits in a small rounded tile (active = amber) so the rail reads
+        // like a modern app nav instead of bare, thin line-art.
+        auto* icoBox = new QWidget(button);
+        icoBox->setObjectName("NavIcoBox");
+        icoBox->setAttribute(Qt::WA_TransparentForMouseEvents);
+        icoBox->setAttribute(Qt::WA_StyledBackground, true);
+        icoBox->setFixedSize(26, 26);
+        icoBox->move(9, (32 - 26) / 2);
+        auto icoBoxQss = [](bool on) {
+            return QString("QWidget#NavIcoBox{border-radius:7px;background:%1;}")
+                .arg(on ? "rgba(255,122,0,0.18)" : "rgba(255,170,90,0.05)");
+        };
+        icoBox->setStyleSheet(icoBoxQss(false));
+        auto* ico = new IconWidget(entry.icon, 15, QColor(0xC7, 0xB6, 0xA2), icoBox);
         ico->setAttribute(Qt::WA_TransparentForMouseEvents);
-        ico->move(16, (32 - ico->height()) / 2);
-        connect(button, &QPushButton::toggled, button, [ico](bool checked) {
+        ico->move((26 - ico->width()) / 2, (26 - ico->height()) / 2);
+        connect(button, &QPushButton::toggled, button, [ico, icoBox, icoBoxQss](bool checked) {
             ico->setColor(checked ? QColor(0xFF, 0x7A, 0x00) : QColor(0xC7, 0xB6, 0xA2));
+            icoBox->setStyleSheet(icoBoxQss(checked));
         });
 
         nav_group_->addButton(button, entry.page_index);
@@ -1719,6 +1735,7 @@ QWidget* MainWindow::BuildSidebar() {
         {"ADVANCED", true, {
             {IconWidget::Activity,      27, "Telemetry Guard"},
             {IconWidget::Eye,           28, "Fingerprint Guard"},
+            {IconWidget::Globe,         29, "Web Guard"},
             {IconWidget::ShieldCheck,   15, "Firewall Pro"},
             {IconWidget::AlertTriangle, 20, "Suricata IDS"},
             {IconWidget::Link,          13, "Supply-chain"},
@@ -1820,7 +1837,7 @@ QWidget* MainWindow::BuildSidebar() {
         bottom->setObjectName("SidebarBottom");
         bottom->setStyleSheet(
             "QFrame#SidebarBottom { background: transparent;"
-            " border: none; border-top: 1px solid #33261A; }");
+            " border: none; border-top: 1px solid #493826; }");
         auto* bl = new QVBoxLayout(bottom);
         bl->setContentsMargins(0, 8, 0, 8);
         bl->setSpacing(0);
@@ -1871,7 +1888,7 @@ QWidget* MainWindow::BuildHomePage() {
 
         auto* sf = new QFrame(c_w);
         sf->setStyleSheet(
-            "QFrame { background: #1C1108; border: 1px solid rgba(255,170,90,0.12); "
+            "QFrame { background: #23160C; border: 1px solid rgba(255,170,90,0.12); "
             "border-radius: 10px; }");
         auto* sfl = new QHBoxLayout(sf);
         sfl->setContentsMargins(10, 5, 10, 5);
@@ -2096,7 +2113,7 @@ QWidget* MainWindow::BuildHomePage() {
             btn->setFixedHeight(52);
             btn->setCursor(Qt::PointingHandCursor);
             btn->setStyleSheet(
-                "QPushButton#QuickAct { background: #1C1108; border: 1px solid #33261A; "
+                "QPushButton#QuickAct { background: #23160C; border: 1px solid #493826; "
                 "border-radius: 14px; text-align: left; padding: 0 14px 0 44px; "
                 "color: #C7B6A2; font-size: 9.5pt; font-weight: 500; }"
                 "QPushButton#QuickAct:hover { border: 1px solid #FF7A00; color: #ECE4DA; }");
@@ -2146,7 +2163,7 @@ QWidget* MainWindow::BuildHomePage() {
             auto* btn = new QPushButton(c_w);
             btn->setObjectName("ModuleTile");
             btn->setStyleSheet(
-                "QPushButton#ModuleTile { background: #241708; "
+                "QPushButton#ModuleTile { background: #2E1D10; "
                 "border: 1px solid rgba(255,170,90,0.10); border-radius: 12px; }"
                 "QPushButton#ModuleTile:hover { background: rgba(255,122,0,0.08); "
                 "border: 1px solid rgba(255,122,0,0.25); }"
@@ -2190,13 +2207,13 @@ QWidget* MainWindow::BuildHomePage() {
     // ── Recent activity (Figma single-column) ─────────────────────────────────
     {
         auto* rc = new QFrame(c_w);
-        rc->setStyleSheet("QFrame { background: #1C1108; border: 1px solid #33261A; border-radius: 14px; }");
+        rc->setStyleSheet("QFrame { background: #23160C; border: 1px solid #493826; border-radius: 14px; }");
         auto* rl = new QVBoxLayout(rc);
         rl->setContentsMargins(0, 0, 0, 6);
         rl->setSpacing(0);
 
         auto* rh = new QWidget(rc);
-        rh->setStyleSheet("QWidget { background: transparent; border-bottom: 1px solid #33261A; }");
+        rh->setStyleSheet("QWidget { background: transparent; border-bottom: 1px solid #493826; }");
         auto* rhl = new QHBoxLayout(rh);
         rhl->setContentsMargins(16, 12, 16, 12);
         auto* rt = new QLabel(QString::fromUtf8("Recent activity"), rh);
@@ -2564,7 +2581,7 @@ void MainWindow::RefreshHomeDetections() {
 
         auto* card = new QFrame(home_detections_layout_->parentWidget());
         card->setStyleSheet(
-            "QFrame { background: #241708; border: 1px solid rgba(255,170,90,0.08); "
+            "QFrame { background: #2E1D10; border: 1px solid rgba(255,170,90,0.08); "
             "border-radius: 10px; }");
         auto* cl = new QVBoxLayout(card);
         cl->setContentsMargins(10, 8, 10, 8);

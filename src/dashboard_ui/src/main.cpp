@@ -61,7 +61,7 @@ QPushButton#NavButton {
     font-weight: 400;
 }
 QPushButton#NavButton:hover {
-    background: #241708;
+    background: #2E1D10;
     color: #ECE4DA;
 }
 QPushButton#NavButton:checked {
@@ -198,10 +198,10 @@ QPushButton#SuccessButton:hover {
 QPushButton#SelectButton {
     background: transparent;
     color: #C7B6A2;
-    border: 1px solid #33261A;
+    border: 1px solid #493826;
 }
 QPushButton#SelectButton:hover {
-    background: #241708;
+    background: #2E1D10;
     color: #ECE4DA;
 }
 

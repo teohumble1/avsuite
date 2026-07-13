@@ -919,7 +919,9 @@ QWidget* MainWindow::BuildAiPage() {
 
     // Input area
     auto* input_area = new QWidget(center);
-    input_area->setFixedHeight(108);
+    // Tall enough for the input line + toolbar row + footer note without clipping
+    // (the previous 108px cramped the toolbar/footer — content needs ~118px).
+    input_area->setFixedHeight(132);
     input_area->setStyleSheet(
         "QWidget { background:rgba(14,9,4,234);"
         " border-top: 1px solid rgba(255,170,90,18); }");
@@ -958,6 +960,9 @@ QWidget* MainWindow::BuildAiPage() {
 
     auto* inject_btn = new QPushButton(toolbar);
     inject_btn->setFixedHeight(26);
+    // QPushButton ignores a child layout when computing its own sizeHint, so give
+    // it an explicit width or the "Inject Detections" label gets clipped.
+    inject_btn->setMinimumWidth(156);
     inject_btn->setStyleSheet(
         "QPushButton { background:rgba(255,122,0,20); color:rgba(255,155,61,0.85);"
         " border:1px solid rgba(255,122,0,46); border-radius:8px;"
@@ -975,6 +980,7 @@ QWidget* MainWindow::BuildAiPage() {
 
     auto* clear_btn = new QPushButton(toolbar);
     clear_btn->setFixedHeight(26);
+    clear_btn->setMinimumWidth(80);
     clear_btn->setStyleSheet(
         "QPushButton { background:rgba(235,59,90,0); color:rgba(235,100,130,0.6);"
         " border:1px solid rgba(235,59,90,30); border-radius:8px;"

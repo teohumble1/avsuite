@@ -36,6 +36,7 @@ set(AVDASHBOARD_PAGE_SOURCES
     src/main_window_suricata.cpp
     src/main_window_syswatch.cpp
     src/main_window_telemetry.cpp
+    src/main_window_webguard.cpp
     src/main_window_threatintel.cpp
     src/main_window_timeline.cpp
     src/main_window_vpn.cpp
@@ -87,6 +88,7 @@ add_custom_command(TARGET avdashboard POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_SOURCE_DIR}/scripts/Harden-Telemetry.ps1
         ${CMAKE_SOURCE_DIR}/scripts/Harden-Fingerprint.ps1
+        ${CMAKE_SOURCE_DIR}/scripts/Harden-WebGuard.ps1
         $<TARGET_FILE_DIR:avdashboard>
 )
 

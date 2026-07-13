@@ -19,10 +19,10 @@ namespace theme {
 
 // ── Color (exact Figma tokens) ──────────────────────────────────────────────
 inline constexpr const char* Bg         = "#120B06"; // app ground
-inline constexpr const char* Surface    = "#1C1108"; // card / panel
-inline constexpr const char* Surface2   = "#241708"; // raised row / input
+inline constexpr const char* Surface    = "#23160C"; // card / panel (lifted for contrast)
+inline constexpr const char* Surface2   = "#2E1D10"; // raised row / input
 inline constexpr const char* Sidebar    = "#0E0804"; // nav rail (darker)
-inline constexpr const char* Border     = "#33261A"; // hairline
+inline constexpr const char* Border     = "#493826"; // hairline (more visible)
 inline constexpr const char* Text        = "#ECE4DA"; // primary text
 inline constexpr const char* Muted       = "#C7B6A2"; // secondary text
 inline constexpr const char* Dim         = "#8B7355"; // captions / disabled

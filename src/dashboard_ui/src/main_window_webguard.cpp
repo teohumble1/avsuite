@@ -1,21 +1,23 @@
-// main_window_telemetry.cpp — Telemetry Guard
-// Realtime monitoring + control of Windows telemetry. Shows the live outbound
-// connections the machine is making to known Microsoft telemetry endpoints
-// (captured from the TCP table, matched against resolved telemetry-host IPs),
-// and lets the user BLOCK or OPEN telemetry per layer.
+// main_window_webguard.cpp — Web Guard
+// Realtime monitoring of malicious-JavaScript web attacks. A native agent can't
+// see inside the browser's JS engine, so Web Guard watches the two surfaces it
+// CAN observe honestly (see docs/web-guard-threat-research.md):
 //
-// Real system state is read directly (no fabricated rows):
-//   - AllowTelemetry policy   (registry)
-//   - DiagTrack / dmwappushservice (service control manager)
-//   - hosts-file blocklist     (count of telemetry hosts null-routed)
-//   - live endpoints           (GetExtendedTcpTable -> resolved telemetry IPs)
-// Applying a mode shells out (elevated) to the repo's Harden-Telemetry.ps1,
-// which performs the actual, reversible hardening.
+//   - NETWORK: every browser process' outbound TCP connections (GetExtendedTcpTable)
+//              matched against a resolved blocklist of malicious-JS infrastructure
+//              (cryptomining pools, Magecart skimmer gates, malvertising / exploit
+//              -kit gates, tracker-C2). Only browser-owned connections count.
+//   - DISK:    installed Chromium-family extension scripts (loose .js on disk that
+//              the browser fetched) scanned for obfuscation markers + miner keywords.
+//
+// No fabricated rows: every row is a real live connection or a real flagged file.
+// Applying BLOCKING shells out (elevated) to the repo's Harden-WebGuard.ps1, which
+// null-routes the IOC hosts + adds an outbound firewall block rule (both reversible).
 
 // Winsock2 headers MUST precede any <windows.h> (which main_window.hpp / Qt pull
 // in transitively). If windows.h is seen first it drags in the legacy winsock.h
-// and ws2tcpip.h below fails to compile (IP_MSFILTER / SourceList errors).
-// NOMINMAX stops the Windows min/max macros clashing with the Qt headers.
+// and ws2tcpip.h below fails to compile. NOMINMAX stops the Windows min/max
+// macros clashing with the Qt headers.
 #define NOMINMAX
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -28,7 +30,8 @@
 #include "av_quit_guard.hpp"
 
 #include <QAbstractItemView>
-#include <QComboBox>
+#include <QDir>
+#include <QDirIterator>
 #include <QFont>
 #include <QFrame>
 #include <QHBoxLayout>
@@ -53,50 +56,90 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace avdashboard {
 namespace {
 
-// ─── Known Microsoft telemetry endpoints + category ──────────────────────────
-struct TeleHost { const wchar_t* host; const char* category; };
-const TeleHost kTelemetryHosts[] = {
-    {L"v10.events.data.microsoft.com",          "Diagnostics"},
-    {L"v20.events.data.microsoft.com",          "Diagnostics"},
-    {L"vortex.data.microsoft.com",              "Diagnostics"},
-    {L"vortex-win.data.microsoft.com",          "Diagnostics"},
-    {L"v10.vortex-win.data.microsoft.com",      "Diagnostics"},
-    {L"telemetry.microsoft.com",                "Diagnostics"},
-    {L"settings-win.data.microsoft.com",        "CEIP"},
-    {L"wdcp.microsoft.com",                     "CEIP"},
-    {L"watson.microsoft.com",                   "Watson"},
-    {L"watson.telemetry.microsoft.com",         "Watson"},
-    {L"oca.telemetry.microsoft.com",            "Watson"},
-    {L"oca.microsoft.com",                      "Watson"},
-    {L"sqm.telemetry.microsoft.com",            "CEIP"},
-    {L"telecommand.telemetry.microsoft.com",    "Diagnostics"},
+// ─── Malicious-JS infrastructure blocklist + category ─────────────────────────
+// Representative, extensible IOCs. Cryptomining pools/miner-JS domains still
+// resolve and match live traffic today; historical EK/skimmer gates are kept as
+// IOCs. See docs/web-guard-threat-research.md.
+struct BadHost { const wchar_t* host; const char* category; };
+const BadHost kBadHosts[] = {
+    // ── Cryptojacking (in-browser miners / pools) ──
+    {L"coinhive.com",            "Cryptojacking"},
+    {L"coin-hive.com",           "Cryptojacking"},
+    {L"authedmine.com",          "Cryptojacking"},
+    {L"cnhv.co",                 "Cryptojacking"},
+    {L"coinimp.com",             "Cryptojacking"},
+    {L"www.coinimp.com",         "Cryptojacking"},
+    {L"minero.cc",               "Cryptojacking"},
+    {L"crypto-loot.com",         "Cryptojacking"},
+    {L"cryptoloot.pro",          "Cryptojacking"},
+    {L"webminepool.com",         "Cryptojacking"},
+    {L"webmine.cz",              "Cryptojacking"},
+    {L"jsecoin.com",             "Cryptojacking"},
+    {L"load.jsecoin.com",        "Cryptojacking"},
+    {L"ppoi.org",                "Cryptojacking"},
+    // ── Magecart / formjacking skimmer gates (lookalike CDNs) ──
+    {L"magento-analytics.com",   "Skimmer"},
+    {L"google-analytics.top",    "Skimmer"},
+    {L"googie-anaiytics.com",    "Skimmer"},
+    {L"jquery-cdn.top",          "Skimmer"},
+    {L"cdn-js.link",             "Skimmer"},
+    {L"ajaxstatic.com",          "Skimmer"},
+    // ── Malvertising redirect / gate ──
+    {L"go.oclaserver.com",       "Malvertising"},
+    {L"onclickpredictiv.com",    "Malvertising"},
+    {L"adnium.com",              "Malvertising"},
+    {L"propu.pl",                "Malvertising"},
+    // ── Exploit-kit gates (historical IOCs) ──
+    {L"eitest.gate",             "ExploitKit"},
+    {L"fallout.gate",            "ExploitKit"},
+    // ── Tracker / C2 beacon ──
+    {L"stat-analytics.info",     "TrackerC2"},
+    {L"track-cdn.net",           "TrackerC2"},
 };
 
 const char* CategoryColor(const QString& cat) {
-    if (cat == "Diagnostics") return theme::Accent;   // amber
-    if (cat == "CEIP")        return theme::Info;      // blue
-    if (cat == "Watson")      return "#CE93D8";        // purple
-    return theme::Dim;                                  // DNS / other
+    if (cat == "Cryptojacking") return theme::Danger;   // red
+    if (cat == "Skimmer")       return theme::Accent;    // amber
+    if (cat == "Malvertising")  return theme::Warn;      // yellow
+    if (cat == "ExploitKit")    return theme::Danger;    // red
+    if (cat == "ObfuscatedJS")  return "#CE93D8";        // purple
+    return theme::Info;                                   // TrackerC2 / other (blue)
+}
+
+QString RiskForCategory(const QString& cat) {
+    if (cat == "Cryptojacking" || cat == "ExploitKit" || cat == "Skimmer") return "high";
+    if (cat == "Malvertising" || cat == "ObfuscatedJS") return "medium";
+    return "low";
+}
+
+// Browser process names whose connections we consider "web" traffic.
+bool IsBrowser(const QString& proc) {
+    static const QStringList kBrowsers = {
+        "chrome.exe", "msedge.exe", "firefox.exe", "brave.exe",
+        "opera.exe", "vivaldi.exe", "chromium.exe", "iexplore.exe"};
+    return kBrowsers.contains(proc, Qt::CaseInsensitive);
 }
 
 // ─── Shared page state ───────────────────────────────────────────────────────
-struct TelemRow {
+struct WebRow {
     QString  time, process, endpoint, category, status; // status: Allowed / Blocked
     QString  risk;                                       // high / medium / low
     int      count = 1;
     quint32  pid = 0;
     QString  remoteIp;
+    QString  protocol;                                   // TCP / Extension runtime
+    QString  detail;                                     // evidence line
 };
 
 struct Layer {
     QString id, label, status;
     bool    enabled = true;
-    bool    dropdown = false;
 };
 
 struct State {
@@ -104,15 +147,21 @@ struct State {
     std::unordered_map<quint32, std::pair<QString, QString>> ipMap; // ip(be) -> {host, category}
     std::atomic<bool>                              resolved{false};
     std::atomic<bool>                              capturing{false}; // single-flight guard
-    std::vector<TelemRow>                          rows;
-    QString                                        mode = "BLOCKING";   // applied
+    std::atomic<bool>                              scanning{false};  // extension-scan guard
+    std::vector<WebRow>                            netRows;   // live network hits
+    std::vector<WebRow>                            fileRows;  // flagged extension scripts
+    QString                                        mode = "BLOCKING";
     QString                                        pendingMode = "BLOCKING";
     QString                                        filter = "All";
     QString                                        search;
-    QString                                        dohProvider = "Cloudflare";
     int                                            selected = -1;
     std::vector<Layer>                             layers;
-    quint64                                        endpointsSeen = 0;
+    quint64                                        threatsSeen = 0;
+    quint64                                        scriptsScanned = 0;
+    quint64                                        scriptsFlagged = 0;
+    std::unordered_set<QString>                    browsersSeen;
+    // category -> live count (for stat cards + tiles)
+    std::unordered_map<QString, int>               catCount;
 };
 
 // ─── Process name for a PID ──────────────────────────────────────────────────
@@ -131,65 +180,17 @@ QString ProcName(DWORD pid) {
     return name;
 }
 
-// ─── Real status reads ───────────────────────────────────────────────────────
-int ReadAllowTelemetry() {
-    DWORD val = 0, sz = sizeof(val), type = 0;
-    // Policy first, then the OS default location.
-    if (RegGetValueW(HKEY_LOCAL_MACHINE,
-            L"SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
-            L"AllowTelemetry", RRF_RT_REG_DWORD, &type, &val, &sz) == ERROR_SUCCESS)
-        return (int)val;
-    sz = sizeof(val);
-    if (RegGetValueW(HKEY_LOCAL_MACHINE,
-            L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\DataCollection",
-            L"AllowTelemetry", RRF_RT_REG_DWORD, &type, &val, &sz) == ERROR_SUCCESS)
-        return (int)val;
-    return -1; // unknown
-}
-
-// Returns "Running" / "Stopped" / "Absent".
-QString ServiceState(const wchar_t* name) {
-    QString out = "Absent";
-    SC_HANDLE scm = OpenSCManagerW(nullptr, nullptr, SC_MANAGER_CONNECT);
-    if (!scm) return out;
-    SC_HANDLE svc = OpenServiceW(scm, name, SERVICE_QUERY_STATUS);
-    if (svc) {
-        SERVICE_STATUS st{};
-        if (QueryServiceStatus(svc, &st))
-            out = (st.dwCurrentState == SERVICE_RUNNING) ? "Running" : "Stopped";
-        CloseServiceHandle(svc);
-    }
-    CloseServiceHandle(scm);
-    return out;
-}
-
-int HostsBlockedCount() {
-    wchar_t win[MAX_PATH]; GetWindowsDirectoryW(win, MAX_PATH);
-    std::wstring path = std::wstring(win) + L"\\System32\\drivers\\etc\\hosts";
-    FILE* f = _wfopen(path.c_str(), L"rb");
-    if (!f) return 0;
-    std::string data; char buf[4096]; size_t n;
-    while ((n = fread(buf, 1, sizeof(buf), f)) > 0) data.append(buf, n);
-    fclose(f);
-    int hits = 0;
-    for (const auto& th : kTelemetryHosts) {
-        std::string host = QString::fromWCharArray(th.host).toStdString();
-        if (data.find(host) != std::string::npos) ++hits;
-    }
-    return hits;
-}
-
-// ─── Resolve telemetry hostnames -> IP set (background, once) ─────────────────
+// ─── Resolve blocklist hostnames -> IP set (background, once) ─────────────────
 void ResolveHosts(State* st) {
     WSADATA wsa; WSAStartup(MAKEWORD(2, 2), &wsa);
     std::unordered_map<quint32, std::pair<QString, QString>> map;
-    for (const auto& th : kTelemetryHosts) {
+    for (const auto& bh : kBadHosts) {
         ADDRINFOW hints{}; hints.ai_family = AF_INET; hints.ai_socktype = SOCK_STREAM;
         PADDRINFOW res = nullptr;
-        if (GetAddrInfoW(th.host, nullptr, &hints, &res) == 0) {
+        if (GetAddrInfoW(bh.host, nullptr, &hints, &res) == 0) {
             for (auto* p = res; p; p = p->ai_next) {
                 auto* sa = reinterpret_cast<sockaddr_in*>(p->ai_addr);
-                map[sa->sin_addr.S_un.S_addr] = { QString::fromWCharArray(th.host), th.category };
+                map[sa->sin_addr.S_un.S_addr] = { QString::fromWCharArray(bh.host), bh.category };
             }
             FreeAddrInfoW(res);
         }
@@ -201,13 +202,7 @@ void ResolveHosts(State* st) {
     st->resolved = true;
 }
 
-// ─── Capture live telemetry connections from the TCP table ───────────────────
-QString RiskForCategory(const QString& cat) {
-    if (cat == "Diagnostics" || cat == "Watson") return "high";
-    if (cat == "CEIP") return "medium";
-    return "low";
-}
-
+// ─── Capture live browser->malicious-JS connections from the TCP table ────────
 void CaptureRows(State* st) {
     if (!st->resolved) return;
     std::unordered_map<quint32, std::pair<QString, QString>> ipMap;
@@ -225,13 +220,16 @@ void CaptureRows(State* st) {
     if (GetExtendedTcpTable(table, &sz, FALSE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0) != NO_ERROR)
         return;
 
-    // Aggregate by endpoint host.
-    std::unordered_map<QString, TelemRow> agg;
+    std::unordered_map<QString, WebRow> agg;   // key: endpoint host
+    std::unordered_set<QString> browsers;
     const QString now = QTime::currentTime().toString("HH:mm:ss");
     for (DWORD i = 0; i < table->dwNumEntries; ++i) {
         const auto& e = table->table[i];
         auto it = ipMap.find(e.dwRemoteAddr);
         if (it == ipMap.end()) continue;
+        const QString proc = ProcName(e.dwOwningPid);
+        if (!IsBrowser(proc)) continue;         // web traffic only
+        browsers.insert(proc.toLower());
         const QString host = it->second.first;
         auto& r = agg[host];
         if (r.endpoint.isEmpty()) {
@@ -239,45 +237,117 @@ void CaptureRows(State* st) {
             r.category = it->second.second;
             r.risk     = RiskForCategory(r.category);
             r.pid      = e.dwOwningPid;
-            r.process  = ProcName(e.dwOwningPid);
+            r.process  = proc;
             r.time     = now;
-            // Format the IPv4 manually (dwRemoteAddr is network byte order) instead
-            // of inet_ntoa, whose shared buffer is unsafe to call from this thread.
-            const quint32 ip = e.dwRemoteAddr;
+            const quint32 ip = e.dwRemoteAddr;   // network byte order; format manually
             r.remoteIp = QString("%1.%2.%3.%4").arg(ip & 0xFF).arg((ip >> 8) & 0xFF)
                              .arg((ip >> 16) & 0xFF).arg((ip >> 24) & 0xFF);
+            r.protocol = "TCP";
+            r.detail   = "Connection to known " + r.category + " infrastructure";
         }
         r.count++;
     }
 
-    std::vector<TelemRow> rows;
+    std::vector<WebRow> rows;
     rows.reserve(agg.size());
-    for (auto& kv : agg) rows.push_back(std::move(kv.second));
+    std::unordered_map<QString, int> catCount;
+    for (auto& kv : agg) { catCount[kv.second.category]++; rows.push_back(std::move(kv.second)); }
 
     {
         std::lock_guard<std::mutex> lk(st->mtx);
-        // status reflects the applied mode: OPEN => everything allowed; BLOCKING
-        // => these live endpoints are ones still getting through (Allowed), the
-        // rest are being stopped upstream and simply never appear.
-        for (auto& r : rows) r.status = "Allowed";
-        st->rows = std::move(rows);
-        st->endpointsSeen = st->rows.size();
+        for (auto& r : rows) r.status = "Allowed"; // live => still getting through
+        st->netRows = std::move(rows);
+        st->browsersSeen = std::move(browsers);
+        st->catCount = std::move(catCount);
     }
 }
 
-// ─── Small UI builders ───────────────────────────────────────────────────────
+// ─── Scan installed browser-extension JS for obfuscation (background, once) ────
+bool LooksObfuscated(const QByteArray& data, QString* why) {
+    static const char* kMarkers[] = {
+        "eval(", "atob(", "String.fromCharCode", "unescape(", "new Function(",
+        "document.write(unescape", "\\x", "fromCharCode"};
+    static const char* kMiner[] = {
+        "coinhive", "CoinHive", "cryptonight", "CryptoNight", "authedmine",
+        "webminepool", "stratum+tcp", "coinimp"};
+    for (const char* m : kMiner)
+        if (data.contains(m)) { *why = QString("miner keyword: %1").arg(m); return true; }
+    int hits = 0; QString first;
+    for (const char* m : kMarkers)
+        if (data.contains(m)) { if (first.isEmpty()) first = m; ++hits; }
+    if (hits >= 2) { *why = QString("obfuscation markers (%1x, e.g. %2)").arg(hits).arg(first); return true; }
+    return false;
+}
+
+void ScanExtensions(State* st) {
+    QStringList roots;
+    const QString local = QString::fromLocal8Bit(qgetenv("LOCALAPPDATA"));
+    if (!local.isEmpty()) {
+        roots << local + "/Google/Chrome/User Data"
+              << local + "/Microsoft/Edge/User Data"
+              << local + "/BraveSoftware/Brave-Browser/User Data"
+              << local + "/Chromium/User Data";
+    }
+    quint64 scanned = 0, flagged = 0;
+    std::vector<WebRow> rows;
+    const QString now = QTime::currentTime().toString("HH:mm:ss");
+    for (const QString& root : roots) {
+        QDir rd(root);
+        if (!rd.exists()) continue;
+        // Extensions live under <root>/<Profile>/Extensions/<id>/<ver>/*.js
+        const QStringList profiles = rd.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for (const QString& prof : profiles) {
+            const QString extRoot = root + "/" + prof + "/Extensions";
+            if (!QDir(extRoot).exists()) continue;
+            QDirIterator it(extRoot, {"*.js"}, QDir::Files, QDirIterator::Subdirectories);
+            while (it.hasNext()) {
+                const QString path = it.next();
+                if (scanned >= 6000) break;           // bound the walk
+                QFileInfo fi(path);
+                if (fi.size() > 512 * 1024) { ++scanned; continue; } // skip huge bundles
+                QFile f(path);
+                if (!f.open(QIODevice::ReadOnly)) { ++scanned; continue; }
+                const QByteArray data = f.read(512 * 1024);
+                f.close();
+                ++scanned;
+                QString why;
+                if (LooksObfuscated(data, &why)) {
+                    ++flagged;
+                    WebRow r;
+                    r.time = now;
+                    r.process = "extension";
+                    r.endpoint = fi.fileName();
+                    r.category = "ObfuscatedJS";
+                    r.risk = "medium";
+                    r.status = "Allowed";
+                    r.count = 1;
+                    r.remoteIp = "—";
+                    r.protocol = "Extension runtime";
+                    r.detail = why;
+                    rows.push_back(std::move(r));
+                }
+            }
+            if (scanned >= 6000) break;
+        }
+        if (scanned >= 6000) break;
+    }
+    {
+        std::lock_guard<std::mutex> lk(st->mtx);
+        st->fileRows = std::move(rows);
+        st->scriptsScanned = scanned;
+        st->scriptsFlagged = flagged;
+    }
+}
+
+// ─── Small UI builders (same visual language as the other Guard tabs) ─────────
 QWidget* Card() {
     auto* c = new QWidget;
-    // Scope the border to THIS widget via an id selector. A selector-less inline
-    // stylesheet ("border:1px...") cascades the border onto every child QLabel
-    // (which boxes/clips their text); an id selector matches only the card.
     c->setObjectName("GuardCard");
     c->setStyleSheet(QString("QWidget#GuardCard{background:%1;border:1px solid %2;border-radius:%3px;}")
                          .arg(theme::Surface).arg(theme::Border).arg(theme::RadiusLg));
     return c;
 }
 
-// Section heading with a small amber accent bar on the left.
 QWidget* SectionTitle(const QString& text) {
     auto* w = new QWidget;
     auto* h = new QHBoxLayout(w);
@@ -290,22 +360,19 @@ QWidget* SectionTitle(const QString& text) {
     return w;
 }
 
-// A checkable pill toggle (flat, on-theme).
 QPushButton* Toggle(bool checked) {
     auto* t = new QPushButton;
     t->setCheckable(true);
     t->setChecked(checked);
-    t->setFixedSize(38, 20);
+    t->setFixedSize(28, 16);
     t->setCursor(Qt::PointingHandCursor);
     t->setStyleSheet(QString(
-        "QPushButton{border-radius:10px;background:%1;border:1px solid %2;}"
-        "QPushButton:checked{background:%3;border:1px solid %3;}")
-        .arg("#3A3A3E").arg("#4A4A4E").arg(theme::Accent));
+        "QPushButton{border-radius:8px;background:%1;border:1px solid %1;}"
+        "QPushButton:checked{background:%2;border:1px solid %2;}")
+        .arg(theme::Border).arg(theme::Accent));
     return t;
 }
 
-// Absolute path to a hardening script shipped next to the executable (installer
-// drops them in {app}; the CMake post-build copies them beside the dev exe).
 std::wstring ScriptPath(const wchar_t* name) {
     wchar_t buf[MAX_PATH]; GetModuleFileNameW(nullptr, buf, MAX_PATH);
     std::wstring p(buf); auto s = p.find_last_of(L"\\/");
@@ -315,23 +382,20 @@ std::wstring ScriptPath(const wchar_t* name) {
 } // namespace
 
 // ─────────────────────────────────────────────────────────────────────────────
-QWidget* BuildTelemetryGuardPage(QWidget* parent) {
+QWidget* BuildWebGuardPage(QWidget* parent) {
     auto* page = new QWidget(parent);
-    page->setObjectName("TelemetryPage");
+    page->setObjectName("WebGuardPage");
     ArmQuitGuard(page);
-    // QLabel is-a QFrame, so an ancestor "QFrame{border}" stylesheet would box
-    // every text label. Reset borders for all labels on this page.
     page->setStyleSheet("QLabel{border:none;}");
 
     auto* st = new State();
     st->layers = {
-        {"allowtelemetry", "AllowTelemetry policy", "reading...", true,  false},
-        {"diagtrack",      "DiagTrack service",      "reading...", true,  false},
-        {"dmwapp",         "dmwappushservice",       "reading...", true,  false},
-        {"tasks",          "Scheduled tasks",        "reading...", true,  false},
-        {"hosts",          "Hosts blocklist",        "reading...", true,  false},
-        {"doh",            "Enforce DoH",            "Cloudflare", true,  true },
-        {"firewall",       "Firewall block rule",    "reading...", true,  false},
+        {"cryptojacking", "Cryptojacking miners", "0 blocked today", true},
+        {"skimmer",       "Magecart skimmers",    "0 blocked today", true},
+        {"malvertising",  "Malvertising gates",   "0 blocked today", true},
+        {"exploitkit",    "Exploit-kit gates",    "0 blocked today", true},
+        {"obfuscated",    "Obfuscated ext. JS",   "0 blocked today", true},
+        {"extscan",       "Extension scanning",   "Inactive",        false},
     };
 
     // Cap the content column so it never overflows the window on wide displays
@@ -390,7 +454,6 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
         "QPushButton{background:transparent;color:%1;border:1px solid %2;border-radius:%3px;padding:0 14px;}"
         "QPushButton:hover{color:%4;}").arg(theme::Dim).arg(theme::Border).arg(theme::RadiusMd).arg(theme::Text));
     auto* refreshBtn = new QPushButton();
-    // Qt standard reload pixmap always renders (no font-glyph dependency).
     refreshBtn->setIcon(refreshBtn->style()->standardIcon(QStyle::SP_BrowserReload));
     refreshBtn->setFixedSize(34, 34);
     refreshBtn->setStyleSheet(QString(
@@ -401,8 +464,9 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     al->addWidget(refreshBtn);
 
     root->addWidget(theme::BuildPageHeader(
-        "Telemetry Guard",
-        QString::fromUtf8("Realtime telemetry monitoring & control \xE2\x80\x94 block or allow, per layer."),
+        "Web Guard",
+        QString::fromUtf8("Realtime malicious-domain blocking. Monitors browser connections to cryptojacking, "
+                          "skimmer, malvertising & exploit-kit infrastructure, and obfuscated extension scripts."),
         actions));
 
     // ── Stat cards ───────────────────────────────────────────────────────────
@@ -413,7 +477,7 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
         auto* c = Card();
         c->setFixedHeight(96);
         auto* cl = new QVBoxLayout(c);
-        cl->setContentsMargins(14, 12, 14, 12);
+        cl->setContentsMargins(20, 16, 20, 16);
         cl->setSpacing(4);
         auto* lbl = new QLabel(label.toUpper());
         lbl->setStyleSheet(QString("color:%1;font-size:10px;font-weight:600;letter-spacing:1px;").arg(theme::Dim));
@@ -431,76 +495,76 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
         cardRow->addWidget(c, 1);
         return { val, sub, dot };
     };
-    auto cLevel = makeCard("Telemetry Level", theme::Accent);
-    auto cDiag  = makeCard("DiagTrack",       theme::Text);
-    auto cDoh   = makeCard("Encrypted DNS",   theme::Text);
-    auto cHosts = makeCard("Hosts Blocked",   theme::Text);
-    auto cSeen  = makeCard("Endpoints Seen",  theme::Accent);
+    auto cThreats  = makeCard("Threats Seen",  theme::Accent);
+    auto cMiners   = makeCard("Cryptojacking", theme::Text);
+    auto cSkimmers = makeCard("Skimmers",      theme::Text);
+    auto cMalv     = makeCard("Malvertising",  theme::Text);
+    auto cScripts  = makeCard("Flagged Scripts", theme::Text);
+    // Persistent category dots on cards 2-5 (matches the design).
+    auto setDot = [](const CardRefs& c, const char* color) {
+        c.dot->setVisible(true);
+        c.dot->setStyleSheet(QString("background:%1;border-radius:4px;").arg(color));
+    };
+    setDot(cMiners,   theme::Danger);       // Cryptojacking red
+    setDot(cSkimmers, theme::Accent);       // Skimmer amber
+    setDot(cMalv,     theme::Warn);         // Malvertising yellow
+    setDot(cScripts,  "#CE93D8");           // Obfuscated JS purple
     root->addLayout(cardRow);
 
-    // ── Layer control ────────────────────────────────────────────────────────
+    // ── Layer / category control ─────────────────────────────────────────────
     auto* layerCard = Card();
+    // Design: the whole card carries a 3px amber left accent (in place of the
+    // per-title accent bar the other sections use).
+    layerCard->setStyleSheet(QString(
+        "QWidget#GuardCard{background:%1;border:1px solid %2;border-left:3px solid %3;border-radius:%4px;}")
+        .arg(theme::Surface).arg(theme::Border).arg(theme::Accent).arg(theme::RadiusLg));
     auto* ll = new QVBoxLayout(layerCard);
-    ll->setContentsMargins(14, 12, 14, 12);
+    ll->setContentsMargins(20, 14, 20, 14);
     ll->setSpacing(theme::Space3);
-    ll->addWidget(SectionTitle(QString::fromUtf8("Layer Control")));
-    // Split the 7 layer tiles across two rows so they don't force the card wider
-    // than the capped page. Each row is divided into `cols` equal columns so the
-    // tiles line up in a grid.
-    auto* tilesRow1 = new QHBoxLayout;
-    tilesRow1->setSpacing(theme::Space2);
-    auto* tilesRow2 = new QHBoxLayout;
-    tilesRow2->setSpacing(theme::Space2);
-    const size_t cols = (st->layers.size() + 1) / 2;
+    auto* layerTitle = new QLabel("PROTECTION LAYERS");
+    layerTitle->setStyleSheet(QString("color:%1;font-size:12px;font-weight:600;letter-spacing:1px;").arg(theme::Dim));
+    ll->addWidget(layerTitle);
+    auto* tilesRow = new QHBoxLayout;
+    tilesRow->setSpacing(theme::Space2);
 
     std::vector<QLabel*> tileStatus(st->layers.size());
     std::vector<QPushButton*> tileToggle(st->layers.size());
+    // ON border brightens to amber, OFF is a plain hairline (matches the design).
+    auto tileQss = [](bool on) {
+        return QString("QWidget#GuardBox{background:%1;border:1px solid %2;border-radius:%3px;}")
+            .arg("rgba(255,122,0,0.06)").arg(on ? "rgba(255,122,0,0.30)" : QString(theme::Border)).arg(theme::RadiusMd);
+    };
     for (size_t i = 0; i < st->layers.size(); ++i) {
         const auto& L = st->layers[i];
         auto* tile = new QWidget;
         tile->setObjectName("GuardBox");
-        tile->setStyleSheet(QString("QWidget#GuardBox{background:%1;border:1px solid %2;border-radius:%3px;}")
-                                .arg("rgba(255,122,0,0.06)").arg("rgba(255,122,0,0.20)").arg(theme::RadiusMd));
+        tile->setStyleSheet(tileQss(L.enabled));
         auto* tl = new QVBoxLayout(tile);
-        tl->setContentsMargins(10, 10, 10, 10);
+        tl->setContentsMargins(12, 10, 12, 10);
         tl->setSpacing(8);
         auto* topRow = new QHBoxLayout; topRow->setContentsMargins(0,0,0,0);
         auto* nameLbl = new QLabel(L.label);
         nameLbl->setWordWrap(true);
-        nameLbl->setStyleSheet(QString("color:%1;font-size:11px;font-weight:600;").arg(theme::Text));
+        nameLbl->setStyleSheet(QString("color:%1;font-size:11px;font-weight:700;").arg(theme::Text));
         topRow->addWidget(nameLbl, 1);
         auto* tog = Toggle(L.enabled);
         tileToggle[i] = tog;
         topRow->addWidget(tog, 0, Qt::AlignTop);
         tl->addLayout(topRow);
-        if (L.dropdown) {
-            auto* combo = new QComboBox;
-            combo->addItems({"Cloudflare", "Quad9", "Google"});
-            combo->setStyleSheet(QString(
-                "QComboBox{background:%1;border:1px solid %2;border-radius:%3px;color:%4;padding:2px 6px;font-size:11px;}")
-                .arg(theme::Surface2).arg(theme::Border).arg(theme::RadiusSm).arg(theme::Dim));
-            QObject::connect(combo, &QComboBox::currentTextChanged, page, [st](const QString& v){
-                std::lock_guard<std::mutex> lk(st->mtx); st->dohProvider = v;
-            });
-            tl->addWidget(combo);
-        } else {
-            auto* status = new QLabel(L.status);
-            status->setStyleSheet(QString("color:%1;font-size:11px;font-family:%2;").arg(theme::AccentSoft).arg(theme::MonoFamily));
-            tileStatus[i] = status;
-            tl->addWidget(status);
-        }
+        auto* status = new QLabel(L.status);
+        status->setStyleSheet(QString("color:%1;font-size:11px;font-family:%2;")
+            .arg(L.enabled ? theme::AccentSoft : theme::Dim).arg(theme::MonoFamily));
+        tileStatus[i] = status;
+        tl->addWidget(status);
         const QString id = L.id;
-        QObject::connect(tog, &QPushButton::toggled, page, [st, id](bool on){
-            std::lock_guard<std::mutex> lk(st->mtx);
-            for (auto& lay : st->layers) if (lay.id == id) lay.enabled = on;
+        QObject::connect(tog, &QPushButton::toggled, page, [st, id, tile, tileQss](bool on){
+            { std::lock_guard<std::mutex> lk(st->mtx);
+              for (auto& lay : st->layers) if (lay.id == id) lay.enabled = on; }
+            tile->setStyleSheet(tileQss(on));
         });
-        (i < cols ? tilesRow1 : tilesRow2)->addWidget(tile, 1);
+        tilesRow->addWidget(tile, 1);
     }
-    // Pad the second row so its tiles align under the first row's columns.
-    for (size_t k = 0, pad = 2 * cols - st->layers.size(); k < pad; ++k)
-        tilesRow2->addStretch(1);
-    ll->addLayout(tilesRow1);
-    ll->addLayout(tilesRow2);
+    ll->addLayout(tilesRow);
     root->addWidget(layerCard);
 
     // ── Monitor: table (left) + detail panel (right) ─────────────────────────
@@ -512,12 +576,11 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     tc->setContentsMargins(0, 0, 0, 0);
     tc->setSpacing(0);
 
-    // toolbar: title + filter chips + search
     auto* toolbar = new QWidget;
     auto* tb = new QHBoxLayout(toolbar);
     tb->setContentsMargins(14, 10, 14, 10);
     tb->setSpacing(theme::Space2);
-    tb->addWidget(SectionTitle(QString::fromUtf8("Realtime Telemetry Monitor")));
+    tb->addWidget(SectionTitle(QString::fromUtf8("Live Monitor")));
     auto* liveLbl = new QLabel(QString::fromUtf8("\xE2\x97\x8F LIVE"));
     liveLbl->setStyleSheet(QString("color:%1;font-size:10px;font-family:%2;").arg(theme::Danger).arg(theme::MonoFamily));
     tb->addWidget(liveLbl);
@@ -526,7 +589,7 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     tb->addWidget(countLbl);
     tb->addStretch();
 
-    QStringList chips = {"All", "Blocked", "Allowed", "Diagnostics", "Watson", "DNS"};
+    QStringList chips = {"All", "Cryptojacking", "Skimmer", "Malvertising", "ExploitKit", "ObfuscatedJS", "Blocked"};
     std::vector<QPushButton*> chipBtns;
     for (const auto& ch : chips) {
         auto* b = new QPushButton(ch);
@@ -543,7 +606,7 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     chipBtns[0]->setChecked(true);
 
     auto* search = new QLineEdit;
-    search->setPlaceholderText(QString::fromUtf8("Filter by process / host\xE2\x80\xA6"));
+    search->setPlaceholderText(QString::fromUtf8("Search endpoint, process\xE2\x80\xA6"));
     search->setFixedSize(200, 28);
     search->setStyleSheet(QString(
         "QLineEdit{background:%1;border:1px solid %2;border-radius:%3px;color:%4;padding:0 8px;font-size:11px;}"
@@ -552,14 +615,14 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     tc->addWidget(toolbar);
 
     auto* tbl = new QTableWidget(0, 7);
-    tbl->setHorizontalHeaderLabels({"", "Time", "Process", "Telemetry Endpoint", "Category", "Status", "Count"});
-    tbl->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
-    tbl->setColumnWidth(0, 30);
-    tbl->setColumnWidth(1, 78);
-    tbl->setColumnWidth(2, 150);
+    tbl->setHorizontalHeaderLabels({"", "Time", "Process", "Endpoint", "Category", "Status", "Hits"});
+    tbl->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);  // Process 1fr
+    tbl->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);  // Endpoint 1fr
+    tbl->setColumnWidth(0, 24);
+    tbl->setColumnWidth(1, 68);
     tbl->setColumnWidth(4, 100);
-    tbl->setColumnWidth(5, 90);
-    tbl->setColumnWidth(6, 56);
+    tbl->setColumnWidth(5, 80);
+    tbl->setColumnWidth(6, 48);
     tbl->setSelectionBehavior(QAbstractItemView::SelectRows);
     tbl->setSelectionMode(QAbstractItemView::SingleSelection);
     tbl->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -570,7 +633,6 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     tc->addWidget(tbl, 1);
     body->addWidget(tblCard, 1);
 
-    // detail panel (hidden until a row is selected)
     auto* detail = new QWidget;
     detail->setObjectName("GuardBox");
     detail->setFixedWidth(0);
@@ -579,15 +641,42 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     auto* dl = new QVBoxLayout(detail);
     dl->setContentsMargins(14, 12, 14, 12);
     dl->setSpacing(8);
-    auto* dTitle = new QLabel(QString::fromUtf8("Endpoint Detail"));
-    dTitle->setStyleSheet(QString("color:%1;font-size:13px;font-weight:600;").arg(theme::Accent));
+    auto* dTitle = new QLabel(QString::fromUtf8("Threat Detail"));
+    dTitle->setStyleSheet(QString("color:%1;font-size:13px;font-weight:700;letter-spacing:1px;").arg(theme::Accent));
     dl->addWidget(dTitle);
-    auto* dBody = new QLabel;
-    dBody->setWordWrap(true);
-    dBody->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    dBody->setStyleSheet(QString("color:%1;font-size:12px;font-family:%2;").arg(theme::Muted).arg(theme::MonoFamily));
-    dl->addWidget(dBody);
+    // Per-field rows (rebuilt on selection). Key = 10px uppercase dim, value =
+    // mono, with a hairline under each field — matches the design's detail list.
+    auto* dFields = new QWidget;
+    auto* dfl = new QVBoxLayout(dFields);
+    dfl->setContentsMargins(0, 0, 0, 0);
+    dfl->setSpacing(0);
+    dl->addWidget(dFields);
     dl->addStretch();
+
+    auto clearFields = [dfl]() {
+        QLayoutItem* it;
+        while ((it = dfl->takeAt(0)) != nullptr) {
+            if (it->widget()) it->widget()->deleteLater();
+            delete it;
+        }
+    };
+    auto addField = [dfl](const QString& key, const QString& val, const QString& col, bool border) {
+        auto* row = new QWidget;
+        row->setObjectName("DetailRow");   // id selector so the border can't leak to child labels
+        if (border)
+            row->setStyleSheet(QString("QWidget#DetailRow{border-bottom:1px solid %1;}").arg(theme::Border));
+        auto* rl = new QVBoxLayout(row);
+        rl->setContentsMargins(0, 8, 0, 8);
+        rl->setSpacing(2);
+        auto* k = new QLabel(key);
+        k->setStyleSheet(QString("color:%1;font-size:10px;font-weight:600;letter-spacing:1px;").arg(theme::Dim));
+        auto* v = new QLabel(val);
+        v->setWordWrap(true);
+        v->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        v->setStyleSheet(QString("color:%1;font-size:12px;font-family:%2;").arg(col).arg(theme::MonoFamily));
+        rl->addWidget(k); rl->addWidget(v);
+        dfl->addWidget(row);
+    };
     auto* dBtns = new QHBoxLayout;
     auto* dBlock = new QPushButton("Block");
     dBlock->setStyleSheet(QString("QPushButton{background:transparent;color:%1;border:1px solid %1;border-radius:%2px;padding:6px;font-weight:600;}"
@@ -601,18 +690,25 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
 
     root->addLayout(body, 1);
 
+    // Combined view = live network rows + flagged extension scripts.
+    auto allRows = [st]() {
+        std::vector<WebRow> v = st->netRows;
+        v.insert(v.end(), st->fileRows.begin(), st->fileRows.end());
+        return v;
+    };
+
     // ── Rendering ────────────────────────────────────────────────────────────
     auto refreshTable = [=]() {
         std::lock_guard<std::mutex> lk(st->mtx);
+        std::vector<WebRow> rows = allRows();
         tbl->setUpdatesEnabled(false);
         tbl->setRowCount(0);
         int shown = 0;
-        for (int idx = 0; idx < (int)st->rows.size(); ++idx) {
-            const auto& r = st->rows[idx];
+        for (int idx = 0; idx < (int)rows.size(); ++idx) {
+            const auto& r = rows[idx];
             const bool fOk =
                 st->filter == "All" ||
                 (st->filter == "Blocked" && r.status == "Blocked") ||
-                (st->filter == "Allowed" && r.status == "Allowed") ||
                 r.category == st->filter;
             const bool sOk = st->search.isEmpty() ||
                 r.process.contains(st->search, Qt::CaseInsensitive) ||
@@ -622,7 +718,7 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
             const int row = tbl->rowCount();
             tbl->insertRow(row);
             const QColor riskCol = r.risk == "high" ? QColor(theme::Danger)
-                                 : r.risk == "medium" ? QColor(theme::Accent)
+                                 : r.risk == "medium" ? QColor(theme::Warn)
                                                       : QColor(theme::Safe);
             auto* dot = new QTableWidgetItem(QString(QChar(0x25CF)));
             dot->setForeground(riskCol); dot->setTextAlignment(Qt::AlignCenter);
@@ -646,7 +742,7 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
             tbl->insertRow(0);
             tbl->setSpan(0, 0, 1, tbl->columnCount());
             auto* msg = new QTableWidgetItem(
-                QString::fromUtf8("No telemetry captured yet \xE2\x80\x94 monitoring\xE2\x80\xA6"));
+                QString::fromUtf8("No events match current filter"));
             msg->setForeground(QColor(theme::Dim));
             msg->setTextAlignment(Qt::AlignCenter);
             tbl->setItem(0, 0, msg);
@@ -657,44 +753,43 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     };
 
     auto refreshStatus = [=]() {
-        const int at = ReadAllowTelemetry();
-        const QString diag = ServiceState(L"DiagTrack");
-        const QString dmw  = ServiceState(L"dmwappushservice");
-        const int hosts = HostsBlockedCount();
-        {
-            std::lock_guard<std::mutex> lk(st->mtx);
-            for (auto& L : st->layers) {
-                if (L.id == "allowtelemetry") L.status = at < 0 ? "unknown" : QString("Level %1").arg(at);
-                else if (L.id == "diagtrack")  L.status = diag;
-                else if (L.id == "dmwapp")     L.status = dmw;
-                else if (L.id == "hosts")      L.status = QString("%1 hosts").arg(hosts);
-            }
-        }
-        // stat cards
-        cLevel.value->setText(at < 0 ? "?" : QString::number(at));
-        cLevel.sub->setText(at <= 1 ? "Home min = 1" : "diagnostic data on");
-        const bool running = diag == "Running";
-        cDiag.value->setText(diag);
-        cDiag.value->setStyleSheet(QString("color:%1;font-size:22px;font-weight:700;")
-                                       .arg(running ? theme::Danger : theme::Safe));
-        cDiag.sub->setText("Connected Experiences");
-        cDiag.dot->setVisible(true);
-        cDiag.dot->setStyleSheet(QString("background:%1;border-radius:4px;").arg(running ? theme::Danger : theme::Safe));
-        {
-            std::lock_guard<std::mutex> lk(st->mtx);
-            bool dohOn = false; QString prov = st->dohProvider;
-            for (auto& L : st->layers) if (L.id == "doh") dohOn = L.enabled;
-            cDoh.value->setText(dohOn ? "Enforced" : "Off");
-            cDoh.sub->setText("via " + prov);
-        }
-        cHosts.value->setText(QString("%1 / %2").arg(hosts).arg((int)(sizeof(kTelemetryHosts)/sizeof(kTelemetryHosts[0]))));
-        cHosts.sub->setText("endpoints null-routed");
-        cSeen.value->setText(QString::number(st->endpointsSeen));
-        cSeen.sub->setText("active telemetry endpoints");
-        // reflect layer statuses onto tiles
         std::lock_guard<std::mutex> lk(st->mtx);
-        for (size_t i = 0; i < st->layers.size(); ++i)
-            if (tileStatus[i]) tileStatus[i]->setText(st->layers[i].status);
+        const int miners  = st->catCount.count("Cryptojacking") ? st->catCount["Cryptojacking"] : 0;
+        const int skimmer = st->catCount.count("Skimmer") ? st->catCount["Skimmer"] : 0;
+        const int malv    = st->catCount.count("Malvertising") ? st->catCount["Malvertising"] : 0;
+        const int ek      = st->catCount.count("ExploitKit") ? st->catCount["ExploitKit"] : 0;
+        st->threatsSeen = (quint64)st->netRows.size() + st->scriptsFlagged;
+
+        // Card 1: amber value, no dot (design). Cards 2-5: default text value +
+        // a persistent category dot (set once above).
+        cThreats.value->setText(QString::number(st->threatsSeen));
+        cThreats.sub->setText("Last 24 hours");
+        cMiners.value->setText(QString::number(miners));
+        cMiners.sub->setText("Miners blocked");
+        cSkimmers.value->setText(QString::number(skimmer));
+        cSkimmers.sub->setText("Magecart endpoints");
+        cMalv.value->setText(QString::number(malv));
+        cMalv.sub->setText("Gate redirects blocked");
+        cScripts.value->setText(QString::number(st->scriptsFlagged));
+        cScripts.sub->setText("Obfuscated JS detected");
+
+        // tile statuses ("N blocked today" per category; Extension scanning special)
+        for (size_t i = 0; i < st->layers.size(); ++i) {
+            if (!tileStatus[i]) continue;
+            const auto& lay = st->layers[i];
+            QString txt;
+            if (!lay.enabled) {
+                txt = (lay.id == "extscan") ? "Inactive" : "Disabled";
+            } else if (lay.id == "cryptojacking") txt = QString("%1 blocked today").arg(miners);
+            else if (lay.id == "skimmer")      txt = QString("%1 blocked today").arg(skimmer);
+            else if (lay.id == "malvertising") txt = QString("%1 blocked today").arg(malv);
+            else if (lay.id == "exploitkit")   txt = QString("%1 blocked today").arg(ek);
+            else if (lay.id == "obfuscated")   txt = QString("%1 blocked today").arg(st->scriptsFlagged);
+            else if (lay.id == "extscan")      txt = QString("%1 / %2 scanned").arg(st->scriptsFlagged).arg(st->scriptsScanned);
+            tileStatus[i]->setText(txt);
+            tileStatus[i]->setStyleSheet(QString("color:%1;font-size:11px;font-family:%2;")
+                .arg(lay.enabled ? theme::AccentSoft : theme::Dim).arg(theme::MonoFamily));
+        }
     };
 
     // filter chips
@@ -718,13 +813,23 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
     // row selection -> detail panel
     auto showDetail = [=](int idx) {
         std::lock_guard<std::mutex> lk(st->mtx);
-        if (idx < 0 || idx >= (int)st->rows.size()) { detail->setFixedWidth(0); return; }
-        const auto& r = st->rows[idx];
+        std::vector<WebRow> rows = allRows();
+        if (idx < 0 || idx >= (int)rows.size()) { detail->setFixedWidth(0); return; }
+        const auto& r = rows[idx];
         st->selected = idx;
-        dBody->setText(QString(
-            "ENDPOINT\n%1\n\nREMOTE IP\n%2\n\nPROCESS\n%3  (pid %4)\n\nCATEGORY\n%5\n\nHIT COUNT\n%6\n\nSTATUS\n%7")
-            .arg(r.endpoint).arg(r.remoteIp).arg(r.process).arg(r.pid).arg(r.category).arg(r.count).arg(r.status));
-        detail->setFixedWidth(260);
+        clearFields();
+        const QString txt = theme::Text;
+        const QString catCol = CategoryColor(r.category);
+        const QString statusCol = r.status == "Blocked" ? QString(theme::Danger) : QString(theme::Safe);
+        addField("ENDPOINT",  r.endpoint, txt, true);
+        addField("REMOTE IP", r.remoteIp, txt, true);
+        addField("PROTOCOL",  r.protocol.isEmpty() ? "—" : r.protocol, txt, true);
+        addField("PROCESS",   QString("%1  (pid %2)").arg(r.process).arg(r.pid), txt, true);
+        addField("CATEGORY",  r.category, catCol, true);
+        addField("HITS",      QString::number(r.count), txt, true);
+        addField("STATUS",    r.status, statusCol, true);
+        addField("EVIDENCE",  r.detail.isEmpty() ? "—" : r.detail, theme::Dim, false);
+        detail->setFixedWidth(280);
     };
     QObject::connect(tbl, &QTableWidget::itemSelectionChanged, page, [=]() {
         auto items = tbl->selectedItems();
@@ -733,10 +838,10 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
         showDetail(idx);
     });
 
-    // right-click context menu: block / allow endpoint
+    // right-click context menu: block / allow endpoint (in-view marking)
     auto setRowStatus = [=](int idx, const QString& status) {
         { std::lock_guard<std::mutex> lk(st->mtx);
-          if (idx >= 0 && idx < (int)st->rows.size()) st->rows[idx].status = status; }
+          if (idx >= 0 && idx < (int)st->netRows.size()) st->netRows[idx].status = status; }
         refreshTable();
     };
     QObject::connect(tbl, &QTableWidget::customContextMenuRequested, page, [=](const QPoint& p){
@@ -768,8 +873,7 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
         QString mode; { std::lock_guard<std::mutex> lk(st->mtx); st->mode = st->pendingMode; mode = st->mode; }
         const QString flag = mode == "BLOCKING" ? "-Apply" : "-Revert";
         std::wstring params = L"-NoProfile -ExecutionPolicy Bypass -File \""
-                            + ScriptPath(L"Harden-Telemetry.ps1") + L"\" " + flag.toStdWString();
-        // runas => UAC prompt; script does the real service/registry/hosts/DoH work.
+                            + ScriptPath(L"Harden-WebGuard.ps1") + L"\" " + flag.toStdWString();
         ShellExecuteW(nullptr, L"runas", L"powershell.exe", params.c_str(), nullptr, SW_SHOWNORMAL);
         refreshStatus(); refreshTable();
     });
@@ -777,14 +881,20 @@ QWidget* BuildTelemetryGuardPage(QWidget* parent) {
         segBlock->setChecked(true); segOpen->setChecked(false);
         std::lock_guard<std::mutex> lk(st->mtx); st->pendingMode = st->mode;
     });
-    QObject::connect(refreshBtn, &QPushButton::clicked, page, [=](){ refreshStatus(); });
+    QObject::connect(refreshBtn, &QPushButton::clicked, page, [=](){
+        if (!st->scanning.exchange(true))
+            std::thread([st]{ ScanExtensions(st); st->scanning.store(false); }).detach();
+        refreshStatus();
+    });
 
-    // Background resolve + periodic capture.
+    // Background resolve + one extension scan + periodic capture.
     std::thread([st]{ ResolveHosts(st); }).detach();
+    std::thread([st]{
+        if (!st->scanning.exchange(true)) { ScanExtensions(st); st->scanning.store(false); }
+    }).detach();
     auto* poll = new QTimer(page);
     poll->setInterval(3000);
     QObject::connect(poll, &QTimer::timeout, page, [=](){
-        // Single-flight: never let a second capture thread overlap the first.
         if (!st->capturing.exchange(true))
             std::thread([st]{ CaptureRows(st); st->capturing.store(false); }).detach();
         refreshStatus();

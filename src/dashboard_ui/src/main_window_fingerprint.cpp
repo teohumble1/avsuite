@@ -298,7 +298,17 @@ QWidget* BuildFingerprintGuardPage(QWidget* parent) {
         {"guid",     "Mask Machine GUID",      "manual",     false},
     };
 
-    auto* root = new QVBoxLayout(page);
+    // Cap the content column so it never overflows the window on wide displays
+    // (the page stack can be forced wider than the viewport by other pages). The
+    // capped column is left-aligned; the remainder is empty background.
+    auto* outer = new QHBoxLayout(page);
+    outer->setContentsMargins(0, 0, 0, 0);
+    outer->setSpacing(0);
+    auto* inner = new QWidget;
+    inner->setMaximumWidth(1180);
+    outer->addWidget(inner);
+    outer->addStretch();
+    auto* root = new QVBoxLayout(inner);
     root->setContentsMargins(theme::Space6, theme::Space6, theme::Space6, theme::Space6);
     root->setSpacing(theme::Space4);
 

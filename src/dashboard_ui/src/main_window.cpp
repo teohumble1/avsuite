@@ -1,5 +1,6 @@
 #include "main_window.hpp"
 #include "perf_mode.hpp"
+#include "theme.hpp"
 
 // Windows headers must come before Qt on Windows to avoid type conflicts.
 #define NOMINMAX
@@ -81,6 +82,7 @@ namespace avdashboard {
     QWidget* BuildTelemetryGuardPage(QWidget* parent);
     QWidget* BuildFingerprintGuardPage(QWidget* parent);
     QWidget* BuildWebGuardPage(QWidget* parent);
+    QWidget* BuildCryptominerPage(QWidget* parent);
     QWidget* BuildSysWatchPage(QWidget* parent);
     QWidget* BuildAutoHuntPage(QWidget* parent, avai::LlmAssistant* ai);
     QWidget* BuildNetGuardPage(QWidget* parent);
@@ -1415,6 +1417,7 @@ MainWindow::MainWindow(avcore::Config config, QWidget* parent)
     pages_->addWidget(BuildTelemetryGuardPage(this)); CtorDbg("telemetry"); // 27
     pages_->addWidget(BuildFingerprintGuardPage(this)); CtorDbg("fingerprint"); // 28
     pages_->addWidget(BuildWebGuardPage(this)); CtorDbg("webguard"); // 29
+    pages_->addWidget(BuildCryptominerPage(this)); CtorDbg("cryptominer"); // 30
     // pages_->addWidget(BuildAutoHuntPage(this, ai_assistant_.get()));  // 11
     // pages_->addWidget(BuildNetGuardPage(this));                        // 12
     // pages_->addWidget(BuildCiCdPage(this));                            // 13
@@ -1736,6 +1739,7 @@ QWidget* MainWindow::BuildSidebar() {
             {IconWidget::Activity,      27, "Telemetry Guard"},
             {IconWidget::Eye,           28, "Fingerprint Guard"},
             {IconWidget::Globe,         29, "Web Guard"},
+            {IconWidget::Cpu,           30, "Cryptominer"},
             {IconWidget::ShieldCheck,   15, "Firewall Pro"},
             {IconWidget::AlertTriangle, 20, "Suricata IDS"},
             {IconWidget::Link,          13, "Supply-chain"},
@@ -2258,59 +2262,161 @@ QWidget* MainWindow::BuildQuarantinePage() {
     layout->setContentsMargins(28, 28, 28, 28);
     layout->setSpacing(12);
 
-    {
-        auto* htc = new QVBoxLayout();
-        htc->setSpacing(2);
-        auto* heading = new QLabel(QString::fromUtf8("Quarantine"), page);
-        heading->setStyleSheet("font-size: 22pt; font-weight: 800; color: #ECE4DA; background: transparent;");
-        htc->addWidget(heading);
-        auto* hsub = new QLabel(
-            QString::fromUtf8("Các tệp bị cách ly — khôi phục hoặc xóa vĩnh viễn"), page);
-        hsub->setStyleSheet("font-size: 9.5pt; color: #C7B6A2; background: transparent;");
-        htc->addWidget(hsub);
-        layout->addLayout(htc);
-    }
+    // Header: title + subtitle + ghost "Export list" action (Figma layout)
+    auto* export_btn = new QPushButton(QString::fromUtf8("⭱  Export list"), page);
+    export_btn->setObjectName("SelectButton");
+    export_btn->setCursor(Qt::PointingHandCursor);
+    layout->addWidget(theme::BuildPageHeader(
+        QString::fromUtf8("Quarantine"),
+        QString::fromUtf8("Các tệp bị cách ly — khôi phục hoặc xóa vĩnh viễn"),
+        export_btn));
 
-    auto* button_row = new QHBoxLayout();
-    button_row->setSpacing(8);
-    auto* select_all_button = new QPushButton(QString::fromUtf8("✓ Select All"), page);
-    select_all_button->setObjectName("SelectButton");
-    auto* restore_button = new QPushButton(QString::fromUtf8("↩  Restore"), page);
+    // Batch action bar — only visible while rows are selected
+    auto* batch_bar = new QFrame(page);
+    batch_bar->setObjectName("QuarBatchBar");
+    batch_bar->setStyleSheet(
+        "QFrame#QuarBatchBar { background: rgba(255,122,0,0.08);"
+        " border: 1px solid rgba(255,122,0,0.25); border-radius: 8px; }"
+        "QFrame#QuarBatchBar QLabel { background: transparent; border: none; }");
+    auto* bb = new QHBoxLayout(batch_bar);
+    bb->setContentsMargins(16, 8, 12, 8);
+    bb->setSpacing(10);
+    auto* sel_lbl = new QLabel(batch_bar);
+    sel_lbl->setStyleSheet(QString("color:%1; font-size:12px;").arg(theme::Accent));
+    bb->addWidget(sel_lbl, 1);
+    auto* restore_button = new QPushButton(QString::fromUtf8("↩  Restore"), batch_bar);
     restore_button->setObjectName("SuccessButton");
-    auto* delete_button = new QPushButton(QString::fromUtf8("   X\xc3\xb3" "a v\xc4\xa9nh vi\xe1\xbb\x85n"), page);
+    auto* delete_button = new QPushButton(QString::fromUtf8("   X\xc3\xb3" "a v\xc4\xa9nh vi\xe1\xbb\x85n"), batch_bar);
     delete_button->setObjectName("DangerButton");
     {
         auto* di = new IconWidget(IconWidget::Archive, 13, QColor(0xC7,0xB6,0xA2), delete_button);
         di->setAttribute(Qt::WA_TransparentForMouseEvents);
         di->move(9, 8);
     }
-    button_row->addWidget(select_all_button);
-    button_row->addWidget(restore_button);
-    button_row->addWidget(delete_button);
-    button_row->addStretch();
-    layout->addLayout(button_row);
+    auto* clear_sel_btn = new QPushButton(QString::fromUtf8("✕"), batch_bar);
+    clear_sel_btn->setObjectName("SelectButton");
+    clear_sel_btn->setFixedWidth(30);
+    clear_sel_btn->setToolTip(QString::fromUtf8("Bỏ chọn tất cả"));
+    bb->addWidget(restore_button);
+    bb->addWidget(delete_button);
+    bb->addWidget(clear_sel_btn);
+    batch_bar->setVisible(false);
+    layout->addWidget(batch_bar);
 
-    quarantine_table_ = new QTableWidget(0, 4, page);
+    // Toolbar: search + Select All + live item count
+    auto* toolbar = new QHBoxLayout();
+    toolbar->setSpacing(8);
+    auto* search_box = new QLineEdit(page);
+    search_box->setPlaceholderText(QString::fromUtf8("Tìm trong quarantine…"));
+    search_box->setClearButtonEnabled(true);
+    search_box->setMaximumWidth(300);
+    search_box->setStyleSheet(QString(
+        "QLineEdit { background:%1; color:%2; border:1px solid %3;"
+        " border-radius:8px; padding:6px 10px; font-size:12px; }")
+        .arg(theme::Surface, theme::Text, theme::Border));
+    auto* select_all_button = new QPushButton(QString::fromUtf8("✓ Select All"), page);
+    select_all_button->setObjectName("SelectButton");
+    auto* count_lbl = new QLabel(page);
+    count_lbl->setStyleSheet(QString("color:%1; font-size:12px; background:transparent;").arg(theme::Dim));
+    toolbar->addWidget(search_box, 1);
+    toolbar->addWidget(select_all_button);
+    toolbar->addStretch();
+    toolbar->addWidget(count_lbl);
+    layout->addLayout(toolbar);
+
+    // Table — col 0 keeps the quarantine ID for the action slots but stays hidden
+    quarantine_table_ = new QTableWidget(0, 5, page);
     quarantine_table_->setHorizontalHeaderLabels(
-        {"ID", QString::fromUtf8("Đường dẫn gốc"), "Rule", QString::fromUtf8("Thời điểm")});
+        {"ID", QString::fromUtf8("Tên tệp"), QString::fromUtf8("Threat / Rule"),
+         QString::fromUtf8("Thời điểm"), QString::fromUtf8("Đường dẫn gốc")});
     {
         auto* qhdr = quarantine_table_->horizontalHeader();
         qhdr->setStretchLastSection(false);
-        qhdr->setSectionResizeMode(0, QHeaderView::ResizeToContents); // ID
-        qhdr->setSectionResizeMode(1, QHeaderView::Stretch);          // path takes remaining width
-        qhdr->setSectionResizeMode(2, QHeaderView::ResizeToContents); // Rule
+        qhdr->setSectionResizeMode(1, QHeaderView::ResizeToContents); // file name
+        qhdr->setSectionResizeMode(2, QHeaderView::ResizeToContents); // rule
         qhdr->setSectionResizeMode(3, QHeaderView::ResizeToContents); // time
+        qhdr->setSectionResizeMode(4, QHeaderView::Stretch);          // path takes remaining width
     }
+    quarantine_table_->setColumnHidden(0, true);
     quarantine_table_->setEditTriggers(QAbstractItemView::NoEditTriggers);
     quarantine_table_->setSelectionBehavior(QAbstractItemView::SelectRows);
     quarantine_table_->setSelectionMode(QAbstractItemView::MultiSelection);
-    quarantine_table_->setAlternatingRowColors(true);
     quarantine_table_->verticalHeader()->setVisible(false);
+    quarantine_table_->setStyleSheet(theme::TableQss());
+    // Elide long paths in the middle so the drive root AND the filename stay
+    // visible (e.g. "C:\Users\…\dropper.dll"); full path is on the tooltip.
+    quarantine_table_->setTextElideMode(Qt::ElideMiddle);
     layout->addWidget(quarantine_table_);
 
     connect(select_all_button, &QPushButton::clicked, this, &MainWindow::OnSelectAllQuarantineClicked);
     connect(restore_button, &QPushButton::clicked, this, &MainWindow::OnRestoreQuarantineClicked);
     connect(delete_button, &QPushButton::clicked, this, &MainWindow::OnDeleteQuarantineClicked);
+    connect(clear_sel_btn, &QPushButton::clicked, page,
+            [this] { quarantine_table_->clearSelection(); });
+
+    // Search filter + item count, re-applied whenever rows change (coalesced so a
+    // full ReloadQuarantineTable only triggers one pass).
+    auto* upd = new QTimer(page);
+    upd->setSingleShot(true);
+    upd->setInterval(0);
+    connect(upd, &QTimer::timeout, page, [this, search_box, count_lbl] {
+        const QString q = search_box->text().trimmed();
+        int visible = 0;
+        for (int r = 0; r < quarantine_table_->rowCount(); ++r) {
+            auto* id_item = quarantine_table_->item(r, 0);
+            const bool msg_row = (id_item == nullptr);  // empty-state row has no ID cell
+            bool show = true;
+            if (!msg_row && !q.isEmpty()) {
+                auto txt = [this, r](int c) {
+                    auto* it = quarantine_table_->item(r, c);
+                    return it ? it->text() : QString();
+                };
+                show = txt(1).contains(q, Qt::CaseInsensitive) ||
+                       txt(2).contains(q, Qt::CaseInsensitive) ||
+                       txt(4).contains(q, Qt::CaseInsensitive);
+            }
+            quarantine_table_->setRowHidden(r, !show);
+            if (show && !msg_row) ++visible;
+        }
+        count_lbl->setText(QString::fromUtf8("%1 mục").arg(visible));
+    });
+    connect(search_box, &QLineEdit::textChanged, page, [upd] { upd->start(200); });
+    connect(quarantine_table_->model(), &QAbstractItemModel::rowsInserted, page, [upd] { upd->start(); });
+    connect(quarantine_table_->model(), &QAbstractItemModel::rowsRemoved, page, [upd] { upd->start(); });
+    upd->start();
+
+    connect(quarantine_table_->selectionModel(), &QItemSelectionModel::selectionChanged, page,
+            [this, batch_bar, sel_lbl] {
+        const int n = quarantine_table_->selectionModel()->selectedRows().count();
+        sel_lbl->setText(QString::fromUtf8("%1 mục đã chọn").arg(n));
+        batch_bar->setVisible(n > 0);
+    });
+
+    connect(export_btn, &QPushButton::clicked, this, [this] {
+        const QString path = QFileDialog::getSaveFileName(
+            this, QString::fromUtf8("Export quarantine list"),
+            "quarantine.csv", "CSV (*.csv)");
+        if (path.isEmpty()) return;
+        QFile f(path);
+        if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::warning(this, QString::fromUtf8("Export thất bại"),
+                                 QString::fromUtf8("Không ghi được file: %1").arg(path));
+            return;
+        }
+        QTextStream ts(&f);
+        ts << "id,file,rule,quarantined_at,original_path\n";
+        for (int r = 0; r < quarantine_table_->rowCount(); ++r) {
+            if (!quarantine_table_->item(r, 0) || quarantine_table_->isRowHidden(r)) continue;
+            auto cell = [this, r](int c) {
+                auto* it = quarantine_table_->item(r, c);
+                QString s = it ? it->text() : QString();
+                s.replace('"', '\'');
+                return s;
+            };
+            ts << cell(0) << ",\"" << cell(1) << "\",\"" << cell(2) << "\",\""
+               << cell(3) << "\",\"" << cell(4) << "\"\n";
+        }
+    });
 
     return page;
 }
@@ -2507,14 +2613,38 @@ void MainWindow::AppendDetectionRow(const avcore::DetectionEvent& event) {
 }
 
 void MainWindow::ReloadQuarantineTable() {
+    quarantine_table_->clearSpans();
     quarantine_table_->setRowCount(0);
     for (const auto& record : engine_->ListQuarantine()) {
         const int row = quarantine_table_->rowCount();
         quarantine_table_->insertRow(row);
+        const QString path = QString::fromUtf8(record.original_path.c_str());
+        auto colored = [](const QString& s, const char* hex) {
+            auto* it = new QTableWidgetItem(s);
+            it->setForeground(QColor(hex));
+            return it;
+        };
         quarantine_table_->setItem(row, 0, new QTableWidgetItem(QString::number(record.id)));
-        quarantine_table_->setItem(row, 1, new QTableWidgetItem(QString::fromUtf8(record.original_path.c_str())));
-        quarantine_table_->setItem(row, 2, new QTableWidgetItem(QString::fromUtf8(record.rule_id.c_str())));
-        quarantine_table_->setItem(row, 3, new QTableWidgetItem(TimePointToQString(record.quarantined_at)));
+        auto* name_item = colored(QFileInfo(path).fileName(), theme::Text);
+        name_item->setToolTip(path);
+        quarantine_table_->setItem(row, 1, name_item);
+        quarantine_table_->setItem(row, 2, colored(QString::fromUtf8(record.rule_id.c_str()), theme::AccentSoft));
+        quarantine_table_->setItem(row, 3, colored(TimePointToQString(record.quarantined_at), theme::Dim));
+        auto* path_item = colored(path, theme::Dim);
+        path_item->setToolTip(path);  // hover shows the full, un-elided path
+        quarantine_table_->setItem(row, 4, path_item);
+    }
+    if (quarantine_table_->rowCount() == 0) {
+        // Empty state: one non-selectable spanning row (no ID cell in col 0, which
+        // is how the filter/count pass and the action slots recognize it).
+        quarantine_table_->insertRow(0);
+        quarantine_table_->setSpan(0, 1, 1, 4);
+        auto* msg = new QTableWidgetItem(
+            QString::fromUtf8("Không có mục cách ly nào — tệp bị chặn sẽ xuất hiện ở đây"));
+        msg->setForeground(QColor(theme::Dim));
+        msg->setTextAlignment(Qt::AlignCenter);
+        msg->setFlags(Qt::ItemIsEnabled);
+        quarantine_table_->setItem(0, 1, msg);
     }
 }
 
@@ -2647,7 +2777,8 @@ void MainWindow::RefreshHomeDetections() {
 std::int64_t MainWindow::SelectedQuarantineId() const {
     const auto selected = quarantine_table_->selectionModel()->selectedRows();
     if (selected.isEmpty()) return 0;
-    return quarantine_table_->item(selected.first().row(), 0)->text().toLongLong();
+    auto* id_item = quarantine_table_->item(selected.first().row(), 0);
+    return id_item ? id_item->text().toLongLong() : 0;  // empty-state row has no ID cell
 }
 
 void MainWindow::RunScanInBackground(std::function<void()> work) {
@@ -2906,7 +3037,9 @@ void MainWindow::OnRestoreQuarantineClicked() {
     if (selected.isEmpty()) return;
     int restored_count = 0;
     for (const auto& idx : selected) {
-        const std::int64_t id = quarantine_table_->item(idx.row(), 0)->text().toLongLong();
+        auto* id_item = quarantine_table_->item(idx.row(), 0);
+        if (!id_item) continue;  // empty-state row
+        const std::int64_t id = id_item->text().toLongLong();
         if (engine_->RestoreFromQuarantine(id)) {
             ++restored_count;
         }
@@ -2936,7 +3069,9 @@ void MainWindow::OnDeleteQuarantineClicked() {
     if (answer != QMessageBox::Yes) return;
     int deleted_count = 0;
     for (const auto& idx : selected) {
-        const std::int64_t id = quarantine_table_->item(idx.row(), 0)->text().toLongLong();
+        auto* id_item = quarantine_table_->item(idx.row(), 0);
+        if (!id_item) continue;  // empty-state row
+        const std::int64_t id = id_item->text().toLongLong();
         if (engine_->DeleteQuarantine(id)) {
             ++deleted_count;
         }

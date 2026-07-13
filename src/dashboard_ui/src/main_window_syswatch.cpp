@@ -53,6 +53,8 @@
 #include <unordered_set>
 #include <vector>
 #include <array>
+#include <algorithm>
+#include <memory>
 
 #include "autohunt_types.hpp"
 
@@ -307,6 +309,92 @@ QWidget* BuildSysWatchPage(QWidget* parent) {
     hlay->addWidget(clear_btn);
 
     root->addWidget(hdr);
+
+    // ── CPU-pegging alert (cryptojacking symptom: a process pinning the CPU) ──
+    auto* cpu_banner = new QLabel(page);
+    cpu_banner->setWordWrap(true);
+    cpu_banner->setVisible(false);
+    cpu_banner->setStyleSheet(
+        "background:#2A0F0F; border:1px solid #FF5A6A; border-radius:10px;"
+        "color:#FF9AA5; font-size:12px; font-weight:600; padding:10px 14px;");
+    root->addWidget(cpu_banner);
+    {
+        SYSTEM_INFO si; GetSystemInfo(&si);
+        const double ncpu = si.dwNumberOfProcessors ? si.dwNumberOfProcessors : 1;
+        auto prev = std::make_shared<std::unordered_map<DWORD, unsigned long long>>();
+        auto prev_wall = std::make_shared<ULONGLONG>(0);
+
+        auto* cpu_timer = new QTimer(page);
+        cpu_timer->setInterval(5000);
+        QObject::connect(cpu_timer, &QTimer::timeout, page, [cpu_banner, prev, prev_wall, ncpu]() {
+            static const std::unordered_set<std::string> kMiners = {
+                "xmrig.exe", "smrig.exe", "nbminer.exe", "phoenixminer.exe",
+                "t-rex.exe", "lolminer.exe", "cpuminer.exe", "ccminer.exe",
+                "nanominer.exe", "xmr-stak.exe", "srbminer-multi.exe",
+            };
+            HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+            if (snap == INVALID_HANDLE_VALUE) return;
+            std::unordered_map<DWORD, unsigned long long> cur;
+            std::unordered_map<DWORD, std::string> names;
+            PROCESSENTRY32W pe{}; pe.dwSize = sizeof(pe);
+            if (Process32FirstW(snap, &pe)) {
+                do {
+                    HANDLE h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pe.th32ProcessID);
+                    if (!h) continue;
+                    FILETIME c, e, k, u;
+                    if (GetProcessTimes(h, &c, &e, &k, &u)) {
+                        ULARGE_INTEGER ku, uu;
+                        ku.LowPart = k.dwLowDateTime; ku.HighPart = k.dwHighDateTime;
+                        uu.LowPart = u.dwLowDateTime; uu.HighPart = u.dwHighDateTime;
+                        cur[pe.th32ProcessID] = ku.QuadPart + uu.QuadPart;   // 100ns units
+                        char nm[260];
+                        int n = WideCharToMultiByte(CP_UTF8, 0, pe.szExeFile, -1,
+                                                    nm, sizeof(nm), nullptr, nullptr);
+                        if (n > 0) names[pe.th32ProcessID] = nm;
+                    }
+                    CloseHandle(h);
+                } while (Process32NextW(snap, &pe));
+            }
+            CloseHandle(snap);
+
+            const ULONGLONG now = GetTickCount64();
+            const ULONGLONG wall_ms = (*prev_wall == 0) ? 0 : (now - *prev_wall);
+
+            double best_pct = 0; DWORD best_pid = 0; std::string best_name;
+            if (wall_ms > 0) {
+                for (const auto& kv : cur) {
+                    auto it = prev->find(kv.first);
+                    if (it == prev->end()) continue;
+                    const unsigned long long d = (kv.second >= it->second) ? kv.second - it->second : 0ull;
+                    const double cpu_ms = d / 10000.0;                        // 100ns -> ms
+                    const double pct = cpu_ms / (static_cast<double>(wall_ms) * ncpu) * 100.0;
+                    if (pct > best_pct) {
+                        best_pct = pct; best_pid = kv.first;
+                        best_name = names.count(kv.first) ? names[kv.first] : std::string("?");
+                    }
+                }
+            }
+            *prev = std::move(cur);
+            *prev_wall = now;
+
+            if (best_pct >= 70.0 && best_pid != 0) {
+                std::string lower = best_name;
+                std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+                const bool is_miner = kMiners.count(lower) > 0;
+                QString msg = is_miner
+                    ? QString::fromUtf8("\xE2\x9A\xA0 Nghi CRYPTOMINER: ")
+                    : QString::fromUtf8("\xE2\x9A\xA0 CPU b\xE1\xBB\x8B ghim: ");
+                msg += QString::fromStdString(best_name)
+                     + QString(" (PID %1) \xE2\x89\x88 ").arg(best_pid)
+                     + QString::number(static_cast<int>(best_pct)) + "% CPU";
+                cpu_banner->setText(msg);
+                cpu_banner->setVisible(true);
+            } else {
+                cpu_banner->setVisible(false);
+            }
+        });
+        cpu_timer->start();
+    }
 
     // ── Watch targets ─────────────────────────────────────────────────────────
     auto* targets_card = new QWidget;

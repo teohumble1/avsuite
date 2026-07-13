@@ -20,6 +20,7 @@ add_library(avbehavior STATIC
     src/rules/rule_ransomware_indicator.cpp
     src/rules/rule_defense_evasion.cpp
     src/rules/rule_malware_behaviors.cpp
+    src/rules/rule_cryptominer.cpp
 )
 
 target_include_directories(avbehavior

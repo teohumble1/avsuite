@@ -21,6 +21,7 @@
 #include "rules/rule_ransomware_indicator.hpp"
 #include "rules/rule_defense_evasion.hpp"
 #include "rules/rule_malware_behaviors.hpp"
+#include "rules/rule_cryptominer.hpp"
 
 namespace avbehavior {
 
@@ -49,6 +50,8 @@ RuleEngine RuleEngine::WithDefaultRules() {
     engine.AddRule(std::make_unique<rules::RuleLateralMovementIndicators>());
     engine.AddRule(std::make_unique<rules::RuleCredentialTheftPatterns>());
     engine.AddRule(std::make_unique<rules::RuleCommandObfuscation>());
+    // Cryptominer launch fingerprint (Stratum/XMRig/pool indicators)
+    engine.AddRule(std::make_unique<rules::RuleCryptominer>());
     return engine;
 }
 

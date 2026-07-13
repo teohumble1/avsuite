@@ -37,6 +37,7 @@ set(AVDASHBOARD_PAGE_SOURCES
     src/main_window_syswatch.cpp
     src/main_window_telemetry.cpp
     src/main_window_webguard.cpp
+    src/main_window_cryptominer.cpp
     src/main_window_threatintel.cpp
     src/main_window_timeline.cpp
     src/main_window_vpn.cpp

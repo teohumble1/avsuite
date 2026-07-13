@@ -84,6 +84,26 @@ static const std::vector<std::string> kC2Keywords = {
     "cnc", "command", "control",
 };
 
+// Cryptomining-pool wire ports (Stratum). A non-browser process talking to one
+// of these is a strong cryptojacking signal — see the /opt/smrig XMRig case.
+static const std::unordered_set<int> kMinerPorts = {
+    3333, 3334, 4444, 5555, 5556, 7777, 9000, 14433, 14444, 20580, 45560, 45700,
+};
+
+// Fragments of well-known mining-pool hostnames.
+static const std::vector<std::string> kMinerPoolDomains = {
+    "minexmr", "supportxmr", "moneroocean", "nanopool", "hashvault",
+    "monerohash", "2miners", "xmrpool", "f2pool", "ethermine",
+    "nicehash", "zpool", "prohashing", "herominers", "c3pool",
+};
+
+// Basenames of widely-abused miner binaries (native cryptojacking process).
+static const std::unordered_set<std::string> kMinerProcs = {
+    "xmrig.exe", "xmrig", "smrig.exe", "smrig", "nbminer.exe", "phoenixminer.exe",
+    "t-rex.exe", "trex.exe", "lolminer.exe", "cpuminer.exe", "ccminer.exe",
+    "nanominer.exe", "srbminer-multi.exe", "teamredminer.exe", "xmr-stak.exe",
+};
+
 // IP CIDR range entry — used for CDN and Microsoft IP classification
 struct CidrEntry { uint32_t net_be; uint32_t mask; const char* name; };
 
@@ -243,6 +263,17 @@ static RiskResult ScoreConn(
     // CDN check
     cdn = CheckCdn(ip_h);
 
+    // Cryptominer / mining-pool connection — a native process speaking to a
+    // Stratum pool port or a known pool host is high-risk cryptojacking.
+    if (kMinerProcs.count(proc_lower)) {
+        score += 50;
+        reasons.push_back("Miner Process");
+    }
+    if (kMinerPorts.count(remote_port)) {
+        score += 45;
+        reasons.push_back("Miner Pool Port");
+    }
+
     // LOLBin
     if (kLolBins.count(proc_lower)) {
         score += 40;
@@ -297,6 +328,14 @@ static RiskResult ScoreConn(
             if (host_lower.find(kw) != std::string::npos) {
                 score += 25;
                 reasons.push_back("C2 Pattern");
+                break;
+            }
+
+        // Known mining-pool hostname
+        for (const auto& pd : kMinerPoolDomains)
+            if (host_lower.find(pd) != std::string::npos) {
+                score += 50;
+                reasons.push_back("Mining Pool");
                 break;
             }
     } else if (!priv && cdn.empty()) {

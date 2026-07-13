@@ -13,37 +13,8 @@ set(CMAKE_AUTOMOC ON)
 set(AVDASHBOARD_PAGE_SOURCES
     src/elevated_script.cpp
     src/main_window.cpp
-    src/main_window_ai.cpp
-    src/main_window_ai_agent.cpp
-    src/main_window_alerts.cpp
-    src/main_window_autohunt.cpp
-    src/main_window_cicd.cpp
-    src/main_window_dllintel.cpp
-    src/main_window_dlp.cpp
-    src/main_window_fingerprint.cpp
-    src/main_window_firewall.cpp
-    src/main_window_hiddenhunt.cpp
     src/main_window_history.cpp
-    src/main_window_hookhunt.cpp
-    src/main_window_kernelbios.cpp
-    src/main_window_lanmonitor.cpp
-    src/main_window_memhunt.cpp
-    src/main_window_netguard.cpp
-    src/main_window_network.cpp
-    src/main_window_osint.cpp
-    src/main_window_selfupdate.cpp
-    src/main_window_settings.cpp
-    src/main_window_supplychain.cpp
-    src/main_window_suricata.cpp
-    src/main_window_syswatch.cpp
-    src/main_window_telemetry.cpp
-    src/main_window_webguard.cpp
-    src/main_window_cryptominer.cpp
-    src/main_window_threatintel.cpp
-    src/main_window_timeline.cpp
-    src/main_window_vpn.cpp
-    src/main_window_waf.cpp
-    src/main_window_wificsi.cpp
+    src/main_window_investigation.cpp
 )
 
 add_executable(avdashboard WIN32

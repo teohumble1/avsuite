@@ -78,31 +78,8 @@
 #include "av_animations.hpp"
 
 namespace avdashboard {
-    QWidget* BuildDllIntelPage(QWidget* parent);
-    QWidget* BuildTelemetryGuardPage(QWidget* parent);
-    QWidget* BuildFingerprintGuardPage(QWidget* parent);
-    QWidget* BuildWebGuardPage(QWidget* parent);
-    QWidget* BuildCryptominerPage(QWidget* parent);
-    QWidget* BuildSysWatchPage(QWidget* parent);
-    QWidget* BuildAutoHuntPage(QWidget* parent, avai::LlmAssistant* ai);
-    QWidget* BuildNetGuardPage(QWidget* parent);
-    QWidget* BuildCiCdPage(QWidget* parent);
-    QWidget* BuildHiddenHuntPage(QWidget* parent);
-    QWidget* BuildWafPage(QWidget* parent);
-    QWidget* BuildSupplyChainPage(QWidget* parent);
-    QWidget* BuildLanMonitorPage(QWidget* parent);
-    QWidget* BuildFirewallPage(QWidget* parent);
-    QWidget* BuildDlpPage(QWidget* parent);
-    QWidget* BuildThreatIntelPage(QWidget* parent);
-    QWidget* BuildOsintPage(QWidget* parent);
-    QWidget* BuildWifiCsiPage(QWidget* parent);
-    QWidget* BuildSuricataPage(QWidget* parent);
-    QWidget* BuildKernelBiosPage(QWidget* parent);
-    QWidget* BuildSelfUpdatePage(QWidget* parent);
-    QWidget* BuildMemHuntPage(QWidget* parent);
-    QWidget* BuildHookHuntPage(QWidget* parent);
-    QWidget* BuildAlertsPage(QWidget* parent);
-    QWidget* BuildTimelinePage(QWidget* parent);
+    QWidget* BuildHistoryPage(QWidget* parent);
+    QWidget* BuildInvestigationPage(QWidget* parent);
 }
 
 namespace avdashboard {
@@ -1390,37 +1367,7 @@ MainWindow::MainWindow(avcore::Config config, QWidget* parent)
     pages_->addWidget(BuildHomePage());       CtorDbg("home");     // 0
     pages_->addWidget(BuildHistoryPage());    CtorDbg("history");  // 1
     pages_->addWidget(BuildQuarantinePage()); CtorDbg("quarantine"); // 2
-    pages_->addWidget(BuildSettingsPage());   CtorDbg("settings"); // 3
-    pages_->addWidget(BuildHashListPage());   CtorDbg("hashlist"); // 4
-    pages_->addWidget(BuildEtwPage());        CtorDbg("etw");      // 5
-    pages_->addWidget(BuildAiPage());         CtorDbg("ai");       // 6
-    pages_->addWidget(BuildNetworkPage());    CtorDbg("network");  // 7
-    pages_->addWidget(BuildVpnPage());        CtorDbg("vpn");      // 8
-    pages_->addWidget(BuildDllIntelPage(this)); CtorDbg("dllintel"); // 9
-    pages_->addWidget(BuildSysWatchPage(this)); CtorDbg("syswatch"); // 10
-    pages_->addWidget(BuildHiddenHuntPage(this)); CtorDbg("hiddenhunt"); // 11
-    pages_->addWidget(BuildWafPage(this)); CtorDbg("waf"); // 12
-    pages_->addWidget(BuildSupplyChainPage(this)); CtorDbg("supplychain"); // 13
-    pages_->addWidget(BuildLanMonitorPage(this)); CtorDbg("lanmonitor"); // 14
-    pages_->addWidget(BuildFirewallPage(this)); CtorDbg("firewall"); // 15
-    pages_->addWidget(BuildDlpPage(this)); CtorDbg("dlp"); // 16
-    pages_->addWidget(BuildThreatIntelPage(this)); CtorDbg("threatintel"); // 17
-    pages_->addWidget(BuildOsintPage(this)); CtorDbg("osint"); // 18
-    pages_->addWidget(BuildWifiCsiPage(this)); CtorDbg("wificsi"); // 19
-    pages_->addWidget(BuildSuricataPage(this)); CtorDbg("suricata"); // 20
-    pages_->addWidget(BuildKernelBiosPage(this)); CtorDbg("kernelbios"); // 21
-    pages_->addWidget(BuildSelfUpdatePage(this)); CtorDbg("selfupdate"); // 22
-    pages_->addWidget(BuildMemHuntPage(this)); CtorDbg("memhunt"); // 23
-    pages_->addWidget(BuildHookHuntPage(this)); CtorDbg("hookhunt"); // 24
-    pages_->addWidget(BuildAlertsPage(this)); CtorDbg("alerts"); // 25
-    pages_->addWidget(BuildTimelinePage(this)); CtorDbg("timeline"); // 26
-    pages_->addWidget(BuildTelemetryGuardPage(this)); CtorDbg("telemetry"); // 27
-    pages_->addWidget(BuildFingerprintGuardPage(this)); CtorDbg("fingerprint"); // 28
-    pages_->addWidget(BuildWebGuardPage(this)); CtorDbg("webguard"); // 29
-    pages_->addWidget(BuildCryptominerPage(this)); CtorDbg("cryptominer"); // 30
-    // pages_->addWidget(BuildAutoHuntPage(this, ai_assistant_.get()));  // 11
-    // pages_->addWidget(BuildNetGuardPage(this));                        // 12
-    // pages_->addWidget(BuildCiCdPage(this));                            // 13
+    pages_->addWidget(BuildInvestigationPage(this)); CtorDbg("investigation"); // 3
     root_layout->addWidget(pages_, /*stretch=*/1);
 
     setCentralWidget(central);
@@ -1717,41 +1664,11 @@ QWidget* MainWindow::BuildSidebar() {
         std::vector<NavEntry> items;
     };
     const NavSection sections[] = {
-        {"PROTECTION", false, {
+        {"CORE", false, {
             {IconWidget::Home,          0,  "Home"},
-            {IconWidget::Bell,          25, "Threat Alerts"},
-            {IconWidget::Activity,      26, "Timeline"},
-            {IconWidget::Archive,       2,  "Quarantine"},
             {IconWidget::Search,        1,  "History"},
-            {IconWidget::Ai,            6,  "AI Assistant"},
-        }},
-        {"MONITORING", false, {
-            {IconWidget::Wifi,          7,  "Network Monitor"},
-            {IconWidget::Eye,           10, "Sys Watch"},
-            {IconWidget::Layers,        9,  "DLL Intel"},
-            {IconWidget::Database,      16, "DLP"},
-            {IconWidget::TrendingUp,    17, "Threat Intel"},
-            {IconWidget::Globe,         8,  "VPN"},
-            {IconWidget::Lock,          4,  "Hash List"},
-            {IconWidget::BarChart2,     5,  "ETW Monitor"},
-        }},
-        {"ADVANCED", true, {
-            {IconWidget::Activity,      27, "Telemetry Guard"},
-            {IconWidget::Eye,           28, "Fingerprint Guard"},
-            {IconWidget::Globe,         29, "Web Guard"},
-            {IconWidget::Cpu,           30, "Cryptominer"},
-            {IconWidget::ShieldCheck,   15, "Firewall Pro"},
-            {IconWidget::AlertTriangle, 20, "Suricata IDS"},
-            {IconWidget::Link,          13, "Supply-chain"},
-            {IconWidget::UserCheck,     18, "OSINT Hub"},
-            {IconWidget::Wifi,          14, "LAN Monitor"},
-            {IconWidget::Shield,        12, "WAF"},
-            {IconWidget::Zap,           11, "Hidden Hunt"},
-            {IconWidget::Cpu,           23, "Memory Hunt"},
-            {IconWidget::File,          24, "Hook Hunt"},
-            {IconWidget::HardDrive,     21, "Kernel/BIOS"},
-            {IconWidget::RefreshCw,     22, "Self-Update"},
-            {IconWidget::Globe,         19, "WiFi CSI"},
+            {IconWidget::Archive,       2,  "Quarantine"},
+            {IconWidget::Layers,        3,  "Investigation"},
         }},
     };
 
@@ -1834,20 +1751,6 @@ QWidget* MainWindow::BuildSidebar() {
     nav_l->addStretch();
     nav_scroll->setWidget(nav_inner);
     layout->addWidget(nav_scroll, 1);
-
-    // ── Bottom: Settings pinned under a hairline (Figma) ──
-    {
-        auto* bottom = new QFrame(sidebar);
-        bottom->setObjectName("SidebarBottom");
-        bottom->setStyleSheet(
-            "QFrame#SidebarBottom { background: transparent;"
-            " border: none; border-top: 1px solid #493826; }");
-        auto* bl = new QVBoxLayout(bottom);
-        bl->setContentsMargins(0, 8, 0, 8);
-        bl->setSpacing(0);
-        bl->addWidget(makeNavButton({IconWidget::Settings, 3, "Settings"}, bottom));
-        layout->addWidget(bottom);
-    }
 
     nav_group_->button(0)->setChecked(true);
 

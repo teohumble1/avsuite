@@ -39,6 +39,12 @@
 #include "avstaticscan/yara_engine.hpp"
 #include "avstorage/database.hpp"
 
+// BƯỚC 1: Kernel callbacks (stubs for now)
+#include "process_monitor.hpp"
+#include "dll_monitor.hpp"
+#include "handle_monitor.hpp"
+#include "registry_monitor.hpp"
+
 namespace avengine {
 
 struct ScanMetrics {
@@ -63,6 +69,12 @@ struct Engine::Impl {
     std::unique_ptr<avetw::EtwSession> etw_session;
     std::thread etw_thread;
     std::unique_ptr<avrealtimeblock::MinifilterClient> minifilter_client;
+
+    // BƯỚC 1: Kernel callback monitors
+    std::unique_ptr<ProcessMonitor> process_monitor;
+    std::unique_ptr<DllMonitor> dll_monitor;
+    std::unique_ptr<HandleMonitor> handle_monitor;
+    std::unique_ptr<RegistryMonitor> registry_monitor;
 
     std::mutex etw_raw_mutex;
     EtwRawCallback etw_raw_cb;
@@ -975,6 +987,17 @@ void Engine::StartRealtimeProtection() {
         impl_->on_detection(status);
     }
 
+    // BƯỚC 1: Start kernel callback monitors
+    impl_->process_monitor = std::make_unique<ProcessMonitor>();
+    impl_->dll_monitor = std::make_unique<DllMonitor>();
+    impl_->handle_monitor = std::make_unique<HandleMonitor>();
+    impl_->registry_monitor = std::make_unique<RegistryMonitor>();
+
+    impl_->process_monitor->Start();
+    impl_->dll_monitor->Start();
+    impl_->handle_monitor->Start();
+    impl_->registry_monitor->Start();
+
     impl_->realtime_started = true;
     impl_->RestartScheduledThread(impl_->config.scheduled_scan);
 }
@@ -986,6 +1009,11 @@ void Engine::Stop() {
     if (impl_->etw_session) impl_->etw_session->Stop();
     if (impl_->etw_thread.joinable()) impl_->etw_thread.join();
     if (impl_->minifilter_client) impl_->minifilter_client->Stop();
+    // BƯỚC 1: Stop kernel monitors
+    if (impl_->process_monitor) impl_->process_monitor->Stop();
+    if (impl_->dll_monitor) impl_->dll_monitor->Stop();
+    if (impl_->handle_monitor) impl_->handle_monitor->Stop();
+    if (impl_->registry_monitor) impl_->registry_monitor->Stop();
 }
 
 int Engine::ScanProcessMemory(std::uint32_t pid) {

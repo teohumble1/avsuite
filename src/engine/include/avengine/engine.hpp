@@ -14,6 +14,12 @@
 
 namespace avengine {
 
+// Forward-declarations of kernel callback monitors (BƯỚC 1: Kernel Callbacks)
+class ProcessMonitor;
+class DllMonitor;
+class HandleMonitor;
+class RegistryMonitor;
+
 using DetectionCallback = std::function<void(const avcore::DetectionEvent&)>;
 using ProgressCallback = std::function<void(int current, int total)>;
 using EtwRawCallback = std::function<void(const avbehavior::ProcessEvent&)>;

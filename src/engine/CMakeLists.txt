@@ -1,5 +1,9 @@
 add_library(avengine STATIC
     src/engine.cpp
+    src/process_monitor.cpp
+    src/dll_monitor.cpp
+    src/handle_monitor.cpp
+    src/registry_monitor.cpp
 )
 
 # MSVC 14.44 (VS 2022 17.14) ICE when httplib.h + nlohmann/json.hpp are both

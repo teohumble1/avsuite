@@ -122,12 +122,20 @@ This is an **educational/research project** that implements:
 
 <br/>
 
-| Dashboard (Home) | ETW Process Monitor (live) |
-|---|---|
-| <img src="docs/images/dashboard-home.png" width="440"/> | <img src="docs/images/etw-monitor.png" width="440"/> |
+<div align="center">
+<img src="docs/images/dashboard-home.png" width="900" alt="Dashboard (Home) — protection status, stats and live security feed"/>
+<br/><em>Dashboard (Home) — protection status, stats &amp; live security feed | Trang chủ Dashboard — trạng thái bảo vệ, thống kê &amp; feed sự kiện trực tiếp</em>
+</div>
 
 *Real data captured on a live system — amber design system ported 1:1 from the Figma redesign.*
 *Dữ liệu thật trên máy đang chạy — hệ màu amber port 1:1 từ bản Figma redesign.*
+
+<br/>
+
+<div align="center">
+<img src="docs/images/ai-assistant.png" width="900" alt="AI Assistant — local LLM (Qwen2.5-7B) for threat analysis, YARA generation and log investigation"/>
+<br/><em>AI Assistant — a local language model (Qwen2.5-7B, in-process) for threat analysis, YARA generation &amp; log investigation | Trợ lý AI — mô hình ngôn ngữ chạy cục bộ (Qwen2.5-7B) phân tích mối đe dọa, sinh luật YARA &amp; điều tra log</em>
+</div>
 
 ## Installation | Cài Đặt
 

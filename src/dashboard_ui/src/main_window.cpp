@@ -2009,12 +2009,18 @@ QWidget* MainWindow::BuildHomePage() {
     {
         auto* qa = new QHBoxLayout();
         qa->setSpacing(10);
+        // Only the four core pages exist (Home 0, History 1, Quarantine 2,
+        // Investigation 3). The old tiles pointed at pages that were removed in
+        // the 4-page refactor (Alerts 25, AI 6, Threat Intel 17), so those
+        // buttons silently did nothing. Point every tile at a real destination:
+        // History carries the detection/alert feed, and Investigation carries the
+        // VirusTotal / threat-intel lookup. The AI Assistant tile is dropped
+        // because that page no longer exists.
         struct QAct { IconWidget::Type ico; QString label; int page; };
         const QAct acts[] = {
             {IconWidget::Archive, QString::fromUtf8("Open Quarantine"), 2},
-            {IconWidget::Bell,    QString::fromUtf8("View Alerts"),     25},
-            {IconWidget::Ai,      QString::fromUtf8("AI Assistant"),    6},
-            {IconWidget::Eye,     QString::fromUtf8("Threat Intel"),    17},
+            {IconWidget::Bell,    QString::fromUtf8("View Alerts"),     1},
+            {IconWidget::Eye,     QString::fromUtf8("Threat Intel"),    3},
         };
         for (const auto& a : acts) {
             auto* btn = new QPushButton(c_w);

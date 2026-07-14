@@ -8,7 +8,7 @@
 *Bộ nghiên cứu bảo mật kernel Windows — phát hiện mối đe dọa chế độ kernel, YARA, phân tích hành vi, trợ lý AI cục bộ*
 
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20x64-0078D6?logo=windows&logoColor=white)
-![Release](https://img.shields.io/badge/release-v1.0.4-FF7A00)
+![Release](https://img.shields.io/badge/release-v1.0.6-FF7A00)
 ![UI](https://img.shields.io/badge/UI-Qt6%20·%20Figma%20design%20system-41CD52?logo=qt&logoColor=white)
 ![Engine](https://img.shields.io/badge/engine-YARA%20%2B%20ETW%20%2B%20minifilter-FF9B3D)
 ![AI](https://img.shields.io/badge/AI-Qwen2.5%20GGUF%20·%20llama.cpp%20runtime%20·%20100%25%20offline-8B5CF6)
@@ -17,7 +17,7 @@
 
 <br/>
 
-[![Download TeoAvSuite](https://img.shields.io/badge/⬇%20%20DOWNLOAD%20TeoAvSuite--Setup--v1.0.4.exe%20%20(27.0%20MB)-FF7A00?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/teohumble1/avsuite/releases/download/v1.0.4/TeoAvSuite-Setup-v1.0.4.exe)
+[![Download TeoAvSuite](https://img.shields.io/badge/⬇%20%20DOWNLOAD%20TeoAvSuite--Setup--v1.0.6.exe%20%20(30.0%20MB)-FF7A00?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/teohumble1/avsuite/releases/download/v1.0.6/TeoAvSuite-Setup-v1.0.6.exe)
 
 **Tải trực tiếp 1 click — Windows 10/11 x64 · Direct download, no signup**
 
@@ -39,23 +39,27 @@ A portfolio security research project demonstrating Windows kernel-mode threat d
 
 Dự án portfolio nghiên cứu bảo mật minh họa phát hiện mối đe dọa ở chế độ kernel Windows và phân tích hành vi. **Không dành cho sử dụng sản xuất.**
 
-## 🆕 What's New in v1.0.4 | Có Gì Mới ở v1.0.4
+## 🆕 What's New in v1.0.6 | Có Gì Mới ở v1.0.6
 
-**v1.0.4 — Performance optimization / Tối ưu hiệu năng** (2026-07-11)
+**v1.0.6 — UI Fixes & Dashboard Reliability** (2026-07-14)
 
-TeoAvSuite is **actively developed with frequent releases** — the project has moved from v1.0.0 to v1.0.4 in a matter of days, and **each version is faster, smoother and stronger than the one before**. This release makes the whole dashboard run well on **every Windows 10/11 machine**, from high-end desktops down to old, low-spec laptops.
+TeoAvSuite continues rapid development — from v1.0.0 to v1.0.6 in 2 weeks. This release includes critical UI fixes, enhanced privacy monitoring, and improved installer distribution for cross-platform builds.
 
-- ⚡ **DLL Intel page no longer lags** — lighter risk-column rendering, debounced search (no full-table rebuild per keystroke), batched repaints, and per-path caching of DLL signature checks (a big win on machines with many running processes).
-- 🖥️ **Low-end / GPU-aware mode** — the app auto-detects weak hardware (few CPU cores, low RAM, or an old/integrated GPU with little dedicated VRAM) and automatically drops the heaviest per-frame effects (neon glow/shadows, 60fps shimmer, page slide/fade) so it stays smooth — while capable machines keep the full visual experience.
-- 🎛️ **`AVSUITE_PERF_MODE=low|full`** environment override to force either path when auto-detection misjudges a machine.
+- 🔧 **Dashboard UI fixes** — Fixed `BuildPageHeader` signature mismatches, removed unimplemented event handlers, enhanced Qt template compilation stability.
+- 🛡️ **Telemetry Guard + Web Guard** — Real-time network monitoring with instant blocking capability; malicious-JS detection in browser extensions.
+- 🔒 **Cryptominer detection** — Behavior rules + stratum-pool IOC detection + CPU-pegging alerts to catch cryptojacking campaigns.
+- 📦 **Portable installer** — PowerShell setup script for zero-dependency installation on any Windows machine; traditional Inno Setup also available.
+- ⚡ **Performance tuned for all hardware** — Adaptive GPU-aware rendering (v1.0.5 optimization carried forward).
 
 ---
 
-**TeoAvSuite được phát triển tích cực, ra bản mới liên tục** — dự án đã đi từ v1.0.0 lên v1.0.4 chỉ trong vài ngày, và **mỗi bản đều nhanh hơn, mượt hơn và mạnh hơn bản trước**. Bản này giúp toàn bộ dashboard chạy tốt trên **mọi máy Windows 10/11**, từ desktop cấu hình cao đến laptop đời cũ yếu.
+**TeoAvSuite tiếp tục phát triển nhanh** — từ v1.0.0 lên v1.0.6 trong 2 tuần. Bản này bổ sung sửa lỗi UI cốt lõi, giám sát quyền riêng tư nâng cao, và cải thiện phân phối installer cho các build cross-platform.
 
-- ⚡ **Trang DLL Intel hết lag** — vẽ cột rủi ro nhẹ hơn, ô tìm kiếm debounce (không dựng lại cả bảng mỗi lần gõ phím), gộp repaint, và cache kết quả kiểm tra chữ ký DLL theo đường dẫn (lợi lớn trên máy nhiều tiến trình).
-- 🖥️ **Chế độ nhận biết máy yếu / GPU cũ** — app tự phát hiện phần cứng yếu (ít nhân CPU, ít RAM, hoặc GPU cũ/tích hợp ít VRAM) và tự tắt các hiệu ứng nặng theo khung hình (glow/shadow, shimmer 60fps, hiệu ứng chuyển trang) để giữ mượt — máy khỏe vẫn giữ trọn hiệu ứng.
-- 🎛️ **`AVSUITE_PERF_MODE=low|full`** để ép chế độ khi nhận diện tự động bị sai.
+- 🔧 **Sửa lỗi Dashboard UI** — Khắc phục không khớp chữ ký `BuildPageHeader`, xóa handler event không được implement, tăng cường ổn định compile template Qt.
+- 🛡️ **Telemetry Guard + Web Guard** — Giám sát mạng thời gian thực với khả năng chặn tức thì; phát hiện JS độc hại trong phần mở rộng trình duyệt.
+- 🔒 **Phát hiện cryptominer** — Luật hành vi + phát hiện IOC stratum-pool + cảnh báo CPU-pegging để bắt các chiến dịch cryptojacking.
+- 📦 **Installer portable** — Script PowerShell setup không phụ thuộc cho cài đặt trên bất kỳ máy Windows nào; Inno Setup truyền thống cũng có sẵn.
+- ⚡ **Tối ưu hiệu năng cho mọi phần cứng** — Vẽ GPU-aware thích ứng (tối ưu v1.0.5 được mang theo).
 
 > 📦 Xem toàn bộ lịch sử phát hành tại **[Releases](https://github.com/teohumble1/avsuite/releases)** — bản mới ra thường xuyên. See all releases for the full, frequently-updated history.
 

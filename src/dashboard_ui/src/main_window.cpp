@@ -3105,8 +3105,7 @@ int MainWindow::ImportThreatIntelHashes(const std::vector<std::pair<std::string,
 }
 
 std::vector<avcore::DetectionEvent> MainWindow::GetRecentDetections(int limit) const {
-    // TODO: Fetch from engine_->GetDetectionHistory()
-    return {};
+    return engine_->RecentDetections(limit);
 }
 
 ThreatIntelUpdateResult MainWindow::FetchThreatIntelFeed() {

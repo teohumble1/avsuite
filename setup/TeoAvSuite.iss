@@ -7,7 +7,7 @@
 
 [Setup]
 AppName=TeoAvSuite
-AppVersion=1.0.5
+AppVersion=1.0.6
 AppPublisher=TeoHumble Security
 AppPublisherURL=https://github.com/teohumble1/avsuite
 AppSupportURL=https://github.com/teohumble1/avsuite/issues

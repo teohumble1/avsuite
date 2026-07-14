@@ -204,6 +204,17 @@ private:
     bool    net_monitor_enabled_ = true;
     QTimer* net_monitor_timer_   = nullptr;
 
+    // Live protection posture, used to compute a real Security Score and the
+    // "X/5 shields active" line (previously both hardcoded). Hash + YARA are
+    // always-on scan layers; these three are the failable/toggleable ones.
+    // Defaults mirror the UI's optimistic startup display (folder watch + ETW
+    // assumed healthy until a failure event; the kernel driver is not loaded
+    // until SYS.MINIFILTER_CONNECTED arrives).
+    QLabel* shields_sub_label_ = nullptr;
+    bool    folder_watch_ok_   = true;
+    bool    etw_ok_            = true;
+    bool    driver_ok_        = false;
+
     // Detection bar chart (threat analytics card)
     DetectionBarChart* detection_chart_ = nullptr;
 

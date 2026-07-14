@@ -10,6 +10,7 @@
 #include <psapi.h>
 #pragma comment(lib, "psapi.lib")
 
+#include <algorithm>
 #include <array>
 #include <chrono>
 #include <cmath>
@@ -1852,6 +1853,7 @@ QWidget* MainWindow::BuildHomePage() {
         auto* sub = new QLabel(
             QString::fromUtf8("5/5 shields active · Hash · YARA · ETW behavior"), card);
         sub->setStyleSheet("font-size: 8pt; color: #C7B6A2; background: transparent;");
+        shields_sub_label_ = sub;  // updated live by RefreshHomeStats()
         tc->addWidget(sub);
 
         auto* cr = new QHBoxLayout();
@@ -1956,7 +1958,7 @@ QWidget* MainWindow::BuildHomePage() {
         };
         StatDef defs[] = {
             {"Threats Blocked", &stat_detections_label_,
-             IconWidget::Shield,    QColor(0xFF,0x7A,0x00), QString::fromUtf8("30 ngày qua")},
+             IconWidget::Shield,    QColor(0xFF,0x7A,0x00), QString::fromUtf8("Tổng cộng")},
             {"Files Scanned",   &stat_scans_label_,
              IconWidget::HardDrive, QColor(0xFF,0x9B,0x3D), QString::fromUtf8("Tổng lần quét")},
             {"Quarantined",     &stat_quarantine_label_,
@@ -2503,16 +2505,26 @@ void MainWindow::AppendDetectionRow(const avcore::DetectionEvent& event) {
         lbl->setProperty("statusSet", true);
     };
 
-    if (event.rule_id == "SYS.REALTIME_STARTED")
+    if (event.rule_id == "SYS.REALTIME_STARTED") {
+        folder_watch_ok_ = true;
         setStatus(folder_watch_status_, true, QString::fromUtf8("Folder Watch"));
-    else if (event.rule_id == "SYS.ETW_START_FAILED")
+    } else if (event.rule_id == "SYS.ETW_START_FAILED") {
+        etw_ok_ = false;
         setStatus(etw_monitor_status_, false, QString::fromUtf8("ETW Monitor"),
                   QString::fromUtf8("Cần Admin"));
-    else if (event.rule_id == "SYS.MINIFILTER_CONNECTED")
+    } else if (event.rule_id == "SYS.MINIFILTER_CONNECTED") {
+        driver_ok_ = true;
         setStatus(driver_status_, true, QString::fromUtf8("Driver Block"));
-    else if (event.rule_id == "SYS.MINIFILTER_CONNECT_FAILED")
+    } else if (event.rule_id == "SYS.MINIFILTER_CONNECT_FAILED") {
+        driver_ok_ = false;
         setStatus(driver_status_, false, QString::fromUtf8("Driver Block"),
                   QString::fromUtf8("Không tải"));
+    }
+
+    // Any posture change may move the Security Score / shields count, and the
+    // Home page may be visible -- refresh it so the ring never lies.
+    if (event.rule_id.rfind("SYS.", 0) == 0 && pages_->currentIndex() == 0)
+        RefreshHomeStats();
 }
 
 void MainWindow::ReloadQuarantineTable() {
@@ -2583,6 +2595,28 @@ void MainWindow::RefreshHomeStats() {
         tray_icon_->setToolTip(threat_active
                                     ? QString::fromUtf8("TeoAvSuite - %1 mối nguy hiểm").arg(stats.active_quarantine_count)
                                     : QString::fromUtf8("TeoAvSuite - Đang bảo vệ"));
+    }
+
+    // ── Real Security Score (replaces the old hardcoded 97) ──────────────────
+    // Five protection layers: Hash + YARA are always-on scan layers; ETW,
+    // Folder Watch and the kernel Driver Block are the failable ones tracked in
+    // the posture booleans. Score = full coverage minus a penalty for each
+    // missing layer, minus threat pressure from currently-quarantined items.
+    const int active_layers = 2 // Hash + YARA always active
+                            + (etw_ok_          ? 1 : 0)
+                            + (folder_watch_ok_ ? 1 : 0)
+                            + (driver_ok_       ? 1 : 0);
+    const int missing_layers  = 5 - active_layers;
+    const int threat_penalty  = std::min<int>(static_cast<int>(stats.active_quarantine_count) * 5, 30);
+    int score = 100 - missing_layers * 12 - threat_penalty;
+    score = std::clamp(score, 5, 100);
+    if (score_ring_)
+        static_cast<ScoreRingWidget*>(score_ring_)->setScore(score);
+
+    if (shields_sub_label_) {
+        shields_sub_label_->setText(
+            QString::fromUtf8("%1/5 shields active · Hash · YARA · ETW behavior")
+                .arg(active_layers));
     }
 
     RefreshHomeDetections();
@@ -3710,6 +3744,13 @@ void MainWindow::OnCancelScanClicked() {
 }
 
 void MainWindow::AppendEtwRow(const avbehavior::ProcessEvent& event) {
+    // The ETW page is not built in the current 4-core-page layout, so etw_table_
+    // is null even though live ETW events are still delivered here via a queued
+    // connection. Dereferencing it crashed the app a few seconds after launch
+    // (null QTableWidget::rowCount, the very first process-creation event). Bail
+    // out until/unless the ETW view is reinstated.
+    if (!etw_table_) return;
+
     // Cap at 500 rows — drop oldest when full
     if (etw_table_->rowCount() >= 500) etw_table_->removeRow(0);
 

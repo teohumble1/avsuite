@@ -29,13 +29,13 @@ add_executable(avdashboard WIN32
 target_link_libraries(avdashboard PRIVATE avengine avai avlogging avcore Qt6::Widgets Qt6::EntryPointPrivate)
 
 # MSVC 14.44 ICE with complex Qt+template headers under the project's default
-# /std:c++20 -- every page TU is pinned to c++17 instead. main.cpp is
-# deliberately left on the project default since it doesn't hit the ICE.
+# /std:c++20 -- every page TU is pinned to c++17 instead. main.cpp also needs
+# the workaround due to MOC-generated template instantiations.
 if(MSVC)
     # /Od: disable optimizations (prevents the base MSVC 14.44 ICE on Qt+templates)
     # /bigobj: allow >65535 COFF sections (large TU)
     # /Zm300: triple the default compiler heap (reduces template-depth ICEs)
-    set_source_files_properties(${AVDASHBOARD_PAGE_SOURCES}
+    set_source_files_properties(src/main.cpp ${AVDASHBOARD_PAGE_SOURCES}
         PROPERTIES COMPILE_FLAGS "/Od /bigobj /Zm300 /std:c++17")
 endif()
 

@@ -31,7 +31,7 @@ QWidget* BuildInvestigationPage(QWidget* parent) {
     auto layout = new QVBoxLayout(page);
 
     // Title
-    auto header = theme::BuildPageHeader(page, "Investigation Console", "Deep file inspection & VirusTotal lookup");
+    auto header = theme::BuildPageHeader("Investigation Console", "Deep file inspection & VirusTotal lookup");
     layout->addWidget(header);
 
     // File Lookup Section

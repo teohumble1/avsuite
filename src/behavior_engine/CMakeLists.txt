@@ -21,6 +21,17 @@ add_library(avbehavior STATIC
     src/rules/rule_defense_evasion.cpp
     src/rules/rule_malware_behaviors.cpp
     src/rules/rule_cryptominer.cpp
+    # BƯỚC 2: 10 High-Quality Behavior Detectors (MITRE-mapped)
+    src/rules/rule_ransomware.cpp
+    src/rules/rule_injection.cpp
+    src/rules/rule_macro_malware.cpp
+    src/rules/rule_credential_theft.cpp
+    src/rules/rule_worm.cpp
+    src/rules/rule_rootkit.cpp
+    src/rules/rule_keylogger.cpp
+    src/rules/rule_exfiltration.cpp
+    src/rules/rule_c2_beaconing.cpp
+    src/rules/rule_persistence.cpp
 )
 
 target_include_directories(avbehavior

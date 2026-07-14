@@ -17,7 +17,7 @@
 
 <br/>
 
-[![Download TeoAvSuite](https://img.shields.io/badge/⬇%20%20DOWNLOAD%20TeoAvSuite--Setup--v1.0.6.exe%20%20(30.0%20MB)-FF7A00?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/teohumble1/avsuite/releases/download/v1.0.6/TeoAvSuite-Setup-v1.0.6.exe)
+[![Download TeoAvSuite](https://img.shields.io/badge/⬇%20%20DOWNLOAD%20TeoAvSuite--Setup--v1.0.6.exe%20%20(26.7%20MB)-FF7A00?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/teohumble1/avsuite/releases/download/v1.0.6/TeoAvSuite-Setup-v1.0.6.exe)
 
 **Tải trực tiếp 1 click — Windows 10/11 x64 · Direct download, no signup**
 
@@ -41,10 +41,11 @@ Dự án portfolio nghiên cứu bảo mật minh họa phát hiện mối đe d
 
 ## 🆕 What's New in v1.0.6 | Có Gì Mới ở v1.0.6
 
-**v1.0.6 — UI Fixes & Dashboard Reliability** (2026-07-14)
+**v1.0.6 — Behavior Detection Expansion & Dashboard Reliability** (2026-07-14)
 
-TeoAvSuite continues rapid development — from v1.0.0 to v1.0.6 in 2 weeks. This release includes critical UI fixes, enhanced privacy monitoring, and improved installer distribution for cross-platform builds.
+TeoAvSuite continues rapid development — from v1.0.0 to v1.0.6 in 2 weeks. This release adds a large expansion of the behavioral rule engine, critical UI fixes, enhanced privacy monitoring, and improved installer distribution.
 
+- 🧠 **10 new MITRE-mapped behavior detectors** — Ransomware, process injection, macro/maldoc execution, credential theft, worm propagation, rootkit / BYOVD driver loading, keylogging, data exfiltration, C2 beaconing, and non-registry persistence. Each uses tiered Malicious/Suspicious scoring and is wired into the live rule engine. **68/68 unit tests pass; benign corpus stays at 0 confirmed-malware false positives.**
 - 🔧 **Dashboard UI fixes** — Fixed `BuildPageHeader` signature mismatches, removed unimplemented event handlers, enhanced Qt template compilation stability.
 - 🛡️ **Telemetry Guard + Web Guard** — Real-time network monitoring with instant blocking capability; malicious-JS detection in browser extensions.
 - 🔒 **Cryptominer detection** — Behavior rules + stratum-pool IOC detection + CPU-pegging alerts to catch cryptojacking campaigns.
@@ -149,12 +150,12 @@ This is an **educational/research project** that implements:
 
 **One-click professional installer - like any normal app**
 
-**Direct link | Link tải thẳng:** https://github.com/teohumble1/avsuite/releases/download/v1.0.4/TeoAvSuite-Setup-v1.0.4.exe
+**Direct link | Link tải thẳng:** https://github.com/teohumble1/avsuite/releases/download/v1.0.6/TeoAvSuite-Setup-v1.0.6.exe
 
 Download and run:
 ```bash
 # Visit: https://github.com/teohumble1/avsuite/releases
-# Download: TeoAvSuite-Setup-v1.0.4.exe
+# Download: TeoAvSuite-Setup-v1.0.6.exe
 # Double-click to run installer
 # Follow the setup wizard (Next → Next → Install)
 # Launch from Start Menu or Desktop shortcut
@@ -164,7 +165,7 @@ Download and run:
 
 ```bash
 # Truy cập: https://github.com/teohumble1/avsuite/releases
-# Tải: TeoAvSuite-Setup-v1.0.4.exe
+# Tải: TeoAvSuite-Setup-v1.0.6.exe
 # Double-click để chạy trình cài đặt
 # Làm theo hướng dẫn (Next → Next → Install)
 # Mở từ Start Menu hoặc Desktop shortcut
@@ -215,7 +216,7 @@ cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release ..
 # Build project
 cmake --build . --config Release
 
-# Output: build\release\src\dashboard_ui\Release\avdashboard.exe
+# Output: build\src\dashboard_ui\Release\avdashboard.exe
 ```
 
 ## Technical Implementation | Triển Khai Kỹ Thuật
@@ -852,15 +853,17 @@ Cho thấy tôi hiểu ràng buộc THẬT trong thiết kế AV không phải t
 
 ## Distribution & Releases | Phân Phối & Phát Hành
 
-**Current Version**: v1.0.4 (2026-07-11) — Performance optimization (low-end / GPU-aware mode, DLL Intel scan + UI lag fixes)
+**Current Version**: v1.0.6 (2026-07-14) — Behavior detection expansion (10 MITRE-mapped detectors) + dashboard reliability
 - Available at: https://github.com/teohumble1/avsuite/releases
-- Format: TeoAvSuite-Setup-v1.0.4.exe (Windows 10/11 installer, ~27 MB)
+- Format: TeoAvSuite-Setup-v1.0.6.exe (Windows 10/11 installer, ~26.7 MB)
 - Installation: Admin + isolated VM recommended
 - Uninstall: Windows Control Panel → Programs and Features
 
 > **Release cadence:** actively developed — new versions ship frequently, each one faster and stronger than the last. Check the [Releases page](https://github.com/teohumble1/avsuite/releases) for the latest.
 
 **Release history:**
+- **v1.0.6** — Behavior detection expansion: 10 MITRE-mapped detectors (ransomware/injection/macro/credential-theft/worm/rootkit/keylogger/exfiltration/C2/persistence), tiered scoring, 68/68 tests, benign-corpus-clean; dashboard UI fixes
+- **v1.0.5** — Telemetry Guard + Web Guard tabs (realtime network/web-attack monitoring), cryptominer detection suite
 - **v1.0.4** — Performance optimization: low-end / GPU-aware mode, DLL Intel lag fixes, `AVSUITE_PERF_MODE` override
 - **v1.0.3** — Non-interactive driver signing, release-prep hardening
 - **v1.0.2** — Figma UI redesign (sectioned sidebar, flat amber design system)
@@ -878,6 +881,8 @@ Cho thấy tôi hiểu ràng buộc THẬT trong thiết kế AV không phải t
 > **Nhịp phát hành:** phát triển tích cực — bản mới ra thường xuyên, mỗi bản nhanh & mạnh hơn bản trước. Xem [trang Releases](https://github.com/teohumble1/avsuite/releases) để lấy bản mới nhất.
 
 **Lịch sử phát hành:**
+- **v1.0.6** — Mở rộng phát hiện hành vi: 10 detector map theo MITRE (ransomware/injection/macro/credential-theft/worm/rootkit/keylogger/exfiltration/C2/persistence), chấm điểm phân tầng, 68/68 test, sạch benign-corpus; sửa lỗi dashboard UI
+- **v1.0.5** — Tab Telemetry Guard + Web Guard (giám sát mạng/tấn công web realtime), bộ phát hiện cryptominer
 - **v1.0.4** — Tối ưu hiệu năng: chế độ máy yếu/GPU-aware, sửa lag DLL Intel, override `AVSUITE_PERF_MODE`
 - **v1.0.3** — Ký driver không tương tác, gia cố chuẩn bị phát hành
 - **v1.0.2** — Redesign UI theo Figma (sidebar chia nhóm, hệ nút phẳng amber)

@@ -2,8 +2,8 @@
 ; Build with: Inno Setup (https://jrsoftware.org/isdl.php)
 ; Command: "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" TeoAvSuite.iss
 
-#define RelDir "..\build\release\src\dashboard_ui\Release"
-#define AmsiDir "..\build\release\src\amsi_provider\Release"
+#define RelDir "..\build\src\dashboard_ui\Release"
+#define AmsiDir "..\build\src\amsi_provider\Release"
 
 [Setup]
 AppName=TeoAvSuite
@@ -99,7 +99,7 @@ Type: filesandordirs; Name: "{app}\platforms"
 
 [Registry]
 Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "InstallPath"; ValueData: "{app}"; Flags: createvalueifdoesntexist
-Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "Version"; ValueData: "1.0.5"; Flags: createvalueifdoesntexist
+Root: HKCU; Subkey: "Software\TeoAvSuite"; ValueType: string; ValueName: "Version"; ValueData: "1.0.6"; Flags: createvalueifdoesntexist
 
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);

